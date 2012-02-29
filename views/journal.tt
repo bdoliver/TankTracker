@@ -1,0 +1,109 @@
+<% IF tanks.size %>
+<form id="selTankForm" action="<% request.uri_base %>/journal" method="POST">
+<div>
+Select a tank:
+  <select id="tankSel" name="tank_id">
+     <option value="0">&lt;&lt; Tank &gt;&gt;</option>
+    <% FOREACH tank IN tanks.keys.nsort %>
+     <option value="<% tanks.$tank.tank_id %>" <% tanks.$tank.selected %> >
+       <% tanks.$tank.tank_name %> (<% tanks.$tank.water_type %>)
+     </option>
+    <% END %>
+  </select>
+  <span id="addTankDialogButton">Add New Tank</span>
+  </div>
+<!-- track the current tank name so we don't have to keep looking it up -->  
+<input type="hidden" id="curr_tank_name" value="" />
+<input type="hidden" id="curr_tank_id"   value="" />
+<input type="hidden" id="is_saltwater"   value="" />
+</form>
+<% ELSE %>
+  <p>No tanks listed in database! <span id="addTankDialogButton">Add New Tank</span></p>
+<% END %>
+
+<p id="message"></p>
+
+<div id="addTankPopup">
+<form id="addTankForm" action="<% request.uri_base %>/tank/add" method="POST">
+<table>
+<tr><td>Tank name</td><td><input name="tankName" id="tankName" type="text" size="30" /></td></tr>
+<tr><td>Type</td><td><select name="tankType" id="tankType">
+			<option value="">-- Select type --</option>
+		<% FOREACH type_id IN types.keys.nsort %>
+			<option value="<% types.$type_id.water_id %>"><% types.$type_id.water_type %> </option>
+		<% END %>
+		     </select></td></tr>
+</table>
+</form>
+</div>
+<script>
+$(function() {
+	$('#tankSel').change(function() { $('#selTankForm').submit(); });
+
+        $('#addTankPopup').dialog({
+		title:     'Add new tank:',
+		autoOpen:  false,
+		resizable: false,
+		height:    175,
+		width:     380,
+		position:  [ 100, 60 ],
+		modal:     true,
+		closeOnEscape: true,
+		buttons:   {
+		    'Save Tank': function() { if ( ! $('#tankName').val() ) {
+						return alert("Please enter a name for this tank.");
+					      }
+					      if ( ! $('#tankType :selected').val() ) {
+						return alert("Please select a water type for this tank.");
+					      }
+					      $('#addTankForm').submit();
+					    },
+		    'Cancel'   : function() { $(this).dialog('close'); }
+			   }
+		// close: function() { }
+	});
+
+	$('#addTankDialogButton').button()
+				 .click(function() { $('#addTankPopup').dialog('open'); });
+});
+</script>
+
+<% IF tank_id %>
+    <p class="tank_title">Journal: <% tank_name %></p> <!-- (id: <% tank_id %>) -->
+    <script>$('#curr_tank_name').val('<% tank_name %>');
+	    $('#curr_tank_id').val(<% tank_id %>);
+    </script>
+    <div id="journal_tabs">
+	<ul>
+	   <li><a href="<% request.uri_base %>/tank?tank_id=<% tank_id %>"  title="Notes">Notes</a></li>
+	   <li><a href="#testTabs"                                          title="Water Tests">Water Tests</a></li>
+	   <li><a href="<% request.uri_base %>/diary?tank_id=<% tank_id %>" title="Diary">Diary</a></li>
+	</ul>
+
+	<div id="testTabs">
+		<ul>
+		   <li><a href="<% request.uri_base %>/test/history?tank_id=<% tank_id %>" title="Test History">Test History</a></li>
+		   <li><a href="<% request.uri_base %>/test/chart?tank_id=<% tank_id %>"   title="Test Charts">Charts</a></li>
+		</ul>
+		<div id="Test_History"></div>
+		<div id="Test_Charts"></div>
+	</div>
+
+	<div id="Diary"></div>
+
+	<div id="Notes"></div>
+    </div>
+<script>    
+$(function() {
+	// initialise menu tabs
+	var tabCookie = { expires: 1 };
+
+	$('#journal_tabs').tabs({cookie: tabCookie});
+	$('#testTabs').tabs();
+
+	$('#message').hide();
+});
+</script>
+<% END %>
+
+<% INCLUDE waterTest.tt %>

@@ -1,0 +1,27 @@
+
+
+Simple web application for tracking things about my aquariums
+	- tanks & water type (whether salt or fresh water)
+	- recording of test results
+	- graphing of test results over time
+	- misc notes, inventory, etc. per tank
+
+Things I'd like to add:
+	- means of uploading pics
+	- links to external websites
+		(eg. find fish species on wikipedia or similar)
+	- automated reminders when tests, dosing, maintenance, etc are due
+	- ???
+
+Not meant to be pretty or polished & probably not a lot of use to others.
+
+My main reason for writing it was to learn more about the perl Dancer 
+framework, and using DBIx::Class for database access.   The original version
+was done using Rose::DB which worked, but was a nuisance to configure. I 
+later discovered the Dancer::Plugin::DBIC module which makes configuring the
+db connection a breeze, hence the switch.
+
+- Brendon Oliver, 2012-03-01
+  <brendon.oliver@gmail.com>
+
+		

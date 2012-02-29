@@ -1,0 +1,68 @@
+<div id="waterTest">
+<p id="testMsg" class="message"></p>
+<p id="testErr" class="error"></p>
+
+<form id="addTestForm" action="/addTest" method="post">
+<input type="hidden" id="tank_id" name="tank_id" value="<% tank_id %>" />
+
+<table>
+<tr><td>Test Date</td>
+    <td><input type="text" id="test_date" name="test_date" size="10" class="num"/></td>
+</tr>
+<tr><td>Ph</td>
+    <td><input type="text" id="test_ph" name="test_ph" size="10" class="num"/></td>
+</tr>
+<tr><td>Ammonia (NH<sub>4</sub>)</td>
+    <td><input type="text" id="test_ammonia" name="test_ammonia" size="10" class="num"/></td>
+</tr>
+<tr><td>Nitrite (NO<sub>2</sub>)</td>
+    <td><input type="text" id="test_nitrite" name="test_nitrite" size="10" class="num"/></td>
+</tr>
+<tr><td>Nitrate (NO<sub>3</sub>)</td>
+    <td><input type="text" id="test_nitrate" name="test_nitrate" size="10" class="num"/></td>
+</tr>
+<% IF is_saltwater %>
+<tr><td>Calcium (Ca)</td>
+    <td><input type="text" id="test_calcium" name="test_calcium" size="10" class="num"/></td>
+</tr>
+<tr><td>Phosphate (PO<sub>4</sub>)</td>
+    <td><input type="text" id="test_phosphate" name="test_phosphate" size="10" class="num"/></td>
+</tr>
+<tr><td>Magnesium (Mg)</td>
+    <td><input type="text" id="test_magnesium" name="test_magnesium" size="10" class="num"/></td>
+</tr>
+<tr><td>Hardness (<sup>0</sup>KH)</td>
+    <td><input type="text" id="test_kh" name="test_kh" size="10" class="num"/></td>
+</tr>
+<tr><td>Alkalinity</td>
+    <td><input type="text" id="test_alkalinity" name="test_alkalinity" size="10" class="num"/></td>
+</tr>
+<tr><td>Specific Gravity</td>
+    <td><input type="text" id="test_salinity" name="test_salinity" size="10" class="num"/></td>
+</tr>
+<% END %>
+<tr><td>Water Change</td>
+    <td><input type="text" id="water_change" name="water_change" size="10" class="num"/></td>
+</tr>
+<tr><td class="tdt">Notes / Obvservations</td>
+    <td><textarea id="testNotes" name="notes" columns="100" rows="10"></textarea></td>
+</tr>
+<tr>
+<td>&nbsp;</td><td><span id="saveTestButton">Save Test</span></td></tr>
+</table>
+
+</form>
+
+<script>
+$(function() { 
+	// clear previous results:
+	clearTestResults();
+
+	$('#test_date').datepicker({ dateFormat: 'yy-mm-dd' });
+
+	$('#saveTestButton').button()
+			    .click(function() { addTestResults(); });
+});
+</script>
+
+</div>

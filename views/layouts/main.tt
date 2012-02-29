@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>TankTracker</title>
+	<meta http-equiv="Content-type" content="text/html; charset=<% settings.charset %>" />
+
+	<script language="javascript" type="text/javascript" src="<% request.uri_base %>/javascripts/jquery-1.6.2.min.js"></script>
+	
+	<script language="javascript" type="text/javascript" src="<% request.uri_base %>/javascripts/jquery.cookie.js"></script>
+	<script language="javascript" type="text/javascript" src="<% request.uri_base %>/javascripts/jquery-disable.js"></script>
+	<script language="javascript" type="text/javascript" src="<% request.uri_base %>/javascripts/jquery.hiddenDimensions.js"></script>
+
+	<script language="javascript" type="text/javascript" src="<% request.uri_base %>/javascripts/jquery.flot.min.js"></script>
+
+	<script language="javascript" type="text/javascript" src="<% request.uri_base %>/javascripts/strftime-min.js"></script>
+	<script language="javascript" type="text/javascript" src="<% request.uri_base %>/javascripts/jquery-ui-1.8.16.custom.min.js"></script>
+
+	<script language="javascript" type="text/javascript" src="<% request.uri_base %>/javascripts/TankTracker.js"></script>
+
+
+	<link rel="StyleSheet" type="text/css" href="<% request.uri_base %>/css/flick/jquery-ui-1.8.16.custom.css" title="none" />
+	<link rel="StyleSheet" type="text/css" href="<% request.uri_base %>/css/plot.css" title="none" />
+	<link rel="StyleSheet" type="text/css" href="<% request.uri_base %>/css/style.css" title="none" />
+
+
+</head>
+<body>
+    <div class="content">
+	<h1>TankTracker</h1>
+
+	<% content %>
+
+    </div>
+    <!-- stash the uri_base so that it's accessible to ajax calls: -->
+    <INPUT TYPE="hidden" ID="uri_base" VALUE="<% request.uri_base %>" />
+
+    <% IF session.logged_in %>
+	<p class="jsLink"><a href="<% request.uri_base %>/logout">Log out</a></p>
+	
+    <% END %>
+
+    <div id="footer">
+	Powered by <a href="http://perldancer.org/">Dancer</a> <% dancer_version %>
+    </div>
+</body>
+</html>

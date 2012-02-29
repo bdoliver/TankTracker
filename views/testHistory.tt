@@ -1,0 +1,95 @@
+<% IF tests.size %>
+<table id="testHistoryTable">
+<tr><th>Date</th>
+    <th class="testHdg">Ph</th>
+    <th class="testHdg">Ammonia<br /> (NH<sub>4</sub>)</th>
+    <th class="testHdg">Nitrite<br />(NO<sub>3</sub>)</th>
+    <th class="testHdg">Nitrate<br />(NO<sub>4</sub>)</th>
+<% IF is_saltwater %>
+    <th class="testHdg">Calcium<br />(Ca)</th>
+    <th class="testHdg">Phosphate<br />(PO<sub>4</sub>)</th>
+    <th class="testHdg">Magnesium<br />(Mg)</th>
+    <th class="testHdg">Hardness<br />(<sup>0</sup>KH)</th>
+    <th class="testHdg">Alkalinity</th>
+    <th class="testHdg">Salinity</th>
+<% END %>
+    <th class="testHdg">Water Change</th>
+    <th class="testHdg">Notes?</th>
+</tr>
+
+<% FOREACH test_id IN tests.keys.nsort %>
+   <tr onmouseover="this.className = 'hlt';" onmouseout="this.className = '';" >
+
+       <td><% IF tests.$test_id.notes %>
+		<div id="testNoteDiv_<% test_id %>" class="testNotes" style="z-index:110; text-align: left; vertical-align: top;">
+		    <table><tr><td style="vertical-align: top;"><% tests.$test_id.notes %></td></tr></table>
+		</div>
+           <% END %>
+           <% tests.$test_id.test_date %></td>
+       <td class="num"><% tests.$test_id.result_ph %></td>
+       <td class="num"><% tests.$test_id.result_ammonia %> </td>
+       <td class="num"><% tests.$test_id.result_nitrite %> </td>
+       <td class="num"><% tests.$test_id.result_nitrate %> </td>
+<% IF is_saltwater %>
+       <td class="num"><% tests.$test_id.result_calcium %> </td>
+       <td class="num"><% tests.$test_id.result_phosphate %> </td>
+       <td class="num"><% tests.$test_id.result_magnesium %> </td>
+       <td class="num"><% tests.$test_id.result_kh %> </td>
+       <td class="num"><% tests.$test_id.result_alkalinity %> </td>
+       <td class="num"><% tests.$test_id.result_salinity %> </td>
+<% END %>       
+       <td class="num"><% tests.$test_id.water_change %> </td>
+       <td><% IF tests.$test_id.notes %><span class="jsLink" onClick="toggleTestNotes(<% test_id %>);">Notes</span>
+	   <% ELSE %>&nbsp;
+	   <% END %>
+       </td>
+   </tr>
+<% END %>
+
+</table>
+<% ELSE %>
+<p>No test results found for selected tank.</p>
+<% END %>
+
+<span id="addTestButton">New Test</span>
+
+<script>
+$(function () {
+	var noteDivs = $('.testNotes');
+	var dim      = $('#testHistoryTable').getHiddenDimensions();
+
+	$.each(noteDivs, function(i, obj) { $(obj).width(dim.width * .9); });
+
+	$('#addTestButton').button()
+			   .click(function() {
+	    // clear previous results:
+	    clearTestResults();
+	    $('#waterTest').dialog('option',
+				   'title',
+				   'New water test: '+$('#curr_tank_name').val());
+	    $('#waterTest').dialog('option',
+				   'buttons',
+				   { 'Close': function() { $(this).dialog('close'); },
+				     'Save' : function() { saveTestResults();
+							   $(this).dialog('close'); } });
+				          
+	    $('#waterTest').dialog('open');
+	});
+
+/*
+// TBD: show/edit test dialog:
+	$('#showTestButton').button()
+			    .click(function() { 	
+	    $('#waterTest').dialog('option',
+				       'title',
+				       'New water test: '+$('#curr_tank_name').val());
+	    $('#waterTest').dialog('option',
+				       'buttons',
+				       { 'Close': function() { $(this).dialog('close'); },
+				         'Save' : function() { addTestResults(); } });
+				          
+	    $('#waterTest').dialog('open');
+	});
+*/
+});
+</script>

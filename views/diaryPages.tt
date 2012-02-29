@@ -1,0 +1,78 @@
+<% IF diaryPages.size %>
+  <table width="100%">
+    <thead>
+    <tr">
+	<th class="thr" width="3%">Item</th>
+	<th class="thl" width="7%">Date</th>
+        <th class="thl" width="80%">Entry</th>
+        <th class="thr" width="10%">Last edited</th>
+    </tr>
+    </thead>
+    <tbody id="diaryPages">
+    <% FOREACH page IN diaryPages %> 
+    <tr onmouseover="this.className = 'hlt';" onmouseout="this.className = '';">
+	<td class="tdr"><% page.item %></td>
+	<td class="tdt">
+		<% IF ! page.test_id %>
+			<span class="jsLink" onClick="editDiaryNote(<% page.diary_id %>);" >
+			<% page.diary_date %>
+			</span>
+		<% ELSE %>
+			<% page.diary_date %>
+		<% END %>
+	</td>
+        <td class="tdt">
+		<% IF page.test_id %>
+			<span class="jsLink" onClick="getTest(<% page.test_id %>);">
+				<% page.diary_note %>
+			</span>
+		<% ELSE %>
+			<% page.diary_note %>
+		<% END %>
+	</td>
+        <td class="tdt" style="text-align: right;"><% page.updated_on %></td>
+    </tr> 
+    <% END %>
+    </tbody>
+  </table>
+
+  <script>
+$('#diary_curr_pg').val(<% curr_pg %>);
+$('#diaryPages > tr > td').addClass('diaryRec');
+  </script>
+  
+  <!-- Pagination links -->
+  <% IF page_chunk %>
+  <div>
+    <% IF first_page %>
+	<span class="jsLink" onClick="fetchDiaryPages(1);">&lt;&lt;First Page</span>
+    <% END %>
+  
+    <% IF prev_page %>
+	<span class="jsLink" onClick="fetchDiaryPages(<% prev_page %>);">&lt;&lt;Previous <% page_chunk %> pages</span>
+    <% END %>
+
+    <% IF pages.size %>
+     Page: <% FOREACH pages %>
+	    <% IF curr_page %>
+		<% page %>
+	    <% ELSE %>
+		<span class="jsLink" onClick="fetchDiaryPages(<% page %>);"><% page %></span>
+	    <% END %>
+	<% END %> 
+    <% END %>
+
+    <% IF next_page %>
+	<span class="jsLink" onClick="fetchDiaryPages(<% next_page %>);">&gt;&gt;Next <% page_chunk %> pages</span>
+    <% END %>
+
+    <% IF last_page %>
+	<span class="jsLink" onClick="fetchDiaryPages(<% last_page %>);">Last Page&gt;&gt;</span>
+    <% END %>
+  </div>
+  <% END %>
+
+<% ELSE %>
+	<p>No diary entries found for selected tank &amp; date.</p>
+<% END %>
+
