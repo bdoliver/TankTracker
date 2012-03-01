@@ -63,7 +63,7 @@ sub pg_datetime {
 ### Pagination links for diary notes
 sub paginate
 {
-	my ( $self, $args ) = @_;
+	my $args = shift;
 
 	my $total_recs  = $args->{total_recs} || 0;
 	my $rec_pp      = $args->{rec_pp};
