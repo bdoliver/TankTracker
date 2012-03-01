@@ -15,19 +15,9 @@ use TankTracker::Common::Utils qw(set_message
 				  get_error
 				  TIMEFMT);
 
-# Long-form names don't really fit in jquery.flot's chart legend:
-# our $ChartLegend = {  result_salinity   => 'Specific Gravity',
-		      # result_ph         => 'Ph',
-		      # result_ammonia    => 'Ammonia',
-		      # result_nitrite    => 'Nitrite',
-		      # result_nitrate    => 'Nitrate',
-		      # result_calcium    => 'Calcium',
-		      # result_phosphate  => 'Phosphate',
-		      # result_magnesium  => 'Magnesium',
-		      # result_kh         => 'dKH',
-		      # result_alkalinity => 'Alkalinity' };
-# Briefer / HTML-friendly legend names:
-our $ChartLegend = Tie::IxHash->new(result_salinity   => { label  => 'Salinity',
+# Legend text & line colours for jquery.flot to use when charting test results:
+our $ChartLegend = Tie::IxHash->new(
+		      result_salinity   => { label  => 'Salinity',
 					     colour => '#7633BD' },
 		      result_ph         => { label  => 'Ph',
 					     colour => '#A23C3C' },
@@ -47,7 +37,7 @@ our $ChartLegend = Tie::IxHash->new(result_salinity   => { label  => 'Salinity',
 					     colour => '#4DA74D' },
 		      result_alkalinity => { label  => 'Alkalinity',
 					     colour => '#EDC240' },
-		   );
+);
 
 prefix '/test';
 
