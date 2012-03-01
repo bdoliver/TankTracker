@@ -1,4 +1,4 @@
---\set ON_ERROR_STOP 1
+\set ON_ERROR_STOP 1
 BEGIN TRANSACTION;
 
 CREATE TABLE tracker_user (
