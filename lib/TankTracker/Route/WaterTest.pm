@@ -65,7 +65,11 @@ sub _test_results
 	while ( my $t = $resultSet->next() ) {
 		my $test = {};
 
-		for my $c ( $ChartLegend->Keys(), 'test_date' ) {
+		for my $c ( $ChartLegend->Keys(),
+			    'test_date',
+			    'notes',
+			    'water_change',
+			    'test_id' ) {
 			my $val = $t->$c;
 			if ( $c eq 'test_date' ) {
 				if ( ! $chart ) {
