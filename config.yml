@@ -21,6 +21,12 @@ session_cookie_key: "19222f015c72e96e2fcac833dbdda7a4"
 logger:  "console"
 show_errors: "1"
 
+## Time zone where this app is located.
+## If not set, default to Australia/Melbourne:
+timezone: 
+
+## KLUDGE ALERT!
+## .. until I get around to doing proper authentication/authorisation:
 username: "brendon"
 password: "testpw"
 
