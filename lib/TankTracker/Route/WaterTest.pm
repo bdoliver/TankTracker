@@ -185,7 +185,7 @@ post '/' => sub {
 	# into a numeric field, so we explicitly nullify them:
 	# (if a test result is zero, we want zero - not 'null' - so don't
 	#  replace emptry string with zero)
-	for my $attr ( keys %{ $ChartLegend }, 'water_change' ) {
+	for my $attr ( $ChartLegend->Keys(), 'water_change' ) {
 		if ( defined $test{$attr} and $test{$attr} eq '' ) {
 			$test{$attr} = undef;
 		}
