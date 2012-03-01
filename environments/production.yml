@@ -27,3 +27,6 @@ plack_middlewares:
         - strip
         - 1
 
+# db_dsn: "dbi:Pg:dbname=TankTracker;host=localhost;port=5432"
+# db_user: "brendon"
+# db_pass:

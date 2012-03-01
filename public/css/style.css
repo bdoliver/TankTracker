@@ -239,7 +239,7 @@ span.jsLink:hover {
 }
 
 th {
-	vertical-align: top;
+/*	vertical-align: top;*/
 	margin: 2;
 	padding: 2;
 }
@@ -255,15 +255,20 @@ th {
 td {
 	margin: 2;
 	padding: 2;
-	vertical-align: top;
+/*	vertical-align: top; */
 }
 
 .tdr {
 	text-align: right;
 }
 
+.tdc {
+	text-align: center;
+}
+
 .testHdg {
 	text-align: right;
+	vertical-align: top;
 	width: 60px;
 }
 

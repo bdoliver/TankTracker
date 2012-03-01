@@ -1,10 +1,10 @@
 <table>
-<tr><td>Date range</td>
-    <td>from: <input type="text" id="sdate" size="10" onChange="generateChart(<% tank_id %>);"/></td>
-    <td>to:   <input type="text" id="edate" size="10" onChange="generateChart(<% tank_id %>);" /></td>
-    <td><span id="chart_reset">Reset</span></td>
+<tr><td>Date range from: <input type="text" id="sdate" size="10" onChange="generateChart(<% tank_id %>);" />
+                     to: <input type="text" id="edate" size="10" onChange="generateChart(<% tank_id %>);" />
+    </td>
+    <td class="tdc"><span id="chart_reset">Reset Chart</span></td>
 </tr>
-<tr><td colspan="4">Select parameters to chart:
+<tr><td colspan="2">Select parameters to chart:
   <span id="chart_opts">
 	<label for="chart_ph">Ph</label><input type="checkbox" id="chart_ph" name="chart_ph" />
 	<label for="chart_ammonia">NH<sub>4</sub></label><input type="checkbox" id="chart_ammonia" name="chart_ammonia" />
@@ -22,6 +22,7 @@
     </td>
 </tr>
 </table>
+
 <div id="testChartDiv"></div>
 
 <script>

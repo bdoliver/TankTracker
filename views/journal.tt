@@ -77,6 +77,7 @@ $(function() {
 	<ul>
 	   <li><a href="<% request.uri_base %>/tank?tank_id=<% tank_id %>"  title="Notes">Notes</a></li>
 	   <li><a href="#testTabs"                                          title="Water Tests">Water Tests</a></li>
+<!--	   <li><a href="#inventory"                                         title="Inventory">Inventory</a></li> -->
 	   <li><a href="<% request.uri_base %>/diary?tank_id=<% tank_id %>" title="Diary">Diary</a></li>
 	</ul>
 
@@ -88,7 +89,18 @@ $(function() {
 		<div id="Test_History"></div>
 		<div id="Test_Charts"></div>
 	</div>
-
+<!--
+	<div id="inventory">
+		<ul>
+		   <li><a href="<% request.uri_base %>/inventory/consumables?tank_id=<% tank_id %>" title="Consumables">Consumables</a></li>
+		   <li><a href="<% request.uri_base %>/inventory/equipment?tank_id=<% tank_id %>"   title="Equipment">Equipment</a></li>
+		   <li><a href="<% request.uri_base %>/inventory/livestock?tank_id=<% tank_id %>"   title="Livestock">Livestock</a></li>
+		</ul>
+		<div id="Consumables"></div>
+		<div id="Livestock"></div>
+		<div id="Equipment"></div>
+	</div>
+-->
 	<div id="Diary"></div>
 
 	<div id="Notes"></div>
@@ -100,7 +112,7 @@ $(function() {
 
 	$('#journal_tabs').tabs({cookie: tabCookie});
 	$('#testTabs').tabs();
-
+	$('#inventory').tabs();
 	$('#message').hide();
 });
 </script>

@@ -5,12 +5,12 @@ use strict;
 use Dancer ':syntax';
 
 ## Route handlers:
-use TankTracker::Diary;
-use TankTracker::Journal;
-use TankTracker::Login;
-use TankTracker::Logout;
-use TankTracker::Tank;
-use TankTracker::WaterTest;
+use TankTracker::Route::Diary;
+use TankTracker::Route::Journal;
+use TankTracker::Route::Login;
+use TankTracker::Route::Logout;
+use TankTracker::Route::Tank;
+use TankTracker::Route::WaterTest;
 
 hook before_template => sub {
 	my $tokens = shift;

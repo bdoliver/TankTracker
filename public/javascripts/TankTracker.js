@@ -208,7 +208,15 @@ function generateChart(tank_id) {
 		lines:  { show: true   },
 		points: { show: true   },
 		xaxis:  { mode: 'time' },
-		grid:   { hoverable: true }
+		grid:   { hoverable: true },
+		zoom:   { interactive: true,
+			  trigger: "dblclick", // or "click" for single click
+			  amount: 1.5          // 2 = 200% (zoom in), 0.5 = 50% (zoom out)
+			},
+		pan:    { interactive: true,
+			  cursor: "move",      // CSS mouse cursor value used when dragging, e.g. "pointer"
+			  frameRate: 20
+			}
 	};
 
 	$.ajax({ url:      setURL('/test/chart'),
@@ -260,10 +268,9 @@ function generateChart(tank_id) {
 							previousPoint = null;            
 						}
 					});
-			
 				}
 				else {
-					alert("No test results available for charting.");
+					alert("No test results available for charting (check selected date range).");
 				}
 			   },
 		 error:    function( req, textStatus, errorThrown ) {

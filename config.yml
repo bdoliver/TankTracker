@@ -40,26 +40,17 @@ engines:
      end_tag:   '%>'
 
 plugins:
-    Database:
-        driver:   'Pg'
-        database: 'TankTracker'
-        host:     'localhost'
-        port:     5432
-        username: 'brendon'
-#        password: 'pgpw'
-        connection_check_threshold: 10
-        dbi_params:
-            RaiseError: 1
-            AutoCommit: 1
-            pg_enable_utf8: 1
-#        on_connect_do: ["SET NAMES 'utf8'", "SET CHARACTER SET 'utf8'" ]
-        log_queries: 1
-
-#plack_middlewares:
-#    -
-#        - "+Dancer::Middleware::Rebase"
-#        - base
-#        - "http://localhost/TankTracker"
-#        - strip
-#        - 1
-
+   DBIC:
+     default:
+       schema_class: TankTracker::Schema
+       dsn: dbi:Pg:dbname=TankTracker;host=localhost;port=5432
+       user: brendon
+       pass:
+       options:
+          FetchHashKeyName:   NAME_lc
+          ChopBlanks:         1
+          AutoCommit:         1
+          RaiseError:         1
+          ShowErrorStatement: 1
+          PrintError:         1
+          pg_enable_utf8:     1
