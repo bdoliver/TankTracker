@@ -68,7 +68,7 @@ sub _test_results
 	my $resultSet = schema->resultset('WaterTest')->search($query,
 							       { 'order_by' => 'test_date DESC' });
 
-	my %tests = ();
+	my @tests = ();
 
 	my $idx;
 
@@ -81,13 +81,11 @@ sub _test_results
 				if ( ! $chart ) {
 					# test_date is a DateTime object, so
 					# reformat to display as yyyy-mm-dd:
-					#$val = scalar $val;
-					#$val =~ s/T\d\d:\d\d:\d\d$//;
 					$val = $val->ymd();
 				}
 				else {
 					# jquery.flot.js requires date
-					# in epoch seconds:
+					# in epoch milliseconds:
 					$val = $val->epoch() * 1000;
 				}
 			}
@@ -96,10 +94,10 @@ sub _test_results
 			}
 			$test->{$c} = $val || 0;
 		}
-		$tests{++$idx} = $test;
+		push @tests, $test;
 	}
 
-	return \%tests;
+	return \@tests;
 }
 
 ## Munge test_results() into a format useable by jquery.flot.js:
@@ -109,7 +107,7 @@ sub _chart_data
 
 	$args->{chart}++;
 
-	my $results = _test_results($args);
+	my $tests = _test_results($args);
 
 ## Example flot data series:
 # {
@@ -118,20 +116,22 @@ sub _chart_data
 #}
 	my ( %data, $axis );
 
-	for my $id ( sort { $b <=> $a } keys %$results ) {
-		my $test      = $results->{$id};
+	for my $test ( @$tests ) {
 		my $test_date = $test->{test_date};
 
 		# Not interested in charting these values:
-		delete $test->{test_id};
-		delete $test->{tank_id};
-		delete $test->{test_date};
-		delete $test->{notes};
-		delete $test->{water_change};
+		map { delete $test->{$_} } qw(test_id
+					      tank_id
+					      test_date
+					      notes
+					      water_change);
 
 		for my $parameter ( keys %$test ) {
-			# Ignore parameters which were not requested for charting:
+			# Ignore parameter which was not requested for charting:
 			$args->{$parameter} or next;
+
+			# Ignore potentially bogus parameter:
+			$ChartLegend->EXISTS($parameter) or next;
 
 			$data{$parameter} ||= { label => $ChartLegend->FETCH($parameter)->{label},
 						color => $ChartLegend->FETCH($parameter)->{colour},

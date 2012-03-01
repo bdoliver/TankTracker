@@ -17,29 +17,29 @@
     <th class="testHdg">Notes?</th>
 </tr>
 
-<% FOREACH test_id IN tests.keys.nsort %>
+<% FOREACH test IN tests %>
    <tr onmouseover="this.className = 'hlt';" onmouseout="this.className = '';" >
 
-       <td><% IF tests.$test_id.notes %>
-		<div id="testNoteDiv_<% test_id %>" class="testNotes" style="z-index:110; text-align: left; vertical-align: top;">
-		    <table><tr><td style="vertical-align: top;"><% tests.$test_id.notes %></td></tr></table>
+       <td><% IF test.notes %>
+		<div id="testNoteDiv_<% test.test_id %>" class="testNotes" style="z-index:110; text-align: left; vertical-align: top;">
+		    <table><tr><td style="vertical-align: top;"><% test.notes %></td></tr></table>
 		</div>
            <% END %>
-           <% tests.$test_id.test_date %></td>
-       <td class="num"><% tests.$test_id.result_ph %></td>
-       <td class="num"><% tests.$test_id.result_ammonia %> </td>
-       <td class="num"><% tests.$test_id.result_nitrite %> </td>
-       <td class="num"><% tests.$test_id.result_nitrate %> </td>
+           <% test.test_date %></td>
+       <td class="num"><% test.result_ph %></td>
+       <td class="num"><% test.result_ammonia %> </td>
+       <td class="num"><% test.result_nitrite %> </td>
+       <td class="num"><% test.result_nitrate %> </td>
 <% IF is_saltwater %>
-       <td class="num"><% tests.$test_id.result_calcium %> </td>
-       <td class="num"><% tests.$test_id.result_phosphate %> </td>
-       <td class="num"><% tests.$test_id.result_magnesium %> </td>
-       <td class="num"><% tests.$test_id.result_kh %> </td>
-       <td class="num"><% tests.$test_id.result_alkalinity %> </td>
-       <td class="num"><% tests.$test_id.result_salinity %> </td>
+       <td class="num"><% test.result_calcium %> </td>
+       <td class="num"><% test.result_phosphate %> </td>
+       <td class="num"><% test.result_magnesium %> </td>
+       <td class="num"><% test.result_kh %> </td>
+       <td class="num"><% test.result_alkalinity %> </td>
+       <td class="num"><% test.result_salinity %> </td>
 <% END %>       
-       <td class="num"><% tests.$test_id.water_change %> </td>
-       <td><% IF tests.$test_id.notes %><span class="jsLink" onClick="toggleTestNotes(<% test_id %>);">Notes</span>
+       <td class="num"><% test.water_change %> </td>
+       <td><% IF test.notes %><span class="jsLink" onClick="toggleTestNotes(<% test.test_id %>);">Notes</span>
 	   <% ELSE %>&nbsp;
 	   <% END %>
        </td>
