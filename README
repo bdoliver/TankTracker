@@ -6,6 +6,11 @@ Simple web application for tracking things about my aquariums
 	- graphing of test results over time
 	- misc notes, inventory, etc. per tank
 
+Todo:
+        - add proper authentication & authorisation
+          (delusions of grandeur: maybe this just might be useful for other
+           aquarists... hosted somewhere for multiuser access)
+
 Things I'd like to add:
 	- means of uploading pics
 	- links to external websites
