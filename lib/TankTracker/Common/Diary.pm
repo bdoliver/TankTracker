@@ -18,7 +18,7 @@ sub save_diary {
 	my $action   = $args->{action};
 	my $diary_id = $args->{diary_id};
 	my $note     = $args->{diary_note};
-	my $date     = pg_timestamp();
+	my $date     = pg_datetime();
 
 	my $diary;
 
