@@ -30,8 +30,10 @@ post '/login' => sub {
 	my $login = params->{login};
 	my $pass  = params->{password};
 
+	my $auth = auth($login, $pass);
+
 	# Validate the user login
-	if ( $login and $pass and auth($login, $pass) ) {
+	if ( $login and $pass and authd() ) {
 		session logged_in => 1;
 
 		$path = params->{path} || '/journal';
