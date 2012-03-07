@@ -1,6 +1,7 @@
 package TankTracker::Route::Diary;
 
 use strict;
+use warnings;
 
 use Dancer               ':syntax';
 use Dancer::Plugin::DBIC 'schema';

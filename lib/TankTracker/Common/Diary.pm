@@ -1,6 +1,7 @@
 package TankTracker::Common::Diary;
 
 use strict;
+use warnings;
 
 use base qw(Exporter);
 

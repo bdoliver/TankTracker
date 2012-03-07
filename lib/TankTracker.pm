@@ -1,6 +1,7 @@
 package TankTracker;
 
 use strict;
+use warnings;
 
 use Dancer ':syntax';
 

@@ -1,6 +1,7 @@
 package TankTracker::Route::Logout;
 
 use strict;
+use warnings;
 
 use Dancer ':syntax';
 

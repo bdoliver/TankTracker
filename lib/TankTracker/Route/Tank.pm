@@ -1,6 +1,7 @@
 package TankTracker::Route::Tank;
 
 use strict;
+use warnings;
 
 use Dancer               ':syntax';
 use Dancer::Plugin::DBIC 'schema';
