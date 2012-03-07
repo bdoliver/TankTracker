@@ -3,10 +3,10 @@ BEGIN TRANSACTION;
 
 CREATE TABLE tracker_user (
 	user_id		SERIAL NOT NULL,
-	first_name	TEXT NOT NULL,
-	last_name	TEXT,
+	login		TEXT NOT NULL,
+	user_name	TEXT,
 	email_address	TEXT NOT NULL,
-	passwd		TEXT NOT NULL,
+	password	TEXT NOT NULL,
 	admin		BOOLEAN NOT NULL DEFAULT FALSE,
 
 	PRIMARY KEY ( user_id )
