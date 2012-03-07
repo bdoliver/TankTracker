@@ -209,13 +209,13 @@ span.jsLink:hover {
 	width: 80%;
 }
 
-.error {
+.err {
 	font-weight: bold;
 	color: #f00;
 	font-size: 12px;
 }
 
-.message {
+.msg {
 	font-weight: bold;
 	color: #00f;
 	font-size: 12px;
