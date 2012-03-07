@@ -60,3 +60,15 @@ plugins:
           ShowErrorStatement: 1
           PrintError:         1
           pg_enable_utf8:     1
+   Auth::RBAC:
+     credentials:
+       class: DBIC
+       options:
+         user_moniker:   TrackerUser
+         id_field:       user_id
+         login_field:    login
+         name_field:     user_name
+         password_field: password
+         password_type:  self_check
+         role_relation:  
+   
