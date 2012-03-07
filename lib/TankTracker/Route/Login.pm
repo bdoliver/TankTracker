@@ -1,9 +1,13 @@
 package TankTracker::Route::Login;
 
 use strict;
+use warnings;
 
 use Dancer               ':syntax';
-use Dancer::Plugin::DBIC 'schema';
+
+# Although we are using the ::Auth::RBAC::Credentials::DBIC plugin,
+# we need to load the core RBAC module to get the auth() method
+use Dancer::Plugin::Auth::RBAC;
 
 use TankTracker::Common::Utils qw(set_message
 				  get_message
@@ -23,11 +27,11 @@ get '/login' => sub {
 post '/login' => sub {
 	my $path;
 
-	# Validate the username and password they supplied
-	if (params->{username} and 
-	    params->{password} and
-	    params->{username} eq setting('username') and
-	    params->{password} eq setting('password') ) {
+	my $login = params->{login};
+	my $pass  = params->{password};
+
+	# Validate the user login
+	if ( $login and $pass and auth($login, $pass) ) {
 		session logged_in => 1;
 
 		$path = params->{path} || '/journal';
