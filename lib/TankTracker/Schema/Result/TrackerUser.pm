@@ -42,12 +42,12 @@ __PACKAGE__->table("tracker_user");
   is_nullable: 0
   sequence: 'tracker_user_user_id_seq'
 
-=head2 first_name
+=head2 login
 
   data_type: 'text'
   is_nullable: 0
 
-=head2 last_name
+=head2 user_name
 
   data_type: 'text'
   is_nullable: 1
@@ -78,9 +78,9 @@ __PACKAGE__->add_columns(
     is_nullable       => 0,
     sequence          => "tracker_user_user_id_seq",
   },
-  "first_name",
+  "login",
   { data_type => "text", is_nullable => 0 },
-  "last_name",
+  "user_name",
   { data_type => "text", is_nullable => 1 },
   "email_address",
   { data_type => "text", is_nullable => 0 },
@@ -150,9 +150,36 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07014 @ 2012-02-28 08:13:50
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:fDsZ86haLr/IjASAUKGRwQ
+# Created by DBIx::Class::Schema::Loader v0.07014 @ 2012-03-07 14:01:20
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:6ykHwzD1NySvDXJEC4spyQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
+use Crypt::Eksblowfish::Bcrypt qw(bcrypt_hash);
+
+sub hash_pw {
+	my ( $self, $pw ) = @_;
+
+	return $pw 
+		? bcrypt_hash({ key_nul => 1,
+				cost    => 8,
+				salt    => ']+_%%^981#^!*|vB' }, $pw)
+		: '';
+}
+
+sub check_password {
+
+	my ( $self, $attempt ) = @_;
+
+	my $ret = 0;
+
+	if ( $attempt ) {
+		my $hash = $self->hash_pw($attempt);
+
+		$ret = ($hash eq $self->password());
+	}
+
+	return $ret;
+}
+
 1;
