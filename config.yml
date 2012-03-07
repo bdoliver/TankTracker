@@ -25,11 +25,6 @@ show_errors: "1"
 ## If not set, default to Australia/Melbourne:
 timezone: 
 
-## KLUDGE ALERT!
-## .. until I get around to doing proper authentication/authorisation:
-username: "brendon"
-password: "testpw"
-
 serializer: "JSON"
 
 # template engine
