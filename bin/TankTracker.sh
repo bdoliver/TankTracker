@@ -9,10 +9,15 @@ case "$1" in
                 ;;
 esac
 
+pidFile=$TRACKER_DIR/TankTracker/logs/starman.pid
+logFile=$TRACKER_DIR/TankTracker/logs/starman.log
+
 cd $TRACKER_DIR/TankTracker &&
-        nohup plackup 	-E $env \
+        plackup 	-E $env \
 			-s Starman \
 			-a $TRACKER_DIR/TankTracker/bin/app.pl \
-			-p 5000 > ./logs/starman.log 2>&1 &
+                        -D --pid $pidFile --error-log $logFile \
+			-p 5000 >$logFile 2>&1
+                
 
-echo "Server PID=$!"
+echo "Server PID=`cat $pidFile`"
