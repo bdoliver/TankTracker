@@ -66,11 +66,3 @@ plugins:
 #        options:
 #          permissions_relation:  
         
-plack_middlewares:
-  -
-    - ServerStatus::Lite
-    -
-        - path: /server_status
-        - allow: 127.0.0.1
-        - scoreboard: /home/brendon/DEVEL/TankTracker/logs
-        
