@@ -62,12 +62,6 @@ __PACKAGE__->table("tracker_user");
   data_type: 'text'
   is_nullable: 0
 
-=head2 admin
-
-  data_type: 'boolean'
-  default_value: false
-  is_nullable: 0
-
 =cut
 
 __PACKAGE__->add_columns(
@@ -86,8 +80,6 @@ __PACKAGE__->add_columns(
   { data_type => "text", is_nullable => 0 },
   "password",
   { data_type => "text", is_nullable => 0 },
-  "admin",
-  { data_type => "boolean", default_value => \"false", is_nullable => 0 },
 );
 
 =head1 PRIMARY KEY
@@ -149,9 +141,24 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 tracker_user_roles
 
-# Created by DBIx::Class::Schema::Loader v0.07014 @ 2012-03-07 14:01:20
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:6ykHwzD1NySvDXJEC4spyQ
+Type: has_many
+
+Related object: L<TankTracker::Schema::Result::TrackerUserRole>
+
+=cut
+
+__PACKAGE__->has_many(
+  "tracker_user_roles",
+  "TankTracker::Schema::Result::TrackerUserRole",
+  { "foreign.user_id" => "self.user_id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+
+# Created by DBIx::Class::Schema::Loader v0.07014 @ 2012-03-13 10:14:53
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:NGq2sinInTQ4LkF81h3EcQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

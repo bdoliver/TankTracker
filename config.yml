@@ -22,17 +22,12 @@ logger:  "console"
 show_errors: "1"
 
 ## Time zone where this app is located.
-## If not set, default to Australia/Melbourne:
+## If not set, the default is Australia/Melbourne:
 timezone: 
 
 serializer: "JSON"
 
 # template engine
-# simple: default and very basic template engine
-# template_toolkit: TT
-
-#template: "simple"
-
 template: "template_toolkit"
 engines:
    template_toolkit:
@@ -65,5 +60,17 @@ plugins:
          name_field:     user_name
          password_field: password
          password_type:  self_check
-         role_relation:  
-   
+         role_relation:  tracker_user_roles
+     permissions:
+       class: DBIC
+#        options:
+#          permissions_relation:  
+        
+plack_middlewares:
+  -
+    - ServerStatus::Lite
+    -
+        - path: /server_status
+        - allow: 127.0.0.1
+        - scoreboard: /home/brendon/DEVEL/TankTracker/logs
+        

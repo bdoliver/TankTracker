@@ -1,17 +1,36 @@
 \set ON_ERROR_STOP 1
 BEGIN TRANSACTION;
 
+CREATE TABLE tracker_role (
+	role_id		SERIAL NOT NULL,
+	name		TEXT NOT NULL,
+
+	PRIMARY KEY ( role_id )
+);
+INSERT INTO tracker_role VALUES ( default, 'Admin' );
+INSERT INTO tracker_role VALUES ( default, 'Guest' );
+INSERT INTO tracker_role VALUES ( default, 'Owner' );
+INSERT INTO tracker_role VALUES ( default, 'User'  );
+
 CREATE TABLE tracker_user (
 	user_id		SERIAL NOT NULL,
 	login		TEXT NOT NULL,
 	user_name	TEXT,
 	email_address	TEXT NOT NULL,
 	password	TEXT NOT NULL,
-	admin		BOOLEAN NOT NULL DEFAULT FALSE,
 
 	PRIMARY KEY ( user_id )
 );
 CREATE UNIQUE INDEX email_address_idx ON tracker_user ( lower(email_address) );
+
+CREATE TABLE tracker_user_role (
+	user_id		INT NOT NULL,
+	role_id		INT NOT NULL,
+
+	PRIMARY KEY	( user_id, role_id ),
+	FOREIGN KEY	( user_id ) REFERENCES tracker_user ( user_id ),
+	FOREIGN KEY	( role_id ) REFERENCES tracker_role ( role_id )
+);
 
 CREATE TABLE session (
 	session_id      BIGINT NOT NULL,
