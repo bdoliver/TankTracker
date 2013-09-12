@@ -7,139 +7,263 @@ use base qw( Exporter );
 
 use Dancer qw(:syntax);
 
+use Carp;
+use Data::Page;
+
 use DateTime::Format::Pg;
+use DateTime::Format::SQLite;
 
-use constant PAGE_CHUNK => 3;
+use List::MoreUtils qw();  ## we want 'any' but it clashes with Exporter!
 
-use constant TIMEFMT => '%Y-%m-%d %T (UTC %z)';
+use constant PAGE_CHUNK   => 3;
+use constant START_PAGE   => 1;
+use constant REC_PER_PAGE => 10;
+
+use constant TIMEFMT      => '%Y-%m-%d %T (UTC %z)';
 
 our @EXPORT_OK = qw(set_message
-		    get_message
-		    set_error
-		    get_error
-		    paginate
-		    pg_datetime
-		    TIMEFMT);
+                    get_message
+                    set_error
+                    get_error
+                    db_datetime
+                    build_gridSearch
+                    paginate
+                    START_PAGE
+                    REC_PER_PAGE
+                    TIMEFMT);
 
 our ( $Message, $Error );
 
-sub set_message {
-	my $msg = shift;
+sub db_driver {
+    my $dsn = config->{plugins}->{DBIC}->{default}->{dsn};
 
-	$Message = $msg;
+    my ( $driver ) = ( $dsn =~ m|dbi:(\w+):dbname| );
+
+    return $driver;
 }
- 
-sub get_message {
-	my $msg  = $Message;
-	$Message = "";
 
-	return $msg;
+sub set_message {
+    my $msg = shift;
+
+    $Message = $msg;
+}
+
+sub get_message {
+    my $msg  = $Message;
+    $Message = "";
+
+    return $msg;
 }
 
 sub set_error {
-	my $err = shift;
-
-	$Error = $err;
+    my $err = shift;
+    $Error  = $err;
 }
- 
+
 sub get_error {
-	my $err  = $Error;
-	$Error = "";
+    my $err = $Error;
+    $Error  = "";
 
-	return $err;
+    return $err;
 }
 
-sub pg_datetime {
-	my $date = shift;
+sub db_datetime {
+    my $date = shift;
 
-	if ( ! $date ) {
-		my $tz = setting('timezone') || 'Australia/Melbourne';
+    if ( ! $date ) {
+        my $tz = setting('timezone') || 'Australia/Melbourne';
 
-		$date  = DateTime->now()->set_time_zone($tz);
-	}
+        $date  = DateTime->now()->set_time_zone($tz);
+    }
 
-	return DateTime::Format::Pg->format_datetime($date);
+    my $db_driver = db_driver() or
+        die "db_datetime() can't determine which DBI driver is in use!\n";
+
+    my $datetimeFormatter;
+
+    if ( $db_driver eq 'Pg' or $db_driver eq 'SQLite' ) {
+            $datetimeFormatter = "DateTime::Format::$db_driver";
+    }
+    else {
+        die "db_datetime() only supports Pg & SQLite databases for now...\n";
+    }
+
+    return $datetimeFormatter->format_datetime($date);
 }
 
-### Pagination links for diary notes
-sub paginate
-{
-	my $args = shift;
+## build a DBIx::Class 'WHERE' clause to search for something
+## when called from jqGrid search popup.
+## When jqGrid sends a search request, there are 12 different
+## match operators, one of which is required:
+## eq    equal
+## ne    not equal
+## bw    begins with
+## bn    does not begin with
+## ew    ends with
+## en    does not end with
+## cn    contains
+## nc    does not contains
+## nu    is null
+## nn    is not null
+## in    is in
+## ni    is not in
+sub build_gridSearch {
+    my $params = shift;
 
-	my $total_recs  = $args->{total_recs} || 0;
-	my $rec_pp      = $args->{rec_pp};
-	my $currentPage = $args->{curr_pg};
+    my $search = $params->{_search};
 
-	my ( $next, $prev, $num_pages );
+    # bail early if search not required:
+    return undef if ( $search and $search eq 'false' );
 
-	## How many pages of records are there to show?
-	my $totalPages = $total_recs / $rec_pp;
+    my $col = $params->{searchField};
+    my $op  = $params->{searchOper};
+    my $val = $params->{searchString};
 
-	# Round up to next whole number of pages:
-	$totalPages = int(++$totalPages) if ( $totalPages > int($totalPages) );
+    # need at least the column & match operator
+    # (value can be null / empty string / zero... whatever)
+    ( $col and $op ) or return undef;
 
-	# Nothing to do if we have a page or less of records to show:
-	if (! $total_recs          or
-	      $total_recs < $rec_pp  or
-	      $totalPages <= 1 ) {
-		return {};
-	}
+    my $s;
 
-	my %pp_params = ( curr_pg    => $currentPage,
-			  page_chunk => PAGE_CHUNK );
-	my @pp_params = ();
+    if ( $op eq 'eq' ) {
+        $s = { $col => $val };
+    }
+    elsif ( $op eq 'ne' ) {
+        $s = { $col => { '!=' => $val } };
+    }
+    elsif ( List::MoreUtils::any { $op eq $_ } (qw(bw nb cn nc ew en)) ) {
+        if ( List::MoreUtils::any { $op eq $_ } (qw(bw nb cn nc)) ) {
+            $val .= '%';
+        }
+        if ( List::MoreUtils::any { $op eq $_ } (qw(ew en cn nc)) ) {
+            $val = "\%$val";
+        }
+        if (List::MoreUtils::any { $op eq $_ } (qw(bw cn ew)) ) {
+            $s = { $col => { 'like' => $val } };
+        }
+        else {
+             $s = { '-not' => [ $col => { 'like' => $val } ] };
+        }
+    }
+    elsif ( $op eq 'nu' ) {
+        $s = { $col => undef };
+    }
+    elsif ( $op eq 'nn' ) {
+        $s = { $col => { '!=' => undef } };
+    }
+    elsif ( $op eq 'in' or $op eq 'ni' ) {
+        $val = [ map { s/^\s*//; s/\s*$//; $_ } split(',', $val) ];
+        $op = 'not_in' if $op eq 'ni';
+        $s = { $col => { "-$op" => $val } };
+    }
+    else {
+        croak "Unrecognised search operator '$op'!\n";
+    }
 
-	my $noPages   = PAGE_CHUNK;
+    return $s;
+}
 
-	my $relPageDiff = $currentPage % ($noPages + 1);
+# sub paginate {
+#     my $args = shift;
+# 
+#     my $name = $args->{name};
+#     my $recs = $args->{recs} || [];
+#     my $page = $args->{page} || START_PAGE;
+#     my $rows = $args->{rows} || REC_PER_PAGE;
+# 
+#     my ($start_row, $end_row);
+# 
+#     my $total_records = scalar @$recs;
+#     my $pagination    = {};
+# 
+#     if ( $total_records ) {
+#         my $total_pages  = int($total_records / $rows);
+#            $total_pages += ($total_records % $rows) ? 1 : 0;
+# 
+#         $start_row = ( $page - 1 ) * $rows;
+#         $end_row   = ( $start_row + $rows <= $total_records )
+#                         ? $start_row + $rows
+#                         : $total_records;
+#         ++$start_row;
+# 
+#         $pagination->{total_records} = $total_records;
+#         $pagination->{total_pages}   = $total_pages;
+#         $pagination->{current_page}  = $page;
+#     }
+# 
+#     my ( $idx, @rows );
+# 
+#     for my $r ( @$recs ) {
+#         if ( $start_row and $end_row ) {
+#             if ( ++$idx < $start_row ) {
+#                 next;
+#             } else {
+#                 last if $idx > $end_row;
+#             }
+#         }
+#         push @rows, $r;
+#     }
+# 
+#     $pagination->{$name} = \@rows;
+# 
+#     return $pagination;
+# }
 
-	my $firstPage = $currentPage - $relPageDiff;
-	my $lastPage  = $currentPage + ($noPages - $relPageDiff);
+sub paginate {
+    my $args = shift;
 
-	if ( $lastPage >= $totalPages ) {
-		$lastPage = $totalPages;
-	}
+    my $name = $args->{name};
+    my $recs = $args->{recs} || [];
+    my $page = $args->{page} || START_PAGE;
+    my $rows = $args->{rows} || REC_PER_PAGE;
 
-	if ( $firstPage <= 0 ) {
-		$firstPage = 1;
-	}
+    my $pager = Data::Page->new();
+    
+    $pager->total_entries(scalar @$recs);
+    $pager->entries_per_page($rows);
+    
+    my $pagination = { total_records => $pager->total_entries(),
+                       total_pages   => $pager->last_page(),
+                       current_page  => $page,
+                       $name         => $pager->splice($recs),
+                     };
 
-	my $displayNext = 1;
-	my $displayPrev = 1;
-
-	if ( $firstPage <= 1 ) {
-		$displayPrev = 0;
-	}
-
-	if ( ($currentPage + $noPages) > $totalPages ) {
-		$displayNext = 0;
-	}
-
-	if ( $totalPages > 1 ) {
-		if ( (! $displayPrev and $currentPage > 1) or $displayPrev ) {
-			$pp_params{first_page}++;
-		}
-
-		if ( $displayPrev ) {
-			$pp_params{prev_page} = $currentPage - $noPages;
-		}
-                
-		for ( $firstPage .. $lastPage ) {
-			push @pp_params, { page      => $_,
-					   curr_page => ( $_ == $currentPage ) };
-		}
-		$pp_params{pages} = \@pp_params;
-
-		if ( $displayNext ) {
-			$pp_params{next_page} =  $currentPage + $noPages;
-		}
-
-		if ( (! $displayNext and $currentPage < $totalPages) or $displayNext ) {
-			$pp_params{last_page} = $totalPages;
-		}
-	}
-
-	return \%pp_params;
+#     my ($start_row, $end_row);
+# 
+#     my $total_records = scalar @$recs;
+#     my $pagination    = {};
+# 
+#     if ( $total_records ) {
+#         my $total_pages  = int($total_records / $rows);
+#            $total_pages += ($total_records % $rows) ? 1 : 0;
+# 
+#         $start_row = ( $page - 1 ) * $rows;
+#         $end_row   = ( $start_row + $rows <= $total_records )
+#                         ? $start_row + $rows
+#                         : $total_records;
+#         ++$start_row;
+# 
+#         $pagination->{total_records} = $total_records;
+#         $pagination->{total_pages}   = $total_pages;
+#         $pagination->{current_page}  = $page;
+#     }
+# 
+#     my ( $idx, @rows );
+# 
+#     for my $r ( @$recs ) {
+#         if ( $start_row and $end_row ) {
+#             if ( ++$idx < $start_row ) {
+#                 next;
+#             } else {
+#                 last if $idx > $end_row;
+#             }
+#         }
+#         push @rows, $r;
+#     }
+# 
+#     $pagination->{$name} = \@rows;
+# 
+#     return $pagination;
 }
 
 1;

@@ -10,6 +10,8 @@ Todo:
         - add proper authentication & authorisation
           (delusions of grandeur: maybe this just might be useful for other
            aquarists... hosted somewhere for multiuser access)
+	- inventory system for keeping track of assets, livestock, consumables
+          and whatever else.
 
 Things I'd like to add:
 	- means of uploading pics

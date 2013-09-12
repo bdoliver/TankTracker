@@ -40,15 +40,20 @@ __PACKAGE__->table("inventory");
   data_type: 'integer'
   is_auto_increment: 1
   is_nullable: 0
-  sequence: 'inventory_item_id_seq'
 
-=head2 inventory_type_id
+=head2 type_id
 
   data_type: 'integer'
   is_foreign_key: 1
   is_nullable: 0
 
 =head2 tank_id
+
+  data_type: 'integer'
+  is_foreign_key: 1
+  is_nullable: 0
+
+=head2 user_id
 
   data_type: 'integer'
   is_foreign_key: 1
@@ -69,19 +74,21 @@ __PACKAGE__->table("inventory");
   data_type: 'money'
   is_nullable: 0
 
+=head2 quantity
+
+  data_type: 'number'
+  is_nullable: 0
+
 =cut
 
 __PACKAGE__->add_columns(
   "item_id",
-  {
-    data_type         => "integer",
-    is_auto_increment => 1,
-    is_nullable       => 0,
-    sequence          => "inventory_item_id_seq",
-  },
-  "inventory_type_id",
+  { data_type => "integer", is_auto_increment => 1, is_nullable => 0 },
+  "type_id",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "tank_id",
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
+  "user_id",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "description",
   { data_type => "text", is_nullable => 0 },
@@ -89,6 +96,8 @@ __PACKAGE__->add_columns(
   { data_type => "date", is_nullable => 0 },
   "purchase_price",
   { data_type => "money", is_nullable => 0 },
+  "quantity",
+  { data_type => "number", is_nullable => 0 },
 );
 
 =head1 PRIMARY KEY
@@ -105,21 +114,6 @@ __PACKAGE__->set_primary_key("item_id");
 
 =head1 RELATIONS
 
-=head2 inventory_type
-
-Type: belongs_to
-
-Related object: L<TankTracker::Schema::Result::InventoryType>
-
-=cut
-
-__PACKAGE__->belongs_to(
-  "inventory_type",
-  "TankTracker::Schema::Result::InventoryType",
-  { inventory_type_id => "inventory_type_id" },
-  { is_deferrable => 1, on_delete => "CASCADE", on_update => "CASCADE" },
-);
-
 =head2 tank
 
 Type: belongs_to
@@ -132,12 +126,42 @@ __PACKAGE__->belongs_to(
   "tank",
   "TankTracker::Schema::Result::Tank",
   { tank_id => "tank_id" },
-  { is_deferrable => 1, on_delete => "CASCADE", on_update => "CASCADE" },
+  { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
+);
+
+=head2 type
+
+Type: belongs_to
+
+Related object: L<TankTracker::Schema::Result::InventoryType>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "type",
+  "TankTracker::Schema::Result::InventoryType",
+  { type_id => "type_id" },
+  { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
+);
+
+=head2 user
+
+Type: belongs_to
+
+Related object: L<TankTracker::Schema::Result::TrackerUser>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "user",
+  "TankTracker::Schema::Result::TrackerUser",
+  { user_id => "user_id" },
+  { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07014 @ 2012-02-28 08:13:50
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:XcVH1COudW+zOKJdDT1bTQ
+# Created by DBIx::Class::Schema::Loader v0.07035 @ 2013-05-24 11:31:58
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:77/9xPRCTjn7eZEmIAMXtg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

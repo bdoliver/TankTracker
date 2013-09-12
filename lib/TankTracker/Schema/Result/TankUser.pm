@@ -50,7 +50,7 @@ __PACKAGE__->table("tank_user");
 =head2 admin
 
   data_type: 'boolean'
-  default_value: false
+  default_value: FALSE
   is_nullable: 1
 
 =cut
@@ -61,7 +61,7 @@ __PACKAGE__->add_columns(
   "user_id",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "admin",
-  { data_type => "boolean", default_value => \"false", is_nullable => 1 },
+  { data_type => "boolean", default_value => \"FALSE", is_nullable => 1 },
 );
 
 =head1 PRIMARY KEY
@@ -92,7 +92,7 @@ __PACKAGE__->belongs_to(
   "tank",
   "TankTracker::Schema::Result::Tank",
   { tank_id => "tank_id" },
-  { is_deferrable => 1, on_delete => "CASCADE", on_update => "CASCADE" },
+  { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
 
 =head2 user
@@ -107,12 +107,12 @@ __PACKAGE__->belongs_to(
   "user",
   "TankTracker::Schema::Result::TrackerUser",
   { user_id => "user_id" },
-  { is_deferrable => 1, on_delete => "CASCADE", on_update => "CASCADE" },
+  { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07014 @ 2012-02-28 08:13:50
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:/nH6MI9JFWEY5om/0Kuktg
+# Created by DBIx::Class::Schema::Loader v0.07035 @ 2013-03-03 12:30:50
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:YmDgMJroyV00vs07AClmmg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

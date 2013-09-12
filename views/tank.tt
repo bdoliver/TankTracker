@@ -1,13 +1,13 @@
 <p id="editTankMsg" class="message"></p>
 <p id="editTankErr" class="error"></p>
 
-<form id="tankForm" action="<% request.uri_base %>/tank" method="post">
-<input type="hidden" id="tank_id" name="tank_id" value="<% tank_id %>" />
-<% IF updated_on %>
-<div><span id="tank_updated_on" class="num">Last Updated: <% updated_on %></span></div>
-<% END %>
+<form id="tankForm" action="[% request.uri_base %]/tank" method="post">
+<input type="hidden" id="tank_id" name="tank_id" value="[% tank_id %]" />
+[% IF updated_on %]
+<div><span id="tank_updated_on" class="num">Last Updated: [% updated_on %]</span></div>
+[% END %]
 <div>
-<textarea id="tankNotes" rows="20"><% notes %></textarea>
+<textarea id="tankNotes" rows="20">[% notes %]</textarea>
 </div>
 <p>
 <span id="editTankButton">Edit</span>
@@ -19,13 +19,19 @@
 </form>
 
 <script>
-$(function() { 
+$(function() {
 	$('#tankNotes').disable();
 
 	$('#editTankButton').button()
 			 .click(function() { toggleTankEdit(true); } );
+
 	$('#saveTankButton').button()
-			 .click(function() { saveTankEdit(); } );
+			 .click(function() { if ( saveTank(true, true) ) {
+                                                setMsg('Updated tank notes ok.');
+                                                $('#tank_updated_on').html("Last Updated: "+upd);
+                                                toggleTankEdit(false);
+                                             }
+                                           } ); // saveTankEdit();
 	$('#cancelTankButton').button()
 			   .click(function() { toggleTankEdit(false); } );
 

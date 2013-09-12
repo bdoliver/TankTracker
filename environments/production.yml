@@ -1,31 +1,36 @@
-# configuration file for production environment
+# configuration file for development environment
 
-# only log warning and error messsages
-log: "warning"
+# the logger engine to use
+# console: log messages to STDOUT (your console where you started the
+#          application server)
+# file:    log message to a file in log/
+logger: "console"
+#logger: log4perl
+#log4perl:
+#   config_file: "./etc/log4perl.conf"
 
-# log message to a file in logs/
-logger: "file"
 
-# don't consider warnings critical
+# the log level for this environement
+# core is the lowest, it shows Dancer's core log messages as well as yours
+# (debug, warning and error)
+log: "core"
+#log: "debug"
+
+# should Dancer consider warnings as critical errors?
 warnings: 1
 
-# hide errors 
+# should Dancer show a stacktrace when an error is caught?
 show_errors: 1
 
-# cache route resolution for maximum performance
-route_cache: 1
+# auto_reload is a development and experimental feature
+# you should enable it by yourself if you want it
+# Module::Refresh is needed 
+# 
+# Be aware it's unstable and may cause a memory leak.
+# DO NOT EVER USE THAT FEATURE IN PRODUCTION 
+# OR TINY KITTENS SHALL DIE WITH LOTS OF SUFFERING
+auto_reload: 0
 
-# cookie path in production:
-#session_cookie_path: "/TankTracker"
-
-plack_middlewares:
-    -
-        - "+Dancer::Middleware::Rebase"
-        - base
-#        - "http://caboo.homelinux.net/TankTracker"
-        - "http://localhost/TankTracker"
-        - strip
-        - 1
 
 # db_dsn: "dbi:Pg:dbname=TankTracker;host=localhost;port=5432"
 # db_user: "brendon"

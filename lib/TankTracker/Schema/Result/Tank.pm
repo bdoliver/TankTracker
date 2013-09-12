@@ -40,32 +40,17 @@ __PACKAGE__->table("tank");
   data_type: 'integer'
   is_auto_increment: 1
   is_nullable: 0
-  sequence: 'tank_tank_id_seq'
 
 =head2 water_id
 
   data_type: 'integer'
-  is_auto_increment: 1
   is_foreign_key: 1
   is_nullable: 0
-  sequence: 'tank_water_id_seq'
 
 =head2 tank_name
 
   data_type: 'text'
   is_nullable: 0
-
-=head2 notes
-
-  data_type: 'text'
-  is_nullable: 1
-
-=head2 updated_on
-
-  data_type: 'timestamp'
-  default_value: current_timestamp
-  is_nullable: 1
-  original: {default_value => \"now()"}
 
 =head2 user_id
 
@@ -73,37 +58,83 @@ __PACKAGE__->table("tank");
   is_foreign_key: 1
   is_nullable: 0
 
+=head2 notes
+
+  data_type: 'text'
+  is_nullable: 1
+
+=head2 capacity
+
+  data_type: 'numeric'
+  is_nullable: 0
+
+=head2 capacity_id
+
+  data_type: 'integer'
+  is_foreign_key: 1
+  is_nullable: 0
+
+=head2 length
+
+  data_type: 'numeric'
+  default_value: 0
+  is_nullable: 1
+
+=head2 width
+
+  data_type: 'numeric'
+  default_value: 0
+  is_nullable: 1
+
+=head2 depth
+
+  data_type: 'numeric'
+  default_value: 0
+  is_nullable: 1
+
+=head2 dimension_id
+
+  data_type: 'integer'
+  is_foreign_key: 1
+  is_nullable: 0
+
+=head2 updated_on
+
+  data_type: 'timestamp'
+  default_value: current_timestamp
+  is_nullable: 1
+
 =cut
 
 __PACKAGE__->add_columns(
   "tank_id",
-  {
-    data_type         => "integer",
-    is_auto_increment => 1,
-    is_nullable       => 0,
-    sequence          => "tank_tank_id_seq",
-  },
+  { data_type => "integer", is_auto_increment => 1, is_nullable => 0 },
   "water_id",
-  {
-    data_type         => "integer",
-    is_auto_increment => 1,
-    is_foreign_key    => 1,
-    is_nullable       => 0,
-    sequence          => "tank_water_id_seq",
-  },
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "tank_name",
   { data_type => "text", is_nullable => 0 },
+  "user_id",
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "notes",
   { data_type => "text", is_nullable => 1 },
+  "capacity",
+  { data_type => "numeric", is_nullable => 0 },
+  "capacity_id",
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
+  "length",
+  { data_type => "numeric", default_value => 0, is_nullable => 1 },
+  "width",
+  { data_type => "numeric", default_value => 0, is_nullable => 1 },
+  "depth",
+  { data_type => "numeric", default_value => 0, is_nullable => 1 },
+  "dimension_id",
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "updated_on",
   {
     data_type     => "timestamp",
     default_value => \"current_timestamp",
     is_nullable   => 1,
-    original      => { default_value => \"now()" },
   },
-  "user_id",
-  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
 );
 
 =head1 PRIMARY KEY
@@ -118,7 +149,51 @@ __PACKAGE__->add_columns(
 
 __PACKAGE__->set_primary_key("tank_id");
 
+=head1 UNIQUE CONSTRAINTS
+
+=head2 C<tank_name_unique>
+
+=over 4
+
+=item * L</tank_name>
+
+=back
+
+=cut
+
+__PACKAGE__->add_unique_constraint("tank_name_unique", ["tank_name"]);
+
 =head1 RELATIONS
+
+=head2 capacity
+
+Type: belongs_to
+
+Related object: L<TankTracker::Schema::Result::Capacity>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "capacity",
+  "TankTracker::Schema::Result::Capacity",
+  { capacity_id => "capacity_id" },
+  { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
+);
+
+=head2 dimension
+
+Type: belongs_to
+
+Related object: L<TankTracker::Schema::Result::Dimension>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "dimension",
+  "TankTracker::Schema::Result::Dimension",
+  { dimension_id => "dimension_id" },
+  { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
+);
 
 =head2 inventories
 
@@ -177,7 +252,7 @@ __PACKAGE__->belongs_to(
   "user",
   "TankTracker::Schema::Result::TrackerUser",
   { user_id => "user_id" },
-  { is_deferrable => 1, on_delete => "CASCADE", on_update => "CASCADE" },
+  { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
 
 =head2 water
@@ -192,7 +267,7 @@ __PACKAGE__->belongs_to(
   "water",
   "TankTracker::Schema::Result::WaterType",
   { water_id => "water_id" },
-  { is_deferrable => 1, on_delete => "CASCADE", on_update => "CASCADE" },
+  { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
 
 =head2 water_tests
@@ -211,22 +286,21 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07014 @ 2012-02-28 08:13:50
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:6w129tmh3fYMzIISb1OVJg
-
-
-# You can replace this text with custom code or comments, and it will be preserved on regeneration
+# Created by DBIx::Class::Schema::Loader v0.07035 @ 2013-03-03 12:30:50
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:SsV8d5Uz0XNx+GwhNq6fGQ
 
 sub is_saltwater {
-        my $self = shift;
-        
-        return ( $self->water_id() == 1 );
+    my $self = shift;
+
+    return ( $self->water_id() == 1 );
 }
 
 sub is_freshwater {
-        my $self = shift;
+    my $self = shift;
 
-        return ! $self->is_saltwater();
+    return ! $self->is_saltwater();
 }
+
+# You can replace this text with custom code or comments, and it will be preserved on regeneration
 
 1;

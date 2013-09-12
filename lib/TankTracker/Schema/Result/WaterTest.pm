@@ -40,9 +40,14 @@ __PACKAGE__->table("water_tests");
   data_type: 'integer'
   is_auto_increment: 1
   is_nullable: 0
-  sequence: 'water_tests_test_id_seq'
 
 =head2 tank_id
+
+  data_type: 'integer'
+  is_foreign_key: 1
+  is_nullable: 0
+
+=head2 user_id
 
   data_type: 'integer'
   is_foreign_key: 1
@@ -51,7 +56,7 @@ __PACKAGE__->table("water_tests");
 =head2 test_date
 
   data_type: 'date'
-  default_value: ('now'::text)::date
+  default_value: current_timestamp
   is_nullable: 1
 
 =head2 result_salinity
@@ -118,18 +123,15 @@ __PACKAGE__->table("water_tests");
 
 __PACKAGE__->add_columns(
   "test_id",
-  {
-    data_type         => "integer",
-    is_auto_increment => 1,
-    is_nullable       => 0,
-    sequence          => "water_tests_test_id_seq",
-  },
+  { data_type => "integer", is_auto_increment => 1, is_nullable => 0 },
   "tank_id",
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
+  "user_id",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "test_date",
   {
     data_type     => "date",
-    default_value => \"('now'::text)::date",
+    default_value => \"current_timestamp",
     is_nullable   => 1,
   },
   "result_salinity",
@@ -184,27 +186,42 @@ __PACKAGE__->belongs_to(
   "tank",
   "TankTracker::Schema::Result::Tank",
   { tank_id => "tank_id" },
-  { is_deferrable => 1, on_delete => "CASCADE", on_update => "CASCADE" },
+  { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
 
-=head2 tank_diaries
+=head2 tank_diary
 
-Type: has_many
+Type: might_have
 
 Related object: L<TankTracker::Schema::Result::TankDiary>
 
 =cut
 
-__PACKAGE__->has_many(
-  "tank_diaries",
+__PACKAGE__->might_have(
+  "tank_diary",
   "TankTracker::Schema::Result::TankDiary",
   { "foreign.test_id" => "self.test_id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 user
 
-# Created by DBIx::Class::Schema::Loader v0.07014 @ 2012-02-28 08:13:50
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:QU542IhVaOOsYrj1ih3piw
+Type: belongs_to
+
+Related object: L<TankTracker::Schema::Result::TrackerUser>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "user",
+  "TankTracker::Schema::Result::TrackerUser",
+  { user_id => "user_id" },
+  { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
+);
+
+
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-05-19 07:56:10
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:vogce7ZjEksHIETty+5rxw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

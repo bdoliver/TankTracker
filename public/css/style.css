@@ -3,7 +3,7 @@ body {
 margin-left: 75px;
 margin-bottom: 25px;
 padding: 0;
-background-color: #ddd;
+background-color: #fff;
 /*background-image: url("/images/perldancer-bg.jpg"); */
 background-repeat: no-repeat;
 background-position: top left;
@@ -307,4 +307,50 @@ div.testNotes {
 #diaryNote {
 	display: block;
 	width: 100%;
+}
+
+td.CaptionTD {
+  vertical-align: top;
+}
+
+
+.ui-tabs .ui-tabs-hide {
+    position: absolute;
+    left: -10000px;
+}
+
+
+.ui-tabs-vertical {
+    width: 71em;
+}
+.ui-tabs-vertical .ui-tabs-nav-vert {
+    padding: .2em .1em .2em .2em;
+    float: left;
+    width: 12em;
+}
+
+.ui-tabs-vertical .ui-tabs-nav-vert li {
+    clear: left;
+    width: 100%;
+    border-bottom-width: 1px !important;
+    border-right-width: 0 !important;
+    margin: 0 -1px .2em 0;
+}
+
+.ui-tabs-vertical .ui-tabs-nav-vert li a {
+    display: block;
+    padding: .5em 1em;
+}
+
+.ui-tabs-vertical .ui-tabs-nav-vert li.ui-tabs-selected {
+    padding-bottom: 0;
+    padding-right: .1em;
+    border-right-width: 1px;
+    border-right-width: 1px;
+}
+
+.ui-tabs-vertical .ui-tabs-panel {
+    padding: 1em;
+    float: left;
+    width: 55em;
 }

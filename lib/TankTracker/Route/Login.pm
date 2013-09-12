@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Dancer               ':syntax';
+use Dancer::Plugin::DBIC 'schema';
 
 # Although we are using the ::Auth::RBAC::Credentials::DBIC plugin,
 # we need to load the core RBAC module to get the auth() method
@@ -17,34 +18,38 @@ use TankTracker::Common::Utils qw(set_message
 prefix undef;
 
 get '/login' => sub {
-	# Display a login page; the original URL they requested is available as
-	# vars->{requested_path}, so put in a hidden field in the form
-	template 'login.tt', { 'page_title' => 'Login',
-			       'msg'        => get_message(),
-			       'err'        => get_error() };
+    # Display a login page; the original URL they requested is available as
+    # vars->{requested_path}, so put in a hidden field in the form
+    template 'login.tt', { 'page_title' => 'Login',
+                           'msg'        => get_message(),
+                           'err'        => get_error() };
 };
 
 post '/login' => sub {
-	my $path;
+    my $path;
 
-	my $login = params->{login};
-	my $pass  = params->{password};
+    my $login = params->{login};
+    my $pass  = params->{password};
 
-	my $auth = auth($login, $pass);
+    my $auth  = auth($login, $pass);
 
-	# Validate the user login
-	if ( $login and $pass and authd() ) {
-		session logged_in => 1;
+    # Validate the user login
+    if ( $login and $pass and authd() ) {
+        session logged_in => 1;
 
-		$path = params->{path} || '/journal';
-	}
-	else {
-		set_error("Login failed");
+        my $user = schema->resultset('TrackerUser')->find({login => $login});
 
-		$path = '/login';
-	}
+        session user_id => $user->user_id();
 
-	redirect $path;
+        $path = params->{path} || '/journal';
+    }
+    else {
+        set_error("Login failed");
+
+        $path = '/login';
+    }
+
+    redirect $path;
 };
 
 1;

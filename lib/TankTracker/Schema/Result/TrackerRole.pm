@@ -40,7 +40,6 @@ __PACKAGE__->table("tracker_role");
   data_type: 'integer'
   is_auto_increment: 1
   is_nullable: 0
-  sequence: 'tracker_role_role_id_seq'
 
 =head2 name
 
@@ -51,12 +50,7 @@ __PACKAGE__->table("tracker_role");
 
 __PACKAGE__->add_columns(
   "role_id",
-  {
-    data_type         => "integer",
-    is_auto_increment => 1,
-    is_nullable       => 0,
-    sequence          => "tracker_role_role_id_seq",
-  },
+  { data_type => "integer", is_auto_increment => 1, is_nullable => 0 },
   "name",
   { data_type => "text", is_nullable => 0 },
 );
@@ -90,9 +84,19 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 users
 
-# Created by DBIx::Class::Schema::Loader v0.07014 @ 2012-03-13 09:43:16
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:bBDYIM3lN+3cnCBZ2Orw2w
+Type: many_to_many
+
+Composing rels: L</tracker_user_roles> -> user
+
+=cut
+
+__PACKAGE__->many_to_many("users", "tracker_user_roles", "user");
+
+
+# Created by DBIx::Class::Schema::Loader v0.07035 @ 2013-03-03 12:30:50
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ekvO5Iz6RUKc+k53Kzb/Ew
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

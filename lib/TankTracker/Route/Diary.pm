@@ -3,10 +3,11 @@ package TankTracker::Route::Diary;
 use strict;
 use warnings;
 
-use Dancer               ':syntax';
-use Dancer::Plugin::DBIC 'schema';
+use Dancer ':syntax';
 
-use TankTracker::Common::Diary qw(save_diary);
+use TankTracker::Common::Diary qw(diary_pages
+                                  save_diary
+                                  test_note);
 
 use TankTracker::Common::Utils qw(set_message
 				  get_message
@@ -17,88 +18,51 @@ use TankTracker::Common::Utils qw(set_message
 prefix '/diary';
 
 get '/' => sub {
-	my $tank_id = params->{'tank_id'};
+    my %params = params;
 
-	my $tank    = schema->resultset('Tank')->find($tank_id);
-
-	template 'diary.tt', 
-		 { tank_id => $tank_id },
-		 { layout  => undef };
+    return paginate({name => 'diary',
+                     recs => diary_pages(\%params),
+                     page => $params{page},
+                     rows => $params{rows}});
 };
 
-
-## Save a new, or edited diary entry:
+## Save a diary page
 post '/' => sub {
-	my $args = { tank_id  => params->{tank_id}.
-		     action   => params->{action}.
-		     diary_id => params->{diary_id},
-		     note     => params->{diary_note} };
+    my %p = params;
 
-	# returns JSON status:
-	return save_diary($args);
+    my $op = $p{oper} or
+                die "POST page() failed - no 'oper' param!\n";
+
+    ## jqGrid gives 'oper', but I prefer 'action':
+    $p{action} = delete $p{oper};
+
+    save_diary(\%p);
 };
 
-get '/pages' => sub {
-	my $tank_id = params->{tank_id};
-	my $date    = params->{diaryDate};
-	my $rec_pp  = params->{numDiaryPP} || 0;
-	my $curr_pg = params->{curr_pg}    || 1;
+## Diary note attached to a specific water test:
+get '/test_note' => sub {
+    my $test_id = params->{test_id};
 
-	my $query   = { '-and' => [ tank_id => $tank_id ] };
+    my $ret;
 
-	push @{ $query->{'-and'} }, [ diary_date => { '>=', $date } ] if $date;
+    if ( $test_id ) {
+       my $page = test_note({test_id => $test_id});
 
-	my $pages = schema->resultset('TankDiary')->search($query,
-							   { 'order_by' => 'diary_id DESC' });
+        if ( $page ) {
+             $page->{diary_note} =~ s|\\n|\n|g if $page->{diary_note};
+             $ret = { page => [ $page ] };
+        }
+        else {
+             # this ensures that the jqGrid sub-grid sees that there
+             # is no note without treating it as an error condition:
+             $ret = { page => [ ] };
+        }
+    }
+    else {
+        print STDERR "/test_note missing param 'test_id'\n";
+    }
 
-	my ( @pages, $item, $i, $c );
-
-	my $total_pg = $pages->count();
-
-	my $start = ( $rec_pp * $curr_pg ) - $rec_pp + 1;
-
-	while ( my $p = $pages->next() ) {
-
-		# 'item' is just a sequential number so that the
-		# diary entries appear ordered in the UI:
-		++$item;
-
-		my $id   = $p->diary_id();
-
-		my $note =  $p->diary_note();
-			$note =~ s|<|&lt;|msg;
-			$note =~ s|>|&gt;|msg;
-			$note =~ s|\n|<br />|msg;
-
-		my $upd  =  $p->updated_on();
-			$upd  =~ s|T|<br />|;
-
-		my $page =  { item       => $item,
-				diary_id   => $id,
-				diary_date => $p->diary_date()->ymd(),
-				diary_note => $note,
-				updated_on => $upd,
-				test_id    => $p->test_id() };
-
-		if ( ! $rec_pp ) {
-			push @pages, $page;
-			next;
-		}
-
-		if ( ++$i >= $start and ++$c <= $rec_pp ) {
-			push @pages, $page;
-			last if $c == $rec_pp;
-		}
-	}
-
-	my $tt_args = paginate({ total_recs => $total_pg,
-				 curr_pg    => $curr_pg,
-				 rec_pp     => $rec_pp });
-
-	$tt_args->{diaryPages} = \@pages;
-	$tt_args->{curr_pg}    = $curr_pg || 1;
-
-	template 'diaryPages.tt', $tt_args, { layout => undef };
+    return $ret;
 };
 
 1;

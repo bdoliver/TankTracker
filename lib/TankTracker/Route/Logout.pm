@@ -13,13 +13,13 @@ use TankTracker::Common::Utils qw(set_message
 prefix undef;
 
 get '/logout' => sub {
-	session->destroy;
+    session->destroy;
 
-	set_message('You are logged out.');
+    set_message('You are logged out.');
 
-	session->destroy;
+    session->destroy;  ## 2nd call should _not_ be necessary!
 
-	redirect "/login";
+    redirect "/login";
 };
 
 1;

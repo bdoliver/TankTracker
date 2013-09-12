@@ -40,7 +40,6 @@ __PACKAGE__->table("tracker_user");
   data_type: 'integer'
   is_auto_increment: 1
   is_nullable: 0
-  sequence: 'tracker_user_user_id_seq'
 
 =head2 login
 
@@ -62,16 +61,17 @@ __PACKAGE__->table("tracker_user");
   data_type: 'text'
   is_nullable: 0
 
+=head2 active
+
+  data_type: 'boolean'
+  default_value: 1
+  is_nullable: 1
+
 =cut
 
 __PACKAGE__->add_columns(
   "user_id",
-  {
-    data_type         => "integer",
-    is_auto_increment => 1,
-    is_nullable       => 0,
-    sequence          => "tracker_user_user_id_seq",
-  },
+  { data_type => "integer", is_auto_increment => 1, is_nullable => 0 },
   "login",
   { data_type => "text", is_nullable => 0 },
   "user_name",
@@ -80,6 +80,8 @@ __PACKAGE__->add_columns(
   { data_type => "text", is_nullable => 0 },
   "password",
   { data_type => "text", is_nullable => 0 },
+  "active",
+  { data_type => "boolean", default_value => 1, is_nullable => 1 },
 );
 
 =head1 PRIMARY KEY
@@ -94,19 +96,48 @@ __PACKAGE__->add_columns(
 
 __PACKAGE__->set_primary_key("user_id");
 
+=head1 UNIQUE CONSTRAINTS
+
+=head2 C<email_address_unique>
+
+=over 4
+
+=item * L</email_address>
+
+=back
+
+=cut
+
+__PACKAGE__->add_unique_constraint("email_address_unique", ["email_address"]);
+
 =head1 RELATIONS
 
-=head2 sessions
+=head2 inventories
 
 Type: has_many
 
-Related object: L<TankTracker::Schema::Result::Session>
+Related object: L<TankTracker::Schema::Result::Inventory>
 
 =cut
 
 __PACKAGE__->has_many(
-  "sessions",
-  "TankTracker::Schema::Result::Session",
+  "inventories",
+  "TankTracker::Schema::Result::Inventory",
+  { "foreign.user_id" => "self.user_id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+=head2 tank_diaries
+
+Type: has_many
+
+Related object: L<TankTracker::Schema::Result::TankDiary>
+
+=cut
+
+__PACKAGE__->has_many(
+  "tank_diaries",
+  "TankTracker::Schema::Result::TankDiary",
   { "foreign.user_id" => "self.user_id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -156,22 +187,47 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 water_tests
 
-# Created by DBIx::Class::Schema::Loader v0.07014 @ 2012-03-13 10:14:53
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:NGq2sinInTQ4LkF81h3EcQ
+Type: has_many
+
+Related object: L<TankTracker::Schema::Result::WaterTest>
+
+=cut
+
+__PACKAGE__->has_many(
+  "water_tests",
+  "TankTracker::Schema::Result::WaterTest",
+  { "foreign.user_id" => "self.user_id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+=head2 roles
+
+Type: many_to_many
+
+Composing rels: L</tracker_user_roles> -> role
+
+=cut
+
+__PACKAGE__->many_to_many("roles", "tracker_user_roles", "role");
+
+
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-05-18 14:05:47
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:26WZqHCS4PUwPsXJmNBpEQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
-use Crypt::Eksblowfish::Bcrypt qw(bcrypt_hash);
+use Crypt::Eksblowfish::Bcrypt qw(bcrypt_hash en_base64);
 
 sub hash_pw {
-	my ( $self, $pw ) = @_;
+    my ( $self, $pw ) = @_;
 
-	return $pw 
-		? bcrypt_hash({ key_nul => 1,
-				cost    => 8,
-				salt    => ']+_%%^981#^!*|vB' }, $pw)
-		: '';
+    return $pw 
+           ? en_base64(bcrypt_hash({ key_nul => 1,
+                                     cost    => 8,
+                                     salt    => ']+_%%^981#^!*|vB' }, $pw))
+           : '';
 }
 
 sub check_password {

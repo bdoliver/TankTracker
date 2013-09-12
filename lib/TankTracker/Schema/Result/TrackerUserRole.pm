@@ -37,13 +37,13 @@ __PACKAGE__->table("tracker_user_role");
 
 =head2 user_id
 
-  data_type: 'integer'
+  data_type: 'int'
   is_foreign_key: 1
   is_nullable: 0
 
 =head2 role_id
 
-  data_type: 'integer'
+  data_type: 'int'
   is_foreign_key: 1
   is_nullable: 0
 
@@ -51,9 +51,9 @@ __PACKAGE__->table("tracker_user_role");
 
 __PACKAGE__->add_columns(
   "user_id",
-  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
+  { data_type => "int", is_foreign_key => 1, is_nullable => 0 },
   "role_id",
-  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
+  { data_type => "int", is_foreign_key => 1, is_nullable => 0 },
 );
 
 =head1 PRIMARY KEY
@@ -84,7 +84,7 @@ __PACKAGE__->belongs_to(
   "role",
   "TankTracker::Schema::Result::TrackerRole",
   { role_id => "role_id" },
-  { is_deferrable => 1, on_delete => "CASCADE", on_update => "CASCADE" },
+  { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
 
 =head2 user
@@ -99,12 +99,12 @@ __PACKAGE__->belongs_to(
   "user",
   "TankTracker::Schema::Result::TrackerUser",
   { user_id => "user_id" },
-  { is_deferrable => 1, on_delete => "CASCADE", on_update => "CASCADE" },
+  { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07014 @ 2012-03-13 09:43:16
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:7J+ol31nLJJzB+TOC6IS7w
+# Created by DBIx::Class::Schema::Loader v0.07035 @ 2013-03-03 12:30:50
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:AeXhj6lWob/WxI1xGvExAg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

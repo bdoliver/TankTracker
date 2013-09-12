@@ -40,9 +40,14 @@ __PACKAGE__->table("tank_diary");
   data_type: 'integer'
   is_auto_increment: 1
   is_nullable: 0
-  sequence: 'tank_diary_diary_id_seq'
 
 =head2 tank_id
+
+  data_type: 'integer'
+  is_foreign_key: 1
+  is_nullable: 0
+
+=head2 user_id
 
   data_type: 'integer'
   is_foreign_key: 1
@@ -51,6 +56,7 @@ __PACKAGE__->table("tank_diary");
 =head2 diary_date
 
   data_type: 'timestamp'
+  default_value: current_timestamp
   is_nullable: 0
 
 =head2 diary_note
@@ -62,12 +68,11 @@ __PACKAGE__->table("tank_diary");
 
   data_type: 'timestamp'
   default_value: current_timestamp
-  is_nullable: 1
-  original: {default_value => \"now()"}
+  is_nullable: 0
 
 =head2 test_id
 
-  data_type: 'integer'
+  data_type: 'int'
   is_foreign_key: 1
   is_nullable: 1
 
@@ -75,27 +80,27 @@ __PACKAGE__->table("tank_diary");
 
 __PACKAGE__->add_columns(
   "diary_id",
-  {
-    data_type         => "integer",
-    is_auto_increment => 1,
-    is_nullable       => 0,
-    sequence          => "tank_diary_diary_id_seq",
-  },
+  { data_type => "integer", is_auto_increment => 1, is_nullable => 0 },
   "tank_id",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
+  "user_id",
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "diary_date",
-  { data_type => "timestamp", is_nullable => 0 },
+  {
+    data_type     => "timestamp",
+    default_value => \"current_timestamp",
+    is_nullable   => 0,
+  },
   "diary_note",
   { data_type => "text", is_nullable => 0 },
   "updated_on",
   {
     data_type     => "timestamp",
     default_value => \"current_timestamp",
-    is_nullable   => 1,
-    original      => { default_value => \"now()" },
+    is_nullable   => 0,
   },
   "test_id",
-  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
+  { data_type => "int", is_foreign_key => 1, is_nullable => 1 },
 );
 
 =head1 PRIMARY KEY
@@ -109,6 +114,20 @@ __PACKAGE__->add_columns(
 =cut
 
 __PACKAGE__->set_primary_key("diary_id");
+
+=head1 UNIQUE CONSTRAINTS
+
+=head2 C<test_id_unique>
+
+=over 4
+
+=item * L</test_id>
+
+=back
+
+=cut
+
+__PACKAGE__->add_unique_constraint("test_id_unique", ["test_id"]);
 
 =head1 RELATIONS
 
@@ -124,7 +143,7 @@ __PACKAGE__->belongs_to(
   "tank",
   "TankTracker::Schema::Result::Tank",
   { tank_id => "tank_id" },
-  { is_deferrable => 1, on_delete => "CASCADE", on_update => "CASCADE" },
+  { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
 
 =head2 test
@@ -140,16 +159,31 @@ __PACKAGE__->belongs_to(
   "TankTracker::Schema::Result::WaterTest",
   { test_id => "test_id" },
   {
-    is_deferrable => 1,
+    is_deferrable => 0,
     join_type     => "LEFT",
     on_delete     => "CASCADE",
-    on_update     => "CASCADE",
+    on_update     => "NO ACTION",
   },
 );
 
+=head2 user
 
-# Created by DBIx::Class::Schema::Loader v0.07014 @ 2012-02-28 08:13:50
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:pgV4xCWO9A/j2SZFBmKKqQ
+Type: belongs_to
+
+Related object: L<TankTracker::Schema::Result::TrackerUser>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "user",
+  "TankTracker::Schema::Result::TrackerUser",
+  { user_id => "user_id" },
+  { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
+);
+
+
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-05-19 07:56:10
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:0Lq1ofG7JCpS//6J1di5CQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

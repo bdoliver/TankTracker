@@ -14,42 +14,65 @@ layout: "main"
 # about unicode within your app when this setting is set (recommended).
 charset: "UTF-8"
 
-#session: "Simple"
-session: "Cookie"
-session_cookie_key: "19222f015c72e96e2fcac833dbdda7a4"
+# Tinker with a DBIC-backed session store:
+session: "DBIC"
+# Optional overrides for DBIC session engine:
+session_options:
+#   serialiser: "xml"
+#   schema: "db_session"
+#   table:  "TcSession"
+#   id:     "id"
+#   data:   "sess_data"
+
 
 logger:  "console"
+log: "core"
 show_errors: "1"
+
+# logger: log4perl
+# log4perl:
+#    config_file: "./etc/log4perl.conf"
+#
+#   config: |
+#      log4perl.rootLogger              = DEBUG, LOG1
+#      log4perl.appender.LOG1           = Log::Log4perl::Appender::File
+#      log4perl.appender.LOG1.filename  = ./log/mylog.log
+#      log4perl.appender.LOG1.mode      = append
+#      log4perl.appender.LOG1.layout    = Log::Log4perl::Layout::PatternLayout
+#      log4perl.appender.LOG1.layout.ConversionPattern = %d %p %m %n
 
 ## Time zone where this app is located.
 ## If not set, the default is Australia/Melbourne:
-timezone: 
+timezone: 'Asia/Tokyo'
 
 serializer: "JSON"
+
+default_theme: 'flick'
 
 # template engine
 template: "template_toolkit"
 engines:
    template_toolkit:
      encoding:  'utf8'
-     start_tag: '<%'
-     end_tag:   '%>'
+     start_tag: '[%'
+     end_tag:   '%]'
 
 plugins:
    DBIC:
      default:
        schema_class: TankTracker::Schema
-       dsn: dbi:Pg:dbname=TankTracker;host=localhost;port=5432
-       user: brendon
-       pass:
-       options:
-          FetchHashKeyName:   NAME_lc
-          ChopBlanks:         1
-          AutoCommit:         1
-          RaiseError:         1
-          ShowErrorStatement: 1
-          PrintError:         1
-          pg_enable_utf8:     1
+       dsn:  dbi:SQLite:dbname=./db/TankTracker.db
+#       dsn: dbi:Pg:dbname=TankTracker;host=localhost;port=5432
+#       user: ebreoli
+#       pass:
+#       options:
+#          FetchHashKeyName:   NAME_lc
+#          ChopBlanks:         1
+#          AutoCommit:         1
+#          RaiseError:         1
+#          ShowErrorStatement: 1
+#          PrintError:         1
+#          pg_enable_utf8:     1
    Auth::RBAC:
      credentials:
        class: DBIC
@@ -61,8 +84,10 @@ plugins:
          password_field: password
          password_type:  self_check
          role_relation:  tracker_user_roles
+         role_name_field: role_id
      permissions:
        class: DBIC
-#        options:
-#          permissions_relation:  
-        
+       options:
+         permissions_relation: tracker_role_permission
+         permission_name_field: permission_id
+

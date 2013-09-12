@@ -1,9 +1,9 @@
 <div>
-<form id="diaryForm" action="<% request.uri_base %>/diary" method="GET">
+<form id="diaryForm" action="[% request.uri_base %]/diary" method="GET">
 Jump to date: <input type="text" id="diaryDate" name="diaryDate" size="10" class="num" />
  Entries per page: <input type="text" id="numDiaryPP" name="numDiaryPP" size="3" class="num" />
- <input type="hidden" id="diary_tank_id" name="diary_tank_id" value="<% tank_id %>" />
- <input type="hidden" id="diary_curr_pg" name="diary_curr_pg" value="<% curr_pp %>" />
+ <input type="hidden" id="diary_tank_id" name="diary_tank_id" value="[% tank_id %]" />
+ <input type="hidden" id="diary_curr_pg" name="diary_curr_pg" value="[% curr_pp %]" />
  
  <span id="getDiary">Fetch Diary</span>
  <span id="addDiaryEntry">Add Entry</span>
@@ -13,9 +13,9 @@ Jump to date: <input type="text" id="diaryDate" name="diaryDate" size="10" class
 <div id="diaryPages"></div>
 
 <div id="addDiaryPopup">
-<form id="addDiaryForm" action="<% request.uri_base %>/diary" method="POST">
+<form id="addDiaryForm" action="[% request.uri_base %]/diary" method="POST">
   <div>
-  <textarea id="diaryNote" rows="20"><% notes %></textarea>
+  <textarea id="diaryNote" rows="20">[% notes %]</textarea>
   </div>
   <span id="pagination"></span>
 </form>
@@ -23,53 +23,55 @@ Jump to date: <input type="text" id="diaryDate" name="diaryDate" size="10" class
 
 <script>
 $(function() {
-	$('#diaryDate').datepicker({ dateFormat: 'yy-mm-dd' });
+    $('#diaryDate').datepicker({ dateFormat: 'yy-mm-dd' });
 
-//	if ( ! $('#diaryDate').val() ) {
-//		$('#diaryDate').val((new Date()).strftime('%Y-%m-%d'));
-//	}
+//  if ( ! $('#diaryDate').val() ) {
+//      $('#diaryDate').val((new Date()).strftime('%Y-%m-%d'));
+//  }
 
-	// default to 10 entries per page
-	if ( ! $('#numDiaryPP').val() ) { $('#numDiaryPP').val(10); };
+    // default to 10 entries per page
+    if ( ! $('#numDiaryPP').val() ) { $('#numDiaryPP').val(10); };
 
-	$('#addDiaryEntry').button()
-			   .click(function() { $('#addDiaryPopup').dialog('open'); });
+    $('#addDiaryEntry').button()
+                        .click(function() { $('#addDiaryPopup').dialog('open'); });
 
-	$('#addDiaryPopup').dialog({
-		title:     'New diary entry:',
-		autoOpen:  false,
-		resizable: false,
-		height:    450,
-		width:     600,
-		position:  [ 100, 60 ],
-		modal:     true,
-		closeOnEscape: true,
-		buttons:   {
-		    'Save'   : function() { if ( $('#diaryNote').val().length > 0 ) {
-						if ( saveDiaryNote({action     : 'add',
-								    tank_id    : <% tank_id %>,
-								    diary_note : $('#diaryNote').val()})) {
-							$('#diaryNote').val('');
-							$(this).dialog('close');
-						}
-					    }
-				          },
-		    'Cancel' : function() { var x = window.confirm("Clicking 'cancel' will discard any changes you have made to this diary entry.  Continue?");
-					      if ( x ) {
-						$(this).dialog('close');
-					      }
-					  }
-			   }
-	});
+    $('#addDiaryPopup').dialog({
+        title:     'New diary entry:',
+        autoOpen:  false,
+        resizable: false,
+        height:    450,
+        width:     600,
+        position:  [ 100, 60 ],
+        modal:     true,
+        closeOnEscape: true,
+        buttons:   {
+            'Save'   : function() {
+                        if ( $('#diaryNote').val().length > 0 ) {
+                            if ( saveDiaryNote({action     : 'add',
+                                                tank_id    : [% tank_id %],
+                                                diary_note : $('#diaryNote').val()})) {
+                                    $('#diaryNote').val('');
+                                    $(this).dialog('close');
+                            }
+                        }
+                       },
+            'Cancel' : function() { 
+                        var x = window.confirm("Clicking 'cancel' will discard any changes you have made to this diary entry.  Continue?");
+                        if ( x ) {
+                            $(this).dialog('close');
+                        }
+                       }
+                    }
+    });
 
-	// page load: fetch all diary pages
-	fetchDiaryPages();
+    // page load: fetch all diary pages
+    fetchDiaryPages();
 
-	// wire the same function to the 'Fetch Diary' button for when the
-	// date &/or number of entries per page is changed:
-	$('#getDiary').button()
-		      .click(function() { alert("will call fetchDiaryPages() with diary_curr_pg="+$('#diary_curr_pg').val());
-					  fetchDiaryPages(); });
+    // wire the same function to the 'Fetch Diary' button for when the
+    // date &/or number of entries per page is changed:
+    $('#getDiary').button()
+                  .click(function() { alert("will call fetchDiaryPages() with diary_curr_pg="+$('#diary_curr_pg').val());
+                                      fetchDiaryPages(); });
 });
 </script>
 

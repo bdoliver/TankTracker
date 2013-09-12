@@ -37,7 +37,8 @@ public/ static content for application (eg. 404 & 500 error files etc.)
        javascripts/
 
 sql/   SQL files for application
-    schema.sql  generate the TankTracker database schema
+    pg-schema.sql	database schema for PostgreSQL
+    sqlite3-schema.sql  database schema for Sqlite3
 
 views/
 	templates & layouts used for HTML rendering (ie. this is the 'V'iew

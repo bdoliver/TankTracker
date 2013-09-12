@@ -5,11 +5,16 @@
 #          application server)
 # file:    log message to a file in log/
 logger: "console"
+#logger: log4perl
+#log4perl:
+#   config_file: "./etc/log4perl.conf"
+
 
 # the log level for this environement
 # core is the lowest, it shows Dancer's core log messages as well as yours
 # (debug, warning and error)
-log: "core"
+#log: "core"
+log: "debug"
 
 # should Dancer consider warnings as critical errors?
 warnings: 1

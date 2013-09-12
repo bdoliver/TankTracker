@@ -40,7 +40,6 @@ __PACKAGE__->table("water_type");
   data_type: 'integer'
   is_auto_increment: 1
   is_nullable: 0
-  sequence: 'water_type_water_id_seq'
 
 =head2 water_type
 
@@ -51,12 +50,7 @@ __PACKAGE__->table("water_type");
 
 __PACKAGE__->add_columns(
   "water_id",
-  {
-    data_type         => "integer",
-    is_auto_increment => 1,
-    is_nullable       => 0,
-    sequence          => "water_type_water_id_seq",
-  },
+  { data_type => "integer", is_auto_increment => 1, is_nullable => 0 },
   "water_type",
   { data_type => "text", is_nullable => 0 },
 );
@@ -91,8 +85,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07014 @ 2012-02-28 08:13:50
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:cJ4mVCVsfusWXyTauh63Yg
+# Created by DBIx::Class::Schema::Loader v0.07035 @ 2013-03-03 12:30:50
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:FhYgEClrM5z6KdFhVb25Dw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
