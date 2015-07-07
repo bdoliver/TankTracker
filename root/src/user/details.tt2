@@ -1,0 +1,162 @@
+<form class="form" method="[% form.method %]" action="[% form.action %]" >
+    [% form.get_element('tank_id') %]
+    <div class="row">
+        <div class="col-md-12">
+
+        [% header %]
+             <div class="row">
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-md-2">
+                             <label for="username">Login</label>
+                        </div>
+                        <div class="col-md-4 form-group">
+                        [% IF form.get_element('username') %]
+                             [% form.get_element('username').placeholder('Login') %]
+                        [% ELSE %]
+                             <p class="form-control-static">[% user.username %]</p>
+                        [% END %]
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2">
+                             <label for="first_name">First name</label>
+                        </div>
+                        <div class="col-md-4 form-group">
+                             [% form.get_element('first_name').placeholder('First name') %]
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2">
+                             <label for="last_name">Last name</label>
+                        </div>
+                        <div class="col-md-4 form-group">
+                             [% form.get_element('last_name').placeholder('Last name') %]
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2">
+                             <label for="email">Email</label>
+                        </div>
+                        <div class="col-md-4 form-group email">
+                             [% form.get_element('email').placeholder('Email') %]
+                        </div>
+                    </div>
+                    [% IF form.get_element('change_password') %]
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label for="change_password">Change password?</label>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            [% form.get_element('change_password') %]
+                        </div>
+                    </div>
+                    [% END %]
+        [% # group change password fields into a single toggled pane... %]
+                <div class="change_password">
+                    [% IF form.get_element('current_password') %]
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label for="current_password">Current password</label>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            [% form.get_element('current_password') %]
+                        </div>
+                    </div>
+                    [% END %]
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label for="new_password1">New password</label>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            [% form.get_element('new_password1').placeholder('Password') %]
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label for="new_password2">Confirm password</label>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            [% form.get_element('new_password2').placeholder('Confirm password') %]
+                        </div>
+                    </div>
+                </div>
+
+                </div>
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="dimension_units">Dimension units</label>
+                        </div>
+                        <div class="col-md-3 form-group">
+                            [% form.get_element('dimension_units') %]
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="capacity_units">Capacity units</label>
+                        </div>
+                        <div class="col-md-3 form-group">
+                            [% form.get_element('capacity_units') %]
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="temperature_scale">Temp. scale</label>
+                        </div>
+                        <div class="col-md-3 form-group">
+                            [% form.get_element('temperature_scale') %]
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="recs_per_page">Recs per page</label>
+                        </div>
+                        <div class="col-md-3 form-group number">
+                            [% form.get_element('recs_per_page') %]
+                        </div>
+                    </div>
+                </div>
+            <div class="row">
+                <div class="btn-group col-md-6 col-md-offset-3">
+                    [% submit_btn('Save') %]
+                [% IF action_heading == 'Add' %]
+                    [% back_btn('/user/admin', 'Cancel') %]
+                [% END %]
+                    [% logout_btn %]
+                </div>
+            </div>
+
+            [% form_errors %]
+
+        </div>
+    </div>
+</form>
+<script>
+$(function() {
+[% # when there's no change_password form element, we are in 'add' mode,
+   # so display the password input fields immediately on load: %]
+[% IF not form.get_element('change_password') %]
+    $('div.change_password').show();
+[% END %]
+
+
+[% IF message %]
+[% # faark, this is ugly! But I cannot figure out how to have the
+   # 'change_password' checkbox UNchecked by HTML::FormFu AFTER a
+   # successful form submission! %]
+   $('input[name="change_password"]').attr('checked', false);
+[% END %]
+    if ( $('input[name="change_password"]').is(':checked') ) {
+        $('div.change_password').show();
+    }
+
+    $('input[name="change_password"]').click(function() {
+        $('div.change_password').toggle('blind');
+        if ( $('input[name="current_password"]').is(':visible') ) {
+            $('input[name="current_password"]').focus();
+        }
+    });
+});
+</script>

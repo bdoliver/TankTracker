@@ -1,0 +1,42 @@
+<form class="form" method="[% form.method %]" action="[% form.action %]" >
+    [% form.get_element('tank_id') %]
+
+<div class="row">
+    <div class="col-md-8 col-md-offset-2">
+
+    [% header %]
+
+    <div class="row">
+        <div class="col-md-2">
+            <label for="length">Notes:</label>
+        </div>
+        <div class="col-md-8 form-group">
+            [% form.get_element('diary_note') %]
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2">
+            <label for="length">Test ID:</label>
+        </div>
+        <div class="col-md-2 form-group number">
+            [% form.get_element('test_id') %]
+        </div>
+        <div class="col-md-8">
+            <p class="form-control-static">
+                Enter a test ID to link this note to a water test (this is optional).
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="btn-group col-md-8 col-md-offset-2">
+            [% submit_btn('Save') %]
+            [% back_btn('/tank/' _ tank.tank_id _ '/diary/list')%]
+            [% logout_btn %]
+        </div>
+    </div>
+
+    </div>
+</div>
+
+</form>

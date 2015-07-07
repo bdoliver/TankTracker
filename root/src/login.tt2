@@ -1,0 +1,50 @@
+<form class="form" method="[% form.method %]" action="[% form.action %]" >
+    <div class="row">
+        <div class="col-md-4 col-md-offset-4 well">
+
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h4>Please sign in...</h4>
+                </div>
+                <div class="panel-body">
+
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label for="username" class="sr-only">Username</label>
+
+                            [% form.get_element('username').placeholder('Username') %]
+
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label for="password" class="sr-only">Password</label>
+
+                            [% form.get_element('password').placeholder('Password') %]
+
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-md-12">
+
+                        [% form.get_element('submit').value('Login') %]
+
+                        </div>
+                    </div>
+
+            [% form_errors %]
+
+            [% IF logout_message %]
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                        <p class="text-info pg-info">[% logout_message %]</p>
+                        </div>
+                    </div>
+            [% END %]
+
+            </div>
+        </div>
+    </div>
+</form>

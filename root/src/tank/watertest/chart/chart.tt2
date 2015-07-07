@@ -1,0 +1,118 @@
+<script language="javascript" type="text/javascript" src="/static/js/jquery.flot.min.js"></script>
+<script language="javascript" type="text/javascript" src="/static/js/jquery.flot.resize.min.js"></script>
+<script language="javascript" type="text/javascript" src="/static/js/jquery.flot.navigate.min.js"></script>
+<script language="javascript" type="text/javascript" src="/static/js/jquery.flot.time.min.js"></script>
+
+<script language="javascript" type="text/javascript" src="/static/js/TankTrackerChart.js"></script>
+
+<form class="form-inline">
+<div class="row">
+    <div class="col-md-12">
+
+        [% header %]
+
+        <div class="row content">
+            <div class="col-md-12">
+
+                <table class="table">
+                <tr><td>
+                    <div class="form-group">
+                        <label for="sdate">Date range from:</label>
+                        <div class="input-group date" id="start_date">
+                            <input type="text" class="form-control" id="sdate" size="10" onChange="generateChart('[% tank.tank_id %]');" />
+                            <span class="input-group-addon">
+                               <span class="glyphicon glyphicon-calendar"></span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="sdate">to:</label>
+                        <div class="input-group date" id="end_date">
+                            <input type="text" class="form-control" id="edate" size="10" onChange="generateChart('[% tank.tank_id %]');" />
+                            <span class="input-group-addon">
+                               <span class="glyphicon glyphicon-calendar"></span>
+                            </span>
+                        </div>
+                    </div>
+                    </td>
+                    <td class="tdc">
+                        <label for="chart_zoom">
+                            Zoom?<input type="checkbox" id="chart_zoom" name="chart_zoom" />
+                        </label>
+                        <label for="show_notes">
+                            Show test notes?<input type="checkbox" id="show_notes" name="show_notes" />
+                        </label>
+                        <a id="chart_reset" href="#" class="btn btn-md btn-info">Reset Chart</a>
+                    </td>
+                </tr>
+                <tr><td colspan="2">Select parameters to chart:
+                  <span id="chart_opts">
+                    <label class="checkbox-inline" for="result_ph">
+                        <input type="checkbox" id="result_ph" name="result_ph" />Ph
+                    </label>
+                    <label class="checkbox-inline" for="result_ammonia">
+                        <input type="checkbox" id="result_ammonia" name="result_ammonia" />NH<sub>4</sub>
+                    </label>
+                    <label class="checkbox-inline" for="result_nitrite">
+                        <input type="checkbox" id="result_nitrite" name="result_nitrite" />NO<sub>2</sub>
+                    </label>
+                    <label class="checkbox-inline" for="result_nitrate">
+                        <input type="checkbox" id="result_nitrate" name="result_nitrate" />NO<sub>3</sub>
+                    </label>
+                [% IF tank.water_type == 'salt' %]
+                    <label class="checkbox-inline" for="result_calcium">
+                        <input type="checkbox" id="result_calcium" name="result_calcium" />Ca
+                    </label>
+                    <label class="checkbox-inline" for="result_phosphate">
+                        <input type="checkbox" id="result_phosphate" name="result_phosphate" />PO<sub>4</sub>
+                    </label>
+                    <label class="checkbox-inline" for="result_magnesium">
+                        <input type="checkbox" id="result_magnesium" name="result_magnesium" />Mg
+                    </label>
+                    <label class="checkbox-inline" for="result_kh">
+                        <input type="checkbox" id="result_kh" name="result_kh" />&deg;KH
+                    </label>
+                    <label class="checkbox-inline" for="result_alkalinity">
+                        <input type="checkbox" id="result_alkalinity" name="result_alkalinity" />Alkalinity
+                    </label>
+                    <label class="checkbox-inline" for="result_salinity">
+                        <input type="checkbox" id="result_salinity" name="result_salinity" />Salinity
+                    </label>
+                [% END %]
+                    <label class="checkbox-inline" for="temperature">
+                        <input type="checkbox" id="temperature" name="temperature" />Temperature</sub>
+                    </label>
+                  </span>
+                    </td>
+                </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div id="msgChartDiv"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div id="testChartDiv"></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-2 pull-right btn-group">
+                [% back_btn('/tank/' _ tank.tank_id _ '/water_test/list') %]
+                [% logout_btn %]
+            </div>
+        </div>
+
+    </div>
+</div>
+</form>
+
+
+<script>
+$(function() { initChart([% tank.tank_id %]); });
+</script>
+

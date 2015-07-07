@@ -1,5 +1,0 @@
-<select>
-[% FOREACH r IN rows %]
-<option value="[%r.id%]">[% r.name %]</option>
-[% END %]
-</select>

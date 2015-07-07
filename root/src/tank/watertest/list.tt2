@@ -1,0 +1,98 @@
+<div class="row">
+    <div class="col-md-12">
+
+    [% header %]
+
+    <div class="row content">
+        <div class="col-md-12">
+        [% IF NOT tests.size %]
+            <p>There are no tests in the database for the selected tank.</p>
+        [% ELSE %]
+            <table class="table table-striped table-hover">
+            <thead>
+            <tr>
+                <th class="text-right">Test ID</th>
+                <th class="text-center">Test Date</th>
+                <th class="text-right">Ph</th>
+                <th class="text-right">Ammonia<br />(NH<sub>4</sub>)</th>
+                <th class="text-right">Nitrite<br />(NO<sub>2</sub>)</th>
+                <th class="text-right">Nitrate<br />(NO<sub>3</sub>)</th>
+                [% IF tank.water_type == 'salt' %]
+                <th class="text-right">Calcium<br />(Ca)</th>
+                <th class="text-right">Magnesium<br />(Mg)</th>
+                <th class="text-right">Phosphate<br />(PO<sub>4</sub>)</th>
+                <th class="text-right">Carbonate<br />Hardness<br />(&deg;Kh)</th>
+                <th class="text-right">Alkalinity</th>
+                <th class="text-right">Salinity</th>
+                [% END %]
+                <th class="text-right">Water<br />Change</th>
+                <th class="text-center">Notes</th>
+            </tr>
+            </thead>
+            <tbody>
+            [% FOR test IN tests %]
+            <tr>
+                <td class="text-right">
+                    <a href="/tank/[% tank.tank_id %]/water_test/[% test.test_id %]/edit"
+                       data-toggle="tooltip"
+                       title="Click to edit test #[% test.test_id %]">
+                       [% test.test_id %]
+                    </a>
+                </td>
+                <td class="text-center">[% test.test_date |replace('\s+.+$', '') %]</td>
+                <td class="text-right">[% test.result_ph FILTER format('%.02f')  %]</td>
+                <td class="text-right">[% test.result_ammonia %]</td>
+                <td class="text-right">[% test.result_nitrite %]</td>
+                <td class="text-right">[% test.result_nitrate %]</td>
+                [% IF tank.water_type == 'salt' %]
+                <td class="text-right">[% test.result_calcium %]</td>
+                <td class="text-right">[% test.result_magnesium %]</td>
+                <td class="text-right">[% test.result_phosphate FILTER format('%.03f') %]</td>
+                <td class="text-right">[% test.result_kh %]</td>
+                <td class="text-right">[% test.result_alkalinity %]</td>
+                <td class="text-right">[% test.result_salinity FILTER format('%.03f') %]</td>
+                [% END %]
+                <td class="text-right">[% test.water_change %] </td>
+                <td class="text_center">[% IF test.notes %]
+                    <a href="#"
+                       data-title="Notes for test #[% test.test_id %]"
+                       data-toggle="popover"
+                       data-placement="left"
+                       data-html="true"
+                       data-content="[% test.notes FILTER html_line_break %]"
+                       title="Click to view notes">
+                           Notes
+                    </a>
+
+                    [% ELSE %]
+                    &nbsp;
+                    [% END %]
+                </td>
+            </tr>
+            [% END %]
+            </tbody>
+            </table>
+
+            [% paging %]
+
+        [% END %]
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 col-md-offset-3 btn-group">
+            [% IF tank.active %]
+            <a [% href(add_url) %] class="btn btn-md btn-info">Add Test</a>
+            [% END %]
+            <a [% href(chart_url) %] class="btn btn-md btn-info">Graph Results</a>
+            <a [% href(export_url) %] class="btn btn-md btn-info">Export Results</a>
+            [% IF tank.active %]
+            <a [% href(import_url) %] class="btn btn-md btn-info">Import Results</a>
+            [% END %]
+            [% back_btn %]
+            [% logout_btn %]
+        </div>
+    </div>
+
+    </div>
+</div>

@@ -22,11 +22,6 @@ Things I'd like to add:
 
 Not meant to be pretty or polished & probably not a lot of use to others.
 
-My main reason for writing it was to learn more about the perl Dancer 
-framework, and using DBIx::Class for database access.   The original version
-was done using Rose::DB which worked, but was a nuisance to configure. I 
-later discovered the Dancer::Plugin::DBIC module which makes configuring the
-db connection a breeze, hence the switch.
 
 - Brendon Oliver, 2012-03-01
   <brendon.oliver@gmail.com>

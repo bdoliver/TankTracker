@@ -1,0 +1,97 @@
+h1,h2 {
+  text-align: center;
+}
+
+h5 {
+  text-decoration: underline;
+}
+
+/* give bootstrap wells a nice drop-shadow effect:
+ */
+.well {
+  box-shadow: 10px 10px 5px #888888;
+}
+
+.row.content {
+  border: 1px solid #555555;
+  margin: 0px 0px 10px;
+  padding-top: 10px;
+}
+
+.form_errors {
+  padding-top: 10px;
+  margin: 10px 5px 0px 5px;   
+}
+.tanksel {
+  margin-top: 15px;
+}
+
+th.sortable,
+.glyphicon-refresh:hover,
+.glyphicon-search:hover {
+  cursor: pointer;
+}
+
+.search-bar {
+  display: none;
+}
+.search-bar .search-btn {
+  margin-top: 23px;
+}
+
+.change_password {
+  display: none;
+}
+#change_password {
+  margin-left: 15px;
+  margin-bottom: 15px;
+}
+
+fieldset.form-group {
+    margin-left: 50px;
+    margin-bottom: 0px;
+}
+
+
+span.radio span {
+  display: block;
+}
+
+/* input field sizings:
+ */
+.number input {     /* numeric inputs */
+  width: 6em;
+  text-align: right;
+}
+
+.tanksel select {  /* tank selection */
+  width: 20em;
+}
+.units select,      /* other select drop-downs */
+.type select {
+  width: 10em;
+}
+.input-group.date { /* datepicker fields */
+  width: 11em;
+}
+
+div.email input {
+  width: 25em;
+}
+
+td.tdc label {
+  margin-right: 10px;
+}
+#chart_zoom,
+#show_notes {
+  margin-left: 10px;
+}
+
+/* the chart page needs explicit height, otherwise it will
+ * collapse into nothing on initial display
+ */
+div#testChartDiv {
+    border: 1px solid black;
+    height: 450px;
+    margin: 15px 0px;
+}

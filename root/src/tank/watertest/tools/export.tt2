@@ -1,0 +1,78 @@
+<form class="form" method="[% form.method %]" action="[% form.action %]" >
+<div class="row">
+    <div class="col-md-6 col-md-offset-3 well">
+
+    [% header %]
+
+    <div class="row content">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="export_all">Export for which tank?</label>
+                </div>
+                <div class="form-group col-md-6">
+                    [% form.get_element('export_all') %]
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="start_date">Date from:</label>
+                </div>
+                <div class="form-group col-md-6">
+                    <div class="input-group date" id="start_date">
+                        [% form.get_element('start_date').placeholder('yyyy-mm-dd') %]
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </div>
+                </div>
+                <script>
+                $(document).ready(function(){
+                    $('#start_date').datepicker({
+                        format         : 'yyyy-mm-dd',
+                        todayHighlight : false,
+                        clearBtn       : true,
+                        autoclose      : true,
+                        endDate        : '+0d'
+                    });
+                });
+                </script>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="end_date">Date to:</label>
+                </div>
+                <div class="form-group col-md-6">
+                    <div class="input-group date" id="end_date">
+                        [% form.get_element('end_date').placeholder('yyyy-mm-dd') %]
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </div>
+                </div>
+                <script>
+                $(document).ready(function(){
+                    $('#end_date').datepicker({
+                        format         : 'yyyy-mm-dd',
+                        todayHighlight : true,
+                        clearBtn       : true,
+                        autoclose      : true,
+                        endDate        : '+0d'
+                    });
+                });
+                </script>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="btn-group col-md-6 col-md-offset-6">
+            [% submit_btn('Export') %]
+            [% back_btn('/tank/' _ tank.tank_id _ '/water_test/list')%]
+            [% logout_btn %]
+        </div>
+    </div>
+
+    </div>
+</div>
+</form>

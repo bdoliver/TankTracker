@@ -1,0 +1,67 @@
+<div class="row">
+    <div class="col-md-12 well">
+<form id="menuTabs" method="POST">
+    <ul class="nav nav-tabs">
+        <li [% IF active_tab == 'tank'   %]class="active"[% END %]><a data-toggle="tab" data-target="#tank">Tank</a></li>
+        <li [% IF active_tab == 'user'   %]class="active"[% END %]><a data-toggle="tab" data-target="#user_[% user.user_id %]_edit">User</a></li>
+        <li [% IF active_tab == 'access' %]class="active"[% END %]><a data-toggle="tab" data-target="#user_[% user.user_id %]_access_list">Access</a></li>
+        [% IF is_admin %]
+        <li [% IF active_tab == 'admin'  %]class="active"[% END %]><a data-toggle="tab" data-target="#user_admin">Admin</a></li>
+        [% END %]
+    </ul>
+</form>
+    <div class="tab-content">
+        <div class="tab-pane active">
+        [% content %]
+        </div>
+    </div>
+<!--
+    [% # following for the ajax-y version... if i ever get it working... %]
+    <div class="tab-content">
+        <div id="tank" class="tab-pane fade in active"></div>
+        <div id="user_[% user.user_id %]_edit" class="tab-pane fade in"></div>
+        <div id="user_[% user.user_id %]_access_list" class="tab-pane fade in"></div>
+        <div id="user_admin" class="tab-pane fade in"></div>
+    </div>
+-->
+    </div>
+</div>
+
+<script>
+$(function() {
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        // perform tab-switch:
+        $('#menuTabs').attr('action',
+                            '/'+$(e.target).attr('data-target')
+                                           .substring(1)
+                                           .replace(/_/g,'/'));
+        $('#menuTabs').submit();
+
+/*
+        var target = $(e.target).attr('data-target');
+        if ( $(target).is(':empty') ) {
+
+            alert("URL =>"+'/'+target.substring(1).replace(/_/g,'/')+"<=");
+
+            $.ajax({
+                'type'      : "POST",
+                'data'      : { ajax: 1 },
+                'xhrFields' : { withCredentials: true },
+                'url'       : '/'+target.substring(1).replace(/_/g,'/'),
+                'error'     : function(data){
+                    alert("There was a problem");
+                },
+                'success'   : function(data){
+                    alert("Ajax call ok");
+                    $(target).html(data);
+                }
+            });
+        }
+*/
+    });
+
+    // always show tank tab first...
+//    $('.nav-tabs a:first').tab().trigger('click');
+
+});
+</script>

@@ -1,0 +1,75 @@
+<form class="form" method="[% form.method %]" action="[% form.action %]" >
+    [% form.get_element('tank_id') %]
+
+<div class="row">
+    <div class="col-md-4 col-md-offset-4">
+
+    [% header %]
+
+    <div class="row">
+        <div class="col-md-4">
+            <label for="length">Type</label>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                [% form.get_element('inventory_type') %]
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <label for="length">Description</label>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                [% form.get_element('description').placeholder('Description') %]
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <label for="purchase_date">Purchase Date</label>
+        </div>
+        <div class="form-group col-md-6">
+            <div class="input-group date">
+                [% form.get_element('purchase_date').placeholder('YYYY-MM-DD') %]
+                <span class="input-group-addon">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                </span>
+            </div>
+        </div>
+        <script>
+        $(document).ready(function(){
+            $('.date').datepicker({
+                format         : 'yyyy-mm-dd',
+                todayHighlight : true,
+                clearBtn       : true,
+                autoclose      : true,
+                endDate        : '+0d'
+            });
+        });
+        </script>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <label for="length">Purchase Price</label>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                [% form.get_element('purchase_price').placeholder('$0.00') %]
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="btn-group col-md-8 col-md-offset-4">
+            [% submit_btn('Save') %]
+            [% back_btn('/tank/' _ tank.tank_id _ '/inventory/list')%]
+            [% logout_btn %]
+        </div>
+    </div>
+
+    </div>
+</div>
+
+</form>
+

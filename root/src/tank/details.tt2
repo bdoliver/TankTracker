@@ -1,0 +1,190 @@
+[% IF ! user.preferences.dimension_units OR ! user.preferences.capacity_units %]
+<div class="row">
+  <div class="col-md-4 text-danger bg-danger">
+  <p>Your preferences have not yet been set up.</p>
+  <p>Please go to the User tab and select the units of measure for your
+     tank's dimensions and capacity.</p>
+  </div>
+</div>
+    [% RETURN %]
+[% END %]
+
+<form class="form" method="[% form.method %]" action="[% form.action %]" >
+    [% form.get_element('tank_id') %]
+    <div class="row">
+        <div class="col-md-12">
+
+        [% header %]
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label for="tank_name">Name</label>
+                        </div>
+                        <div class="form-group col-md-5">
+                            [% form.get_element('tank_name').placeholder('Name') %]
+                        </div>
+                        <div class="col-md-2">
+                            <label for="water_type">Water type</label>
+                        </div>
+                        <div class="form-group col-md-3 type">
+                            [% form.get_element('water_type') %]
+                         </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="text-primary">Tank dimensions:</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2">
+                             <label for="length">Length</label>
+                        </div>
+                        <div class="form-group col-md-2 number">
+                             [% form.get_element('length').placeholder('Length') %]
+                        </div>
+                        <div class="col-md-1">
+                            [% preferences.dimension_units %]
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label for="width">Width</label>
+                        </div>
+                        <div class="form-group col-md-2 number">
+                            [% form.get_element('width').placeholder('Width') %]
+                        </div>
+                        <div class="col-md-1">
+                            [% preferences.dimension_units %]
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label for="depth">Depth</label>
+                        </div>
+                        <div class="form-group col-md-2 number">
+                            [% form.get_element('depth').placeholder('Depth') %]
+                        </div>
+                        <div class="col-md-1">
+                            [% user.preferences.dimension_units %]
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label for="capacity">Capacity</label>
+                        </div>
+                        <div class="form-group col-md-2 number">
+                            [% form.get_element('capacity').placeholder('Capacity') %]
+                        </div>
+                        <div class="col-md-1">
+                            [% user.preferences.capacity_units %]
+                        </div>
+                        <div class="col-md-1">
+                            <input type="button" id="calc_capacity" value="Calculate" class="btn btn-md btn-primary" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label for="active">Active?</label>
+                        </div>
+                        <div class="form-group col-md-2">
+                            [% form.get_element('active') %]
+                        </div>
+                    </div>
+
+
+
+
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="notes" class="sr-only">Notes</label>
+                    [% form.get_element('notes').placeholder('Notes') %]
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="btn-group col-md-6">
+                [% IF tank_action == 'view' %]
+                    <a [% href('/tank/' _ tank.tank_id _ '/edit') %] class="btn btn-md btn-info">Edit</a>
+                    <script>
+                    $(function() {
+                        $('input').addClass('disabled').prop('disabled', true);
+                        $('select').addClass('disabled').prop('disabled', true);
+                        $('textarea').addClass('disabled').prop('disabled', true);
+                    });
+                    </script>
+                [% ELSE %]
+                    [% submit_btn('Save') %]
+                [% END %]
+                    [% back_btn %]
+                    [% logout_btn %]
+                </div>
+            </div>
+
+            [% form_errors %]
+
+        </div>
+    </div>
+</form>
+
+<script>
+$(function() {
+    $('#calc_capacity').click(function() {
+
+        var dimension_units  = '[% preferences.dimension_units %]';
+        var dimension_factor = 1;
+        var dimension_metric = true;
+
+        switch (dimension_units) {
+            case 'mm':
+                 dimension_factor = 0.001; //conv. to metres
+                 break;
+
+            case 'cm':
+                dimension_factor = 0.01; // conv. to metres
+                break;
+
+            case 'inches':
+                dimension_factor = 1/12; // conv. to feet
+                dimension_metric = false;
+                break;
+            case 'feet':
+                dimension_metric = false;
+                break;
+        }
+
+        // volume here is either cubic metre, or cubic feet:
+        var volume = ($('input[name="length"]').val() * dimension_factor) *
+                     ($('input[name="width"]').val()  * dimension_factor) *
+                     ($('input[name="depth"]').val()  * dimension_factor);
+
+        var capacity_units = '[% preferences.capacity_units %]';
+        var capacity_factor;
+
+        /* volume conversion rates:
+            1 cubic meter = 1 000 litre
+            1 cubic meter = 219.969 248 3 gallon [UK]
+            1 cubic meter = 264.172 052 36 gallon [US, liquid]
+
+            1 cubic foot = 28.316 846 592 litre
+            1 cubic foot = 6.228 835 459 gallon [UK]
+            1 cubic foot = 7.480 519 480 5 gallon [US, liquid]
+        */
+
+        switch (capacity_units) {
+            case 'litres':
+                capacity_factor = dimension_metric ? 1000 : 28.316846592;
+                break;
+            case 'gallons':
+                capacity_factor = dimension_metric ? 219.9692483 : 6.228835459;
+                break;
+            case 'us gallons':
+                capacity_factor = dimension_metric ? 264.17205236 : 7.4805194805;
+                break;
+        }
+        $('input[name="capacity"]').val((volume * capacity_factor).toFixed(2));
+    });
+
+});
+</script>

@@ -1,0 +1,9 @@
+[%  # content wrapper:
+    WHILE (wrapper = template_wrappers.pop);
+        content = WRAPPER $wrapper;
+        content;
+        END;
+    END;
+    content;
+%]
+

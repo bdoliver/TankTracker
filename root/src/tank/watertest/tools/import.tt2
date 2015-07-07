@@ -1,0 +1,98 @@
+<form class="form" method="[% form.method %]" action="[% form.action %]" >
+<div class="row">
+    <div class="col-md-8 col-md-offset-2 well">
+
+    [% header %]
+
+    <div class="row content">
+        <div class="col-md-12">
+
+        [% IF import_result %]
+        <p class="text-success bg-success">[% import_result %]</p>
+        [% END %]
+        [% IF import_error %]
+        <p class="text-danger bg-danger">[% import_error %]</p>
+        [% END %]
+
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="import_file">Select file to upload:</label>
+                </div>
+                <div class="form-group col-md-6">
+                    [% form.get_element('import_file') %]
+                </div>
+            </div>
+        </div>
+    </div>     
+    <div class="row">
+        <div class="col-md-3 pull-right btn-group">
+            [% back_btn('/tank/' _ tank.tank_id _ '/water_test/list') %]
+            [% logout_btn %]
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <h5>Test File Format</h5>
+            <p>The file you are uploading must be formatted as follows:</p>
+            <ul>
+                <li>CSV format</li>
+                <li>First row must be column names (not case-sensitive).
+                    <ul>
+                        <li>tank_id<sup>#1</sup></li>
+                        <li>test_date<sup>#2</sup></li>
+                        <li>test_id<sup>#3</sup></li>
+                        <li>result_ph</li>
+                        <li>result_ammonia</li>
+                        <li>result_nitrite</li>
+                        <li>result_nitrate</li>
+                        <li>water_change</li>
+                        <li>notes</li>
+                    </ul>
+                    <p>If you are uploading results for a saltwater tank, the
+                    following columns may also be included:</p>
+                    <ul>
+                        <li>result_salinity</li>
+                        <li>result_calcium</li>
+                        <li>result_phosphate</li>
+                        <li>result_magnesium</li>
+                        <li>result_kh</li>
+                        <li>result_alkalinity</li>
+                    </ul>
+                </li>
+            </ul>
+            <p><strong><u>NOTES:</u></strong></p>
+            <ul>
+                <li>#1 - tank ID is optional; results will be uploaded to
+                    the currently-selected tank.  If you include tank_id, and there
+                    are records for more than one tank, they will be uploaded to the
+                    respective tank ID <strong>provided that you are the owner of the
+                    nominated tank.</strong> Note that you cannot import test results
+                    for a tank you do not 'own' in any circumstances.
+                </li>
+                <li>#2 - test_date must be provided in 'YYYY/MM/DD' format.
+                    If you have more than one test on a date, you can provide a
+                    timestamp in place of a date. The timestamp must be of the format
+                    'YYYY/MM/DD HH:MM:SS';
+                <li>#3 - test_id is optional.  But if present, the test
+                    record will update (replace) that record within the database. Be
+                    careful with this as a missing value will overwrite any previous
+                    test value;
+                </li>
+                <li>Your upload must contain, at a minimum, the test_date and one
+                    data column (note that if you are updating existing test results,
+                    a missing column will NOT overwrite an existing test value with
+                    null);
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    </div>
+</div>
+</form>
+<script>
+$(document).ready(function(){
+    $('#import_file').fileinput();
+});
+</script>

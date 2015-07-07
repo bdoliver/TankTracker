@@ -1,0 +1,128 @@
+[% MACRO header(xtra) BLOCK %]
+    <div class="row header">
+        <div class="col col-md-8">
+        [% IF tank OR action_heading %]
+        <h4>[% IF page_title AND not tank.name %]
+                [% page_title%]
+            [% ELSE %]
+                [% IF tank.tank_name %][% tank.tank_name %][% END %]
+             [% END %]
+             [% IF action_heading %] - [% action_heading %][% END %]</h4>
+        [% END %]
+        </div>
+        <div class="col col-md-4 text-right">
+            [% xtra %]
+        </div>
+    </div>
+[% END %]
+
+[% MACRO href(path) BLOCK %]
+href="[% path %]"
+[% END %]
+
+[% MACRO paging BLOCK %]
+
+    [% SET path = pager.path.join('/') _ '/' %]
+
+    <p class="small"> [% # always show the list record count, but only show
+           # the pager when pagination is required %]
+        Displaying [% pager.first %] to [% pager.last =%]
+        of [% pager.total_entries %]&nbsp;[% pager.what || 'records' %].
+    </p>
+  [% IF pager.last_page || 0 > 1 ~%]
+    <ul class="pagination pagination-sm">
+
+        <li[% IF pager.first_page == pager.current_page %] class="disabled"[% END %]>
+            <a [% href(path _ pager.first_page) =%]>&lt;&lt;first</a>
+        </li>
+
+        <li[% IF NOT pager.previous_page %] class="disabled"[% END %]>
+            <a [% href(path _ pager.previous_page) %]>&lt;previous</a>
+        </li>
+
+        <li class="disabled"><a href="#">[% pager.current_page %]</a></li>
+
+        <li[% IF NOT pager.next_page %] class="disabled"[% END %]>
+            <a [% href(path _ pager.next_page) %] >next&gt;</a>
+        </li>
+
+        <li[% IF pager.last_page == pager.current_page %] class="disabled"[% END %]>
+            <a [% href(path _ pager.last_page) %] >last&gt;&gt;</a>
+        </li>
+
+    </ul>
+  [% END %]
+
+[% END%]
+
+[% MACRO form_errors BLOCK %]
+    [% IF form.get_errors.size %]
+        <div class="row form_errors">
+            <div class="col col-md-6 text-danger bg-danger form_errors">
+            [% # FOR error IN form.get_errors %]
+            [% # only render the first form error... %]
+            [% error = form.get_errors.shift %]
+                [% error.message | html_line_break | html_para %]
+            [% # END %]
+            </div>
+        </div>
+    [% ELSE %]
+        [% IF message %]
+        <div class="row form_errors">
+            <div class="col col-md-6 text-success bg-success">[% message %]</div>
+        </div>
+        [% END %]
+        [% IF error %]
+        <div class="row form_errors">
+            <div class="col text-danger bg-danger">[% error %]</div>
+        </div>
+        [% END %]
+    [% END %]
+[% END %]
+
+[% MACRO submit_btn(btn_value) BLOCK %]
+   <input name="submit" type="submit" value="[% btn_value || 'Submit' %]" class="btn btn-md btn-primary" />
+[% END %]
+
+[% MACRO logout_btn BLOCK %]
+   <a [% href('/logout') %] class="btn btn-md btn-info">Logout</a>
+[% END %]
+
+[% MACRO back_btn(path, label) BLOCK %]
+   <a [% href( path || '/tank' ) %] class="btn btn-md btn-primary">[% label || 'Back' %]</a>
+[% END %]
+
+[% MACRO search_asc BLOCK %]
+    <span class="glyphicon glyphicon-circle-arrow-up" data-toggle="tooltip" title="Click to sort"></span>
+[% END %]
+
+[% MACRO search_desc BLOCK %]
+    <span class="glyphicon glyphicon-circle-arrow-desc" data-toggle="tooltip" title="Click to sort"></span>
+[% END %]
+
+[% MACRO sortable_column(col, col_hdg, hdg_class) BLOCK %]
+    <th class="sortable [% hdg_class %]" 
+    
+    [%~ IF pager.column == col AND pager.direction == 'asc';
+            order_by = [ col, 'desc' ];
+        ELSE;
+            order_by = [ col, 'asc'  ];
+        END =%]
+[% # Catalyst.uri_for( ) %]
+        onclick='window.location.href="[% pager.path.join('/') _ '/' _ order_by.join('/') %]";
+                 return false;'>
+
+    [%~ IF pager.column == col ~%]
+        [%~ IF pager.direction == 'desc' ~%]
+        <span class="glyphicon glyphicon-circle-arrow-down"
+                 alt="sort in ascending order" /></span>
+        [%~ ELSE ~%]
+        <span class="glyphicon glyphicon-circle-arrow-up"
+                 alt="sort in descending order" /></span>
+        [%~ END ~%]
+    [%~ ELSE %]
+        <span class="glyphicon"></span>
+    [%~ END %]
+                [%= col_hdg %]
+    </th>
+[% END %]
