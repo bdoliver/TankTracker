@@ -3,8 +3,8 @@
 <form id="menuTabs" method="POST">
     <ul class="nav nav-tabs">
         <li [% IF active_tab == 'tank'   %]class="active"[% END %]><a data-toggle="tab" data-target="#tank">Tank</a></li>
-        <li [% IF active_tab == 'user'   %]class="active"[% END %]><a data-toggle="tab" data-target="#user_[% user.user_id %]_edit">User</a></li>
-        <li [% IF active_tab == 'access' %]class="active"[% END %]><a data-toggle="tab" data-target="#user_[% user.user_id %]_access_list">Access</a></li>
+        <li [% IF active_tab == 'user'   %]class="active"[% END %]><a data-toggle="tab" data-target="#user_[% session_uid %]_edit">User</a></li>
+        <li [% IF active_tab == 'access' %]class="active"[% END %]><a data-toggle="tab" data-target="#user_[% session_uid %]_access_list">Access</a></li>
         [% IF is_admin %]
         <li [% IF active_tab == 'admin'  %]class="active"[% END %]><a data-toggle="tab" data-target="#user_admin">Admin</a></li>
         [% END %]

@@ -69,7 +69,9 @@ sub check_request : Private {
     );
     $c->response->headers->header('Pragma' => 'no-cache');
 
-    $c->stash->{'user'} = $c->model('User')->get($c->user->user_id());
+#     $c->stash->{'user'} = $c->model('User')->get($c->user->user_id());
+
+    $c->stash->{'session_uid'} = $c->user->user_id();
 
     push @{ $c->stash->{template_wrappers} }, 'menu.tt2';
 
