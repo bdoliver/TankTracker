@@ -80,7 +80,7 @@
                     </label>
                 [% END %]
                     <label class="checkbox-inline" for="temperature">
-                        <input type="checkbox" id="temperature" name="temperature" />Temperature</sub>
+                        <input type="checkbox" id="temperature" name="temperature" />Temperature
                     </label>
                   </span>
                     </td>

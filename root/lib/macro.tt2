@@ -10,9 +10,11 @@
              [% IF action_heading %] - [% action_heading %][% END %]</h4>
         [% END %]
         </div>
+        [% IF xtra %]
         <div class="col col-md-4 text-right">
             [% xtra %]
         </div>
+        [% END %]
     </div>
 [% END %]
 

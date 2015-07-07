@@ -17,13 +17,13 @@ subtest 'header' => sub {
     $template = q{[% header %]};
 
     my $content = $tt->process({ tank => { tank_name => 'Fooby-tank' } });
-    like($content => qr{<h4>Fooby-tank - </h4>},
-        q{tank name}
+    like($content => qr{<h4>Fooby-tank\s*</h4>}msx,
+        q{tank name only}
     );
 
     $content = $tt->process({ action_heading => 'gracNify' });
-    like($content => qr{<h4>gracNify</h4>},
-        q{action heading}
+    like($content => qr{<h4>\s+-\s+gracNify</h4>}msx,
+        q{action heading only}
     );
 
     $content = $tt->process({
@@ -32,6 +32,14 @@ subtest 'header' => sub {
     });
     like($content => qr{<h4>Bobble-tank - splotz!</h4>},
         q{tank name + action heading}
+    );
+
+    $content = $tt->process({
+        page_title     => 'My page title',
+        action_heading => 'some action',
+    });
+    like($content => qr{<h4>\QMy page title - some action\E</h4>}msx,
+        q{action heading + page title (no tank)}
     );
 
     $template = q{[% header('<span>good html</span>') %]};
@@ -45,6 +53,8 @@ subtest 'header' => sub {
         q{xtra html rendered}
     );
 };
+done_testing();
+exit;
 
 subtest 'href' => sub {
     # this is hardly worth it... just doing for the sake of completeness

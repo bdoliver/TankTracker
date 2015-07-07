@@ -6,7 +6,7 @@ use warnings;
 use Test::More;
 use Test::Template;
 
-my $tt = Test::Template->new({ INPUT => 'tank/watertest/chart.tt2', })
+my $tt = Test::Template->new({ INPUT => 'tank/watertest/chart/chart.tt2', })
     or die "$Template::ERROR\n";
 
 my $content;
