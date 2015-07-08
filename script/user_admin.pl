@@ -11,7 +11,7 @@ use lib "$Bin/../lib";
 
 use Getopt::Long qw(:config no_ignore_case bundling);
 
-use TankTracker::Schema::Result::TrackerUser;
+use TankTracker::Schema::TrackerUser;
 
 our ( $add, $edit, $user, $pass, $email, $first_name, $last_name );
 
@@ -25,7 +25,7 @@ Getopt::Long::GetOptions(
 );
 
 DBICx::Sugar::config(
-    { default => { dsn => "dbi:Pg:dbname=TankTracker", } },
+    { default => { dsn => "dbi:Pg:dbname=TankTracker", schema_class => 'TankTracker::Schema'} },
 );
 
 $user or die "Missing --user=user_first_name (mandatory)\n";
@@ -45,7 +45,7 @@ my $rs = $schema->resultset('TrackerUser');
 
 if ( $add ) {
     ## create user:
-    my $hash = TankTracker::Schema::Result::TrackerUser->hash_pw($pass);
+    my $hash = TankTracker::Schema::TrackerUser->hash_pw($pass);
     Encode::from_to($hash, "iso-8859-1", "utf8");
     my $user = $rs->create({
         username   => $user,
