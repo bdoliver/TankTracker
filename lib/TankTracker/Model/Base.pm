@@ -120,6 +120,12 @@ sub search {
     return $self->resultset->search(@_);
 }
 
+sub result_source {
+    my $self = shift;
+
+    return $self->resultset->result_source(@_);
+}
+
 sub AUTOLOAD {
     my $self = shift;
     my $name = our $AUTOLOAD;

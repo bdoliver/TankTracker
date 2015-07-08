@@ -88,13 +88,7 @@ __PACKAGE__->config(
                 },
                 'store' => {
                     'class'         => 'DBIx::Class',
-                    'user_model'    => 'TankTracker::TrackerUser',
-# FIXME: switch to Model::User here...
-#                    'user_model'    => 'User',
-#
-#                     'role_relation' => 'tracker_user_roles',
-#                     'role_field'    => 'role_id',
-
+                    'user_model'    => 'User',
                 },
             },
         },
