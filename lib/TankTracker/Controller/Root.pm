@@ -69,9 +69,9 @@ sub check_request : Private {
     );
     $c->response->headers->header('Pragma' => 'no-cache');
 
-    $c->stash->{'session_uid'} = $c->user->user_id();
+    $c->stash->{'user'} = $c->model('User')->get($c->user->user_id());
 
-    push @{ $c->stash->{template_wrappers} }, 'menu.tt2';
+    push @{ $c->stash->{'template_wrappers'} }, 'menu.tt2';
 
     if ( $c->user->has_role('Admin') ) {
         $c->stash->{'is_admin'} = 1;
@@ -157,10 +157,10 @@ sub login : Local FormMethod('_login_form') Args(0) {
                 $c->detach();
                 return;
             } else {
-                $c->stash(error_msg => q{Bad username or password.});
+                $c->stash(error => q{Bad username or password.});
             }
         } else {
-            $c->stash(error_msg => q{Empty username or password.})
+            $c->stash(error => q{Empty username or password.})
                 unless ($c->user_exists);
         }
     }
