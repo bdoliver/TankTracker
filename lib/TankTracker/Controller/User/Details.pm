@@ -333,12 +333,11 @@ sub details :Args(0) FormMethod('_details') {
             $defaults = { recs_per_page => 10 };
         }
         else {
+            my $prefs = delete $c->stash->{'edit_user'}{'preferences'};
             $defaults = {
-                'first_name' => $c->user->first_name(),
-                'last_name'  => $c->user->last_name(),
-                'email'      => $c->user->email(),
-                %{ $c->stash->{'user'}{'preferences'} },
-            }
+                %{ $c->stash->{'edit_user'} },
+                %{ $prefs },
+            };
         }
 
         $form->default_values($defaults);
@@ -351,20 +350,26 @@ sub details :Args(0) FormMethod('_details') {
 }
 
 sub list :Path('/user/admin/') {
-    my ( $self, $c, $page ) = @_;
+    my ( $self, $c, $page, $column, $direction ) = @_;
+
+    $page      ||= 1;
+    $column    ||= 'username',
+    $direction ||= 'asc';
 
     my ( $users, $pager ) = @{ $c->model('User')->list(
         undef,
         {
-            order_by => { '-asc' => [ 'last_name', 'first_name' ] },
-            page     => $page || 1,
+            order_by => { "-$direction" => $column },
+            page     => $page,
             rows     => $c->stash->{'user'}{'preferences'}{'recs_per_page'} || 10,
         },
     ) };
 
     if ( $pager and ref($pager) ) {
-        $pager->{'what'} = 'users';
-        $pager->{'path'} = [ '/user/admin/' ];
+        $pager->{'what'}      = 'users';
+        $pager->{'path'}      = [ '/user', 'admin', $page ];
+        $pager->{'column'}    = $column;
+        $pager->{'direction'} = $direction;
     }
 
     $c->stash->{'users'} = $users;

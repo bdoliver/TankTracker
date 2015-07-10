@@ -11,26 +11,27 @@
             <table class="table table-striped table-hover">
             <thead>
             <tr>
-                <th class="text-right">User ID</th>
-                <th class="text-left">Login</th>
-                <th class="text-left">First Name</th>
-                <th class="text-left">Last Name</th>
-                <th class="text-left">Email</th>
-                <th class="text-center">Active?</th>
-                <th class="text-center">Last Login</th>
-                <th class="text-center">Created On</th>
+                [% sortable_column('user_id',    'User ID',       'text-right'  ) %]
+                [% sortable_column('username',   'Login',         'text-left'   ) %]
+                [% sortable_column('first_name', 'First Name',    'text-left'   ) %]
+                [% sortable_column('last_name',  'Last Name',     'text-left'   ) %]
+                [% sortable_column('email',      'Email Address', 'text-left'   ) %]
+                [% sortable_column('active',     'Active?',       'text-center' ) %]
+                [% sortable_column('last_login', 'Last Login',    'text-center' ) %]
+                [% sortable_column('created_on', 'Created On',    'text-center' ) %]
             </tr>
             </thead>
             <tbody>
             [% FOR user IN users %]
             <tr>
-                <td class="text-right">
+                <td class="text-right">[% user.user_id %] </td>
+                <td class="text-left">
                     <a href="/user/[% user.user_id %]/edit"
                        data-toggle="tooltip"
-                       title="Click to edit user #[% user.user_id %]">
-                       [% user.user_id %]</a>
+                       title="Click to edit user #[% user.username %]">
+                       [% user.username %]
+                    </a>
                 </td>
-                <td class="text-left">[% user.username %] </td>
                 <td class="text-left">[% user.first_name %] </td>
                 <td class="text-left">[% user.last_name %] </td>
                 <td class="text-left">[% user.email %] </td>
