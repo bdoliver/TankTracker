@@ -120,8 +120,7 @@ sub select : Chained('base') :PathPart('') Args(0) FormMethod('_select_form') {
         return;
     }
 
-    $c->stash->{'admin_user'} = $c->user->has_role('admin');
-    $c->stash->{'template'}   = 'tank/select.tt2';
+    $c->stash->{'template'} = 'tank/select.tt2';
 
     return;
 }
