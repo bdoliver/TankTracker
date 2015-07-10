@@ -28,7 +28,7 @@ sub get_user :Chained('base') :PathPart('') CaptureArgs(1) {
     }
 
     if ( my $user = $c->model('User')->get($user_id) ) {
-        $c->stash->{'user'} = $user;
+        $c->stash->{'edit_user'} = $user;
     }
     else {
         my $error = qq{User requested '$user_id': not found in database!};
