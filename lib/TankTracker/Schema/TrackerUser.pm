@@ -156,15 +156,6 @@ sub can_admin_tank {
     } $self->tank_user_accesses->all();
 }
 
-sub get_preferences {
-    my ( $self ) = @_;
-
-    return {
-        'recs_per_page' => 10, # default in case no prefs set
-        $self->preference->get_columns(),
-    };
-}
-
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
 __PACKAGE__->meta->make_immutable;
 1;

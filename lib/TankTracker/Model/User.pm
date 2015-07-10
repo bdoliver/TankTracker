@@ -2,8 +2,6 @@ package TankTracker::Model::User;
 
 use strict;
 
-use Crypt::Eksblowfish::Bcrypt qw(bcrypt_hash en_base64);
-use List::Util qw(any);
 use Moose;
 use Try::Tiny;
 use DateTime;
@@ -110,60 +108,25 @@ sub update {
     return 1;
 }
 
-sub hash_pw {
-    my ( $self, $pw ) = @_;
-
-    return $pw
-           ? en_base64(bcrypt_hash({ key_nul => 1,
-                                     cost    => 8,
-                                     salt    => ']+_%%^981#^!*|vB' }, $pw))
-           : '';
-}
-
-sub check_password {
-
-        my ( $self, $attempt ) = @_;
-
-        my $ret = 0;
-
-        if ( $attempt ) {
-                my $hash = $self->hash_pw($attempt);
-
-                $ret = ($hash eq $self->password());
-        }
-
-        return $ret;
-}
-
-sub has_role {
-    my ( $self, $role ) = @_;
-
-    $role or return 0;
-
-    return any {
-        $_->role->name() eq $role
-    } $self->tracker_user_roles->all();
-}
-
-sub can_access_tank {
-    my ( $self, $tank_id ) = @_;
-
-    $tank_id or return 0;
-
-    return any {
-        $_->tank_id() eq $tank_id
-    } $self->tank_user_accesses->all();
-}
-
-sub can_admin_tank {
-    my ( $self, $tank_id ) = @_;
-
-    $tank_id or return 0;
-
-    return any {
-        ( $_->tank_id() eq $tank_id ) and $_->admin()
-    } $self->tank_user_accesses->all();
-}
+# sub can_access_tank {
+#     my ( $self, $tank_id ) = @_;
+#
+#     $tank_id or return 0;
+#
+#     return any {
+#         $_->tank_id() eq $tank_id
+#     } $self->tank_user_accesses->all();
+# }
+#
+# sub can_admin_tank {
+#     my ( $self, $tank_id ) = @_;
+#
+#     $tank_id or return 0;
+#
+#     return any {
+#         ( $_->tank_id() eq $tank_id ) and $_->admin()
+#     } $self->tank_user_accesses->all();
+# }
 
 no Moose;
 __PACKAGE__->meta->make_immutable();
