@@ -71,7 +71,7 @@ sub update {
             ( $pw_1 and $pw_2 and $pw_1 eq $pw_2 ) or
                 die qq{cannot set new password: new + confirmed do not match\n};
 
-            $params->{'password'} = $self->hash_pw($pw_1);
+            $params->{'password'} = $self->resultset->result_class->hash_pw($pw_1);
         }
     }
     else {
@@ -81,7 +81,7 @@ sub update {
         ( $pw_1 and $pw_2 and $pw_1 eq $pw_2 ) or
             die qq{passwords do not match\n};
 
-        $params->{'password'} = $self->hash_pw($pw_1);
+        $params->{'password'} = $self->resultset->result_class->hash_pw($pw_1);
     }
 
     $self->txn_begin();
@@ -107,26 +107,6 @@ sub update {
 
     return 1;
 }
-
-# sub can_access_tank {
-#     my ( $self, $tank_id ) = @_;
-#
-#     $tank_id or return 0;
-#
-#     return any {
-#         $_->tank_id() eq $tank_id
-#     } $self->tank_user_accesses->all();
-# }
-#
-# sub can_admin_tank {
-#     my ( $self, $tank_id ) = @_;
-#
-#     $tank_id or return 0;
-#
-#     return any {
-#         ( $_->tank_id() eq $tank_id ) and $_->admin()
-#     } $self->tank_user_accesses->all();
-# }
 
 no Moose;
 __PACKAGE__->meta->make_immutable();
