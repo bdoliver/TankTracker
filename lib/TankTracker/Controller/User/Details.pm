@@ -316,19 +316,21 @@ sub details :Args(0) FormMethod('_details') {
                 $c->stash->{'user'}{'user_id'}, $params, $prefs
             );
             $c->stash->{'message'} = q{Updated user details.};
-
-            # return to the Admin user list after successful add:
-            if ( $c->stash->{'action_heading'} eq 'Add' ) {
-                $c->response->redirect($c->uri_for('/user/admin'));
-                $c->detach();
-                return;
-            }
         }
         catch {
             my $error = qq{Error saving user details: $_};
             $c->log->error($error);
             $c->stash->{'error'} = $error;
+            $c->detach();
+            return;
         };
+
+        # return to the Admin user list after successful add:
+        if ( $c->stash->{'action_heading'} eq 'Add' ) {
+            $c->response->redirect($c->uri_for('/user/admin'));
+            $c->detach();
+            return;
+        }
     }
 
     if ( not $form->submitted() ) {
