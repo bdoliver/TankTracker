@@ -37,9 +37,9 @@ sub auto :Private {
 sub _select_form :Private {
     my ( $self, $c ) = @_;
 
-    my @tanks = @{ $c->model('Tank')->list(
+    my @tanks = @{ $c->model('UserTank')->list(
         {
-            owner_id => $c->user->user_id(),
+            user_id => $c->user->user_id(),
         },
         {
             order_by => { -asc => 'tank_name' },

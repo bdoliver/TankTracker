@@ -214,4 +214,15 @@ CREATE TABLE preferences (
     PRIMARY KEY ( user_id )
 );
 
+CREATE VIEW user_tanks AS (
+    SELECT tank_id,
+           tank_name,
+           water_type,
+           active,
+           admin,
+           owner_id,
+           user_id
+    FROM tank_user_access JOIN tank USING ( tank_id )
+);
+
 COMMIT;
