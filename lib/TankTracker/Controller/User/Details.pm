@@ -306,6 +306,11 @@ sub details :Args(0) FormMethod('_details') {
         # ensure default...
         $prefs->{'recs_per_page'} ||= 10;
 
+        if ( $c->stash->{'action_heading'} eq 'Add' ) {
+            # set the parent user when adding a new user
+            $params->{'parent_id'} = $c->user->user_id();
+        }
+
         try {
             $c->model('User')->update(
                 $c->stash->{'user'}{'user_id'}, $params, $prefs

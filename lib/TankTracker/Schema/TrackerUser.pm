@@ -33,6 +33,8 @@ __PACKAGE__->add_columns(
   { data_type => "text", is_nullable => 0 },
   "active",
   { data_type => "boolean", default_value => \"true", is_nullable => 1 },
+  "parent_id",
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "last_login",
   { data_type => "timestamp", is_nullable => 1 },
   "created_on",
@@ -63,6 +65,12 @@ __PACKAGE__->has_many(
   { "foreign.user_id" => "self.user_id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
+__PACKAGE__->belongs_to(
+  "parent",
+  "TankTracker::Schema::TrackerUser",
+  { user_id => "parent_id" },
+  { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
+);
 __PACKAGE__->might_have(
   "preference",
   "TankTracker::Schema::Preference",
@@ -88,6 +96,12 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 __PACKAGE__->has_many(
+  "tracker_users",
+  "TankTracker::Schema::TrackerUser",
+  { "foreign.parent_id" => "self.user_id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+__PACKAGE__->has_many(
   "water_tests",
   "TankTracker::Schema::WaterTest",
   { "foreign.user_id" => "self.user_id" },
@@ -96,8 +110,8 @@ __PACKAGE__->has_many(
 __PACKAGE__->many_to_many("roles", "tracker_user_roles", "role");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-07-06 14:55:36
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:tUZKmXsRPSu+FCq5WN3mLQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-07-28 12:17:18
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:oCJuTjcyG/C9jLKbci4Zmw
 
 use Crypt::Eksblowfish::Bcrypt qw(bcrypt_hash en_base64);
 sub hash_pw {

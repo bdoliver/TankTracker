@@ -8,6 +8,7 @@ CREATE TABLE tracker_role (
 
     name        TEXT NOT NULL
 );
+
 INSERT INTO tracker_role VALUES ( default, 'Admin' );
 INSERT INTO tracker_role VALUES ( default, 'Guest' );
 INSERT INTO tracker_role VALUES ( default, 'Owner' );
@@ -24,6 +25,9 @@ CREATE TABLE tracker_user (
     last_name     TEXT,
     email         TEXT NOT NULL,
     active        BOOLEAN DEFAULT TRUE,
+    parent_id     INTEGER NOT NULL
+                  REFERENCES tracker_user (user_id),
+
     last_login    TIMESTAMP(0),
     created_on    TIMESTAMP(0) NOT NULL DEFAULT now(),
     updated_on    TIMESTAMP(0) DEFAULT now()
