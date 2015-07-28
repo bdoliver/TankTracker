@@ -23,7 +23,6 @@ href="[% path %]"
 [% END %]
 
 [% MACRO paging BLOCK %]
-
     [% SET path = pager.path.join('/') _ '/' %]
 
     <p class="small"> [% # always show the list record count, but only show
@@ -31,7 +30,8 @@ href="[% path %]"
         Displaying [% pager.first %] to [% pager.last =%]
         of [% pager.total_entries %]&nbsp;[% pager.what || 'records' %].
     </p>
-  [% IF pager.last_page || 0 > 1 ~%]
+
+  [% IF ( pager.last_page || 0 ) > 1 ~%]
     <ul class="pagination pagination-sm">
 
         <li[% IF pager.first_page == pager.current_page %] class="disabled"[% END %]>
@@ -54,7 +54,6 @@ href="[% path %]"
 
     </ul>
   [% END %]
-
 [% END%]
 
 [% MACRO form_errors BLOCK %]
