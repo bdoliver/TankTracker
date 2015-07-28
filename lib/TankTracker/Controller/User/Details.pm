@@ -127,7 +127,7 @@ sub _details :Private {
                 },
                 {
                     type    => 'MaxLength',
-                    min     => 20,
+                    max     => 20,
                     message => 'Password must be no more than 20 characters long',
                 },
             ],
