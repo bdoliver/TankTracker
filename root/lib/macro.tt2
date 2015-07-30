@@ -1,13 +1,13 @@
 [% MACRO header(xtra) BLOCK %]
     <div class="row header">
         <div class="col col-md-8">
-        [% IF tank OR action_heading %]
+        [% IF tank OR action_heading OR page_title %]
         <h4>[% IF page_title AND not tank.name %]
-                [% page_title%]
+                [% page_title %]
             [% ELSE %]
                 [% IF tank.tank_name %][% tank.tank_name %][% END %]
-             [% END %]
-             [% IF action_heading %] - [% action_heading %][% END %]</h4>
+            [% END %]
+            [% IF action_heading %] - [% action_heading %][% END %]</h4>
         [% END %]
         </div>
         [% IF xtra %]
@@ -81,16 +81,18 @@ href="[% path %]"
     [% END %]
 [% END %]
 
-[% MACRO submit_btn(btn_value) BLOCK %]
-   <input name="submit" type="submit" value="[% btn_value || 'Submit' %]" class="btn btn-md btn-primary" />
+[% MACRO submit_btn(btn_value, size) BLOCK %]
+   [% IF ! size %][% SET size = 'md' %][% END %]
+   <input name="submit" type="submit" value="[% btn_value || 'Submit' %]" class="btn btn-[% size %] btn-primary" />
 [% END %]
 
 [% MACRO logout_btn BLOCK %]
    <a [% href('/logout') %] class="btn btn-md btn-info">Logout</a>
 [% END %]
 
-[% MACRO back_btn(path, label) BLOCK %]
-   <a [% href( path || '/tank' ) %] class="btn btn-md btn-primary">[% label || 'Back' %]</a>
+[% MACRO back_btn(path, label, size) BLOCK %]
+   [% IF ! size %][% SET size = 'md' %][% END %]
+   <a [% href( path || '/tank' ) %] class="btn btn-[% size %] btn-primary">[% label || 'Back' %]</a>
 [% END %]
 
 [% MACRO search_asc BLOCK %]
