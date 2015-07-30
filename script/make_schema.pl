@@ -20,6 +20,10 @@ make_schema_at(
         exclude                 => qr{^_.*},
         db_schema               => [ '%' ],
         moniker_parts           => [ 'name' ],
+        # NB: 'user' is a reserved word in PostgreSQL and needs to be quoted
+        # to avoid syntax errors.  Instead, we'll just re-map the
+        # relationship name to something safer...
+        rel_name_map            => { 'user' => 'tracker_user' },
         qualify_objects         => 1,
         components              => [ qw(InflateColumn::DateTime) ],
     },

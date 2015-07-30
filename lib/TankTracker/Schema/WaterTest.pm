@@ -72,15 +72,15 @@ __PACKAGE__->belongs_to(
   { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
 __PACKAGE__->belongs_to(
-  "user",
+  "tracker_user",
   "TankTracker::Schema::TrackerUser",
   { user_id => "user_id" },
   { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07043 @ 2015-06-28 10:54:04
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:JRFXZB0RC17rnpz52hj5lQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-07-29 11:59:28
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:zEE9aa24N/dj4gkvlKEv5w
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

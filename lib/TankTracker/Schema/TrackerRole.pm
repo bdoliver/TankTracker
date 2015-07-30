@@ -31,11 +31,11 @@ __PACKAGE__->has_many(
   { "foreign.role_id" => "self.role_id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
-__PACKAGE__->many_to_many("users", "tracker_user_roles", "user");
+__PACKAGE__->many_to_many("tracker_users", "tracker_user_roles", "tracker_user");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-06-23 13:59:40
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:RFKp8uJj1umN3y/S1LTeVw
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-07-29 11:59:28
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:pmYc5kHz7SZr+qmqxVwPMg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
