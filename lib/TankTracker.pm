@@ -69,7 +69,9 @@ __PACKAGE__->config(
         PRE_PROCESS => 'macro.tt2',
         WRAPPER     => 'content.tt2',
         PRE_CHOMP   => 1,
-        ERROR       => 'error/template_error.tt2',
+        ERROR       => $ENV{'CATALYST_DEBUG'}
+                       ? undef
+                       : 'error/template_error.tt2',
     },
 
     'View::JSON' => {
