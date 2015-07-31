@@ -1,0 +1,47 @@
+<table class="table table-striped table-hover">
+<thead>
+    <tr>
+        <th>User</th>
+        <th>Accessible Tanks</th>
+        <th>Admin?</th>
+        <th>&nbsp;</th>
+    </tr>
+</thead>
+<tbody>
+[% FOR user IN list %]
+    <tr>
+        <td class="text-left">[% user.first_name _ ' ' _ user.last_name %]</td>
+    [% IF user.access.size %]
+        <td class="text-left">
+            <ul class="list-unstyled">
+        [% FOR t IN user.access %]
+                <li>[% t.tank_name _ ' (' _ t.water_type _ ')' %]</li>
+        [% END %]
+            </ul>
+        </td>
+        <td class="text-left">
+            <ul class="list-unstyled">
+            [% FOR t IN user.access %]
+                [% IF t.admin %]
+                <li class="text-success"><strong>Yes</strong></li>
+                [% ELSE %]
+                <li class="text-danger"><strong>No</strong></li>
+                [% END %]
+            [% END %]
+            </ul>
+        </td>
+        <td class="text-center">
+            [% back_btn( user.edit_url.join('/'), 'Edit access', 'sm' ) %]
+        </td>
+    [% ELSE %]
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td class="text-center">
+            [% back_btn( user.edit_url.join('/'), 'Add access', 'sm' ) %]
+        </td>
+    [% END %]
+    </tr>
+[% END %]
+</tbody>
+</table>
+

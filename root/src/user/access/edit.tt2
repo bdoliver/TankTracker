@@ -1,0 +1,89 @@
+<form class="form" method="[% form.method %]" action="[% form.action %]" >
+
+    <div class="row content">
+        <div class="col-md-12">
+
+        [% header %]
+
+        <div class="row">
+            <div class="col-md-6">
+            <table class="table table-striped table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th class="text-left">Tank</th>
+                    <th class="text-center">Access?</th>
+                    <th class="text-center">Admin?</th>
+                </tr>
+                </thead>
+                <tbody>
+
+        [%
+           # we need to process these two arrays in parallel:
+           access_cb = form.get_elements({ name => 'access' });
+           admin_cb  = form.get_elements({ name => 'admin'  });
+           i = 0;
+        %]
+
+        [% WHILE i < access_cb.size %]
+                <tr>
+                    <td class="text-left">
+                        [% access_cb.$i.label %]
+                    </td>
+                    <td class="text-center">
+                        <input type="[% access_cb.$i.type %]" id="[% access_cb.$i.id %]" name="[% access_cb.$i.name %]" value="[% access_cb.$i.value %]" [% access_cb.$i.default ? 'checked' : '' %] />
+                    </td>
+                    <td class="text-center">
+                        <input type="[% admin_cb.$i.type %]" id="[% admin_cb.$i.id %]" name="[% admin_cb.$i.name %]"  value="[% admin_cb.$i.value %]"  [% admin_cb.$i.default ? 'checked' : '' %] />
+                    </td>
+                </tr>
+
+            [% i = i + 1 %]
+        [% END %]
+
+                </tbody>
+            </table>
+            </div>
+        </div>
+
+        </div>
+    </div>
+
+    [% form_errors %]
+
+    <div class="row">
+        <div class="btn-group col-md-8 col-md-offset-2">
+            [% submit_btn('Save') %]
+            [% back_btn('/user/' _ user.user_id _ '/access/list')%]
+            [% logout_btn %]
+        </div>
+    </div>
+
+</form>
+
+<script>
+$(function() {
+    [% # on page load, we un-check & disable ALL admin checkboxes where the
+       # corresponding access checkbox is _not_ checked (can't admin something
+       # which is not accessible)
+    %]
+    $('input[name="access"]:checkbox:not(:checked)').each(function(idx, obj) {
+        $('#admin_'+$(obj).val()).prop('disabled', true).prop('checked', false);
+    });
+
+    [% # This sets up a click handler so that:
+       # 1) checking an access checkbox will enable the corresponding admin
+       #    checkbox; and
+       # 2) un-checking an access checkbox also un-checks the corresponding
+       #    admin checkbox & disables it.
+    %]
+    $('input[name="access"]').click(function() {
+        var admin_id = '#admin_'+$(this).val();
+        if ( $(this).is(':checked') ) {
+            $(admin_id).prop('disabled', false);
+        }
+        else {
+            $(admin_id).prop('disabled', true).prop('checked', false);
+        }
+    });
+});
+</script>

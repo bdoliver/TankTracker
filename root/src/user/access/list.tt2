@@ -1,1 +1,47 @@
-<p> access list...</p>
+<div class="row">
+    <div class="col-md-12">
+
+    [% header %]
+
+    <div class="row content">
+        <div class="col-md-12">
+        [% IF NOT list.size %]
+            <p>There are no users with tank access the database.</p>
+        [% ELSE %]
+            <form id="search_form" class="form" method="[% form.method %]" action="[% form.action %]" >
+            [% form.get_element('by_tank') %]
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="btn-group btn-group-sm">
+                        <input type="submit" class="btn[% by_tank ? ' btn-default' : ' btn-primary' %]" value='User / Tank' />
+                        <input type="submit" class="btn[% by_tank ? ' btn-primary' : ' btn-default' %]" value='Tank / User' />
+                    </div>
+                </div>
+            </div>
+            </form>
+            [% IF by_tank;
+                INCLUDE user/access/list/by_tank.tt2;
+               ELSE;
+                INCLUDE user/access/list/by_user.tt2;
+               END;
+            %]
+
+        [% END %]
+        </div>
+    </div>
+
+    [% paging %]
+
+    [% form_errors %]
+
+    </div>
+</div>
+
+<script>
+$(function() {
+    $('input[type="submit"]').click(function() {
+        $('input[name="by_tank"]').val( $(this).val() == 'Tank / User' ? 1 : 0 );
+        return true;
+    });
+});
+</script>
