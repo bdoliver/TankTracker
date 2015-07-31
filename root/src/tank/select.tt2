@@ -1,5 +1,8 @@
 <form class="form" method="[% form.method %]" action="[% form.action %]" >
+[% header %]
 
+<div class="row content">
+    <div class="col-md-12">
     [% IF form.get_element('tank_id') %]
     <div class="row tanksel">
         <div class="form-group col-md-2">
@@ -27,15 +30,17 @@
     </div>
     [% END %]
 
-    <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-            <div class="btn-group center-block">
-                [% submit_btn %]
-                [% logout_btn %]
-            </div>
+    [% form_errors %]
+
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-8 col-md-offset-2">
+        <div class="btn-group center-block">
+            [% submit_btn %]
+            [% logout_btn %]
         </div>
     </div>
-
-    [% form_errors %]
+</div>
 
 </form>
