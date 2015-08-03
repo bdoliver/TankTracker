@@ -6,7 +6,7 @@
     <div class="row content">
         <div class="col-md-12">
         [% IF NOT list.size %]
-            <p>There are no users with tank access the database.</p>
+            <p>There are no users with tank access in the database.</p>
         [% ELSE %]
             <form id="search_form" class="form" method="[% form.method %]" action="[% form.action %]" >
             [% form.get_element('by_tank') %]
