@@ -47,14 +47,12 @@ __PACKAGE__->add_columns(
     },
     is_nullable => 0,
   },
-  "description",
-  { data_type => "text", is_nullable => 0 },
   "title",
   { data_type => "text", is_nullable => 0 },
   "label",
   { data_type => "text", is_nullable => 0 },
   "rgb_colour",
-  { data_type => "char", is_nullable => 1, size => 7 },
+  { data_type => "char", is_nullable => 0, size => 7 },
 );
 __PACKAGE__->set_primary_key("parameter_id");
 __PACKAGE__->add_unique_constraint("parameters_parameter_key", ["parameter"]);
@@ -66,8 +64,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-04 11:51:00
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:9sgL4BwRbPR5W2vWV2Q8YA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-05 09:14:39
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:BHjKn0PMTStBlH109YPV3w
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

@@ -126,7 +126,6 @@ CREATE TABLE parameters (
                       PRIMARY KEY,
     parameter         parameter_type NOT NULL UNIQUE,
 
-    description       TEXT NOT NULL,
     title             TEXT NOT NULL,
     label             TEXT NOT NULL,
     rgb_colour        CHAR(7)
