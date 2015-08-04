@@ -33,7 +33,7 @@ __PACKAGE__->add_columns(
     original      => { default_value => \"now()" },
   },
   "diary_note",
-  { data_type => "text", is_nullable => 0 },
+  { data_type => "text", is_nullable => 1 },
   "updated_on",
   {
     data_type     => "timestamp",
@@ -70,8 +70,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-07-29 11:59:28
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:iwFt/jjTyJNArlF4f5O/7A
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-13 10:47:52
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:dALBYG6zvRJDp1AcajFG8A
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

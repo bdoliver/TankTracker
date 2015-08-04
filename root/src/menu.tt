@@ -9,6 +9,8 @@
         [% END %]
         [% IF is_admin %]
         <li [% IF active_tab == 'admin'  %]class="active"[% END %]><a data-toggle="tab" data-target="#user_admin">Admin</a></li>
+        <li [% IF active_tab == 'params' %]class="active"[% END %]><a data-toggle="tab" data-target="#admin_parameters">Test Params</a></li>
+
         [% END %]
     </ul>
 </form>

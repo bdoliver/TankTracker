@@ -20,7 +20,7 @@ sub _tools :Private {
     $c->stash->{'tools_action'}   = $action;
     $c->stash->{'action_heading'} = q{Test Results - }.ucfirst($action);
 
-    $c->stash(template => qq{tank/watertest/tools/$action.tt});
+    $c->stash->{'template'} = qq{tank/watertest/tools/$action.tt};
 
     return;
 }
@@ -77,10 +77,6 @@ sub export :Chained('get_tank') PathPart('water_test/tools/export') Args(0) Form
 
     if ( $form->submitted_and_valid() ) {
         my $search = {};
-        my $order  = {
-            order_by   => [ qw(tank_id test_date) ],
-            no_deflate => 1, # we want the raw resultset for export
-        };
 
         my $export_file = q{water_tests};
 
@@ -90,8 +86,7 @@ sub export :Chained('get_tank') PathPart('water_test/tools/export') Args(0) Form
             ## other users.  Instead, we lookup all tanks owned by the
             ## current user.
 
-            $search->{'tank.owner_id'} = $c->user->user_id();
-            $order->{'join'} = 'tank';
+            $search->{'owner_id'} = $c->user->user_id();
 
             $export_file .= q{-all_tanks};
         }
@@ -128,9 +123,9 @@ sub export :Chained('get_tank') PathPart('water_test/tools/export') Args(0) Form
 
         $export_file =~ s{/}{}g;
 
-        my $tests = $c->model('WaterTest')->list($search, $order);
+        my $tests = $c->model('WaterTest')->export_tests($search);
 
-        $c->stash( columns      => [ $c->model('WaterTest')->columns() ],
+        $c->stash( columns      => $c->model('WaterTest')->export_column_names(),
                    cursor       => $tests->cursor(),
                    current_view => 'CSV',
                    filename     => "$export_file.csv",
@@ -141,8 +136,6 @@ sub export :Chained('get_tank') PathPart('water_test/tools/export') Args(0) Form
 sub _import_form :Private {
     my ($self, $c ) = @_;
 
-    my $tank_id = $c->stash->{'tank'}{'tank_id'};
-
     my $elements = [
         {
             name => 'import_file',
@@ -152,7 +145,12 @@ sub _import_form :Private {
                 'data-preview-file-type' => 'text',
                 'data-wrap-text-length' => 45,
             },
-            constraints => [ 'Required' ],
+            constraints => [
+                {
+                    type    => 'Required',
+                    message => 'No file selected for upload.',
+                },
+            ],
         },
         {
             type => 'Submit',
@@ -184,7 +182,7 @@ sub import :Chained('get_tank') PathPart('water_test/tools/import') Args(0) Form
                 die "Failed to copy '$file' to '$target': $!";
 
             try {
-                my $result = $c->model('WaterTest')->load_tests({
+                my $result = $c->model('WaterTest')->import_tests({
                     tank_id => $c->stash->{'tank'}{'tank_id'},
                     user_id => $c->user->user_id(),
                     fh      => $upload->decoded_fh(),

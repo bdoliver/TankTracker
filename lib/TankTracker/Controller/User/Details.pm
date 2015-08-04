@@ -167,58 +167,58 @@ sub _details :Private {
 
     push @$elements,
         @password_fields,
-        {
-            name  => 'dimension_units',
-            type  => 'Select',
-            empty_first       => 1,
-            empty_first_label => '- Units -',
-            options => [
-                [ 'mm'     => 'mm'     ],
-                [ 'cm'     => 'cm'     ],
-                [ 'm'      => 'm'      ],
-                [ 'inches' => 'inches' ],
-                [ 'feet'   => 'feet'   ],
-            ],
-            constraints => [
-                {
-                    type    => 'Required',
-                    message => 'You must select the units for the dimensions of your tank(s)',
-                },
-            ],
-        },
-        {
-            name  => 'capacity_units',
-            type  => 'Select',
-            empty_first       => 1,
-            empty_first_label => '- Units -',
-            options => [
-                [ 'litres'     => 'Litres'     ],
-                [ 'gallons'    => 'Gallons'    ],
-                [ 'us gallons' => 'US Gallons' ],
-            ],
-            constraints => [
-                {
-                    type    => 'Required',
-                    message => 'You must select the units for the capacity of your tank(s)',
-                },
-            ],
-        },
-        {
-            name  => 'temperature_scale',
-            type  => 'Select',
-            empty_first       => 1,
-            empty_first_label => '- Units -',
-            options => [
-                [ 'C' => 'Celsius'    ],
-                [ 'F' => 'Fahrenheit' ],
-            ],
-            constraints => [
-                {
-                    type    => 'Required',
-                    message => 'You must select the temperature scale for your tank(s) water tests',
-                },
-            ],
-        },
+#         {
+#             name  => 'dimension_units',
+#             type  => 'Select',
+#             empty_first       => 1,
+#             empty_first_label => '- Units -',
+#             options => [
+#                 [ 'mm'     => 'mm'     ],
+#                 [ 'cm'     => 'cm'     ],
+#                 [ 'm'      => 'm'      ],
+#                 [ 'inches' => 'inches' ],
+#                 [ 'feet'   => 'feet'   ],
+#             ],
+#             constraints => [
+#                 {
+#                     type    => 'Required',
+#                     message => 'You must select the units for the dimensions of your tank(s)',
+#                 },
+#             ],
+#         },
+#         {
+#             name  => 'capacity_units',
+#             type  => 'Select',
+#             empty_first       => 1,
+#             empty_first_label => '- Units -',
+#             options => [
+#                 [ 'litres'     => 'Litres'     ],
+#                 [ 'gallons'    => 'Gallons'    ],
+#                 [ 'us gallons' => 'US Gallons' ],
+#             ],
+#             constraints => [
+#                 {
+#                     type    => 'Required',
+#                     message => 'You must select the units for the capacity of your tank(s)',
+#                 },
+#             ],
+#         },
+#         {
+#             name  => 'temperature_scale',
+#             type  => 'Select',
+#             empty_first       => 1,
+#             empty_first_label => '- Units -',
+#             options => [
+#                 [ 'C' => 'Celsius'    ],
+#                 [ 'F' => 'Fahrenheit' ],
+#             ],
+#             constraints => [
+#                 {
+#                     type    => 'Required',
+#                     message => 'You must select the temperature scale for your tank(s) water tests',
+#                 },
+#             ],
+#         },
         {
             name => 'recs_per_page',
             type => 'Text',
@@ -265,8 +265,8 @@ sub add : Chained('base') :PathPart('add') Args(0) {
 sub edit : Chained('get_user') :PathPart('edit') Args(0) {
     my ( $self, $c ) = @_;
 
-    $c->stash->{tank_action}    = 'edit';
-    $c->stash->{action_heading} = 'Edit';
+    $c->stash->{'tank_action'}    = 'edit';
+    $c->stash->{'action_heading'} = 'Edit';
 
     $c->forward('details');
 
@@ -277,8 +277,8 @@ sub edit : Chained('get_user') :PathPart('edit') Args(0) {
 sub view : Chained('get_user') Args(0) {
     my ( $self, $c ) = @_;
 
-    $c->stash->{tank_action}    = 'view';
-    $c->stash->{action_heading} = 'Details';
+    $c->stash->{'tank_action'}    = 'view';
+    $c->stash->{'action_heading'} = 'Details';
 
     $c->forward('details');
 }
@@ -296,10 +296,8 @@ sub details :Args(0) FormMethod('_details') {
         # need to split preferences from user attributes
         my $prefs = {};
 
-        for my $pref ( qw(capacity_units
-                          dimension_units
-                          temperature_scale
-                          recs_per_page) ) {
+        # Currently there's only one user pref...
+        for my $pref ( qw(recs_per_page) ) {
             $prefs->{$pref} = delete $params->{$pref};
         }
 
@@ -334,20 +332,13 @@ sub details :Args(0) FormMethod('_details') {
     }
 
     if ( not $form->submitted() ) {
-       my $defaults = {};
+        my $prefs   = delete $c->stash->{'edit_user'}{'preferences'};
+           $prefs ||= { 'recs_per_page' => 10 };
 
-        if ( $c->stash->{'action_heading'} eq 'Add' ) {
-            $defaults = { recs_per_page => 10 };
-        }
-        else {
-            my $prefs = delete $c->stash->{'edit_user'}{'preferences'};
-            $defaults = {
-                %{ $c->stash->{'edit_user'} },
-                %{ $prefs },
-            };
-        }
-
-        $form->default_values($defaults);
+        $form->default_values({
+            %{ $c->stash->{'edit_user'} },
+            %{ $prefs },
+        });
     }
 
     $c->stash->{'action_heading'} = 'Details';

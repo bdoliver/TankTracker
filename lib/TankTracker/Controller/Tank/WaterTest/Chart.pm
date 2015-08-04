@@ -28,27 +28,35 @@ sub chart :Chained('get_tank') PathPart('water_test/chart') Args(0) {
 
     $c->stash->{'action_heading'} = 'Graph Test Results';
 
+    my $chart_cols = $c->model('WaterTest')->test_columns({
+        'tank_id' => $c->stash->{'tank'}{'tank_id'},
+        'chart'   => 1
+    });
+
+    # this gives us the tank's water test parameter IDs in their
+    # desired sequence:
+    my @cols = sort { ( ($a->{param_order}  || 0) <=> ($b->{param_order}  || 0) )
+                            ||
+                      ( ($a->{parameter_id} || 0) <=> ($b->{parameter_id} || 0) )
+               } values %{ $chart_cols };
+
+    $c->stash->{'chart_columns'} = \@cols;
     return;
 }
 
 sub chart_data :Chained('get_tank') PathPart('water_test/chart_data') Args(0) {
     my ($self, $c) = @_;
 
-    my $params = $c->request->body_params();
-
-    $c->stash->{'chart_data'} = [];
+    my $params = $c->request->body_data();
 
     # must have either start or end date requested, and at least one of
     # the result_* parameters must be true:
     if ( $params->{'edate'} or $params->{'sdate'} ) {
-        my @cols = grep  { $params->{$_}      }
-                   grep  { $_ =~ qr{^result_} }
-                   keys %{ $params            };
-
-        if ( @cols ) {
+        if ( my $parameter_ids = $params->{'parameter_id'} ) {
             my $search = {
-                'tank_id' => $c->stash->{'tank'}{'tank_id'},
-                '-and'    => [],
+                'tank_id'      => $c->stash->{'tank'}{'tank_id'},
+                'parameter_id' => { '-in' => $parameter_ids },
+                '-and'         => [],
             };
 
             if ( $params->{'edate'} ) {
@@ -60,20 +68,9 @@ sub chart_data :Chained('get_tank') PathPart('water_test/chart_data') Args(0) {
                     [ 'test_date' => { '>=', $params->{'sdate'} } ];
             }
 
-            # must always have the test_date (otherwise there's nothing
-            # to graph!)
-            push @cols, 'test_date';
-
-            if ( $params->{'show_notes'} ) {
-                push @cols, 'notes';  # user wants notes in the tooltips
-            }
-
             my $results = $c->model('WaterTest')->chart_data(
                 $search,
-                {
-                    columns  => \@cols,
-                    order_by => { '-asc' => 'test_date' },
-                },
+                $params->{'show_notes'},
             );
 
             $c->stash->{'chart_data'} = $results;

@@ -67,7 +67,7 @@ sub _select_form :Private {
                 {
                     type    => 'Required',
                     when    => { field => 'tank_action',
-                                 value => 'add',
+                                 values => [ 'add/fresh', 'add/salt' ],
                                  not   => 1,
                                },
                     message => 'You must select a tank.',
@@ -77,13 +77,33 @@ sub _select_form :Private {
         {
             name    => 'tank_action',
             type    => 'Radiogroup',
-            default => $c->session->{tank_action},
+            default => $c->session->{'tank_action'},
             options => [
                 [ 'water_test/list' => 'Water tests' ],
                 [ 'view'            => 'View / edit tank details' ],
-                [ 'add'             => 'Add a new tank' ],
+                [ 'add/salt'        => 'Add a new saltwater tank' ],
+                [ 'add/fresh'       => 'Add a new freshwater tank' ],
                 [ 'inventory/list'  => 'Inventory'   ],
                 [ 'diary/list'      => 'Diary'       ],
+            ],
+            constraints => [
+                'AutoSet',
+                {
+                    type    => 'Required',
+                    message => 'You must select an action.',
+                },
+            ],
+        },
+    }
+    else {
+        push @elements,
+        {
+            name    => 'tank_action',
+            type    => 'Radiogroup',
+            default => $c->session->{'tank_action'},
+            options => [
+                [ 'add/salt'        => 'Add a new saltwater tank' ],
+                [ 'add/fresh'       => 'Add a new freshwater tank' ],
             ],
             constraints => [
                 'AutoSet',
@@ -109,10 +129,10 @@ sub select : Chained('base') :PathPart('') Args(0) FormMethod('_select_form') {
 
         # remember the currently-selected tank & action:
         $c->session->{tank_id}     = $tank_id;
-        $c->session->{tank_action} = $action if $action ne 'add';
+        $c->session->{tank_action} = $action if $action !~ qr{^add};
 
         my $path  = q{/tank/};
-           $path .= "$tank_id/" if $action ne 'add';
+           $path .= "$tank_id/" if $action !~ qr{^add};
            $path .= $action;
 
         $c->response->redirect($c->uri_for($path));
@@ -125,11 +145,15 @@ sub select : Chained('base') :PathPart('') Args(0) FormMethod('_select_form') {
     return;
 }
 
-sub add : Chained('base') :PathPart('add') Args(0) {
-    my ( $self, $c ) = @_;
+sub add : Chained('base') :PathPart('add') Args(1) {
+    my ( $self, $c, $water_type ) = @_;
 
-    $c->stash->{tank_action}    = 'add';
-    $c->stash->{action_heading} = 'Add Tank';
+    $c->stash->{'tank_action'}    = 'add';
+    $c->stash->{'action_heading'} = sprintf(
+                                        'Add %s Water Tank',
+                                        ucfirst($water_type)
+                                    );
+    $c->stash->{'water_type'}     = $water_type;
 
     $c->forward('details');
 
@@ -139,8 +163,8 @@ sub add : Chained('base') :PathPart('add') Args(0) {
 sub edit : Chained('get_tank') :PathPart('edit') Args(0) {
     my ( $self, $c ) = @_;
 
-    $c->stash->{tank_action}    = 'edit';
-    $c->stash->{action_heading} = 'Edit';
+    $c->stash->{'tank_action'}    = 'edit';
+    $c->stash->{'action_heading'} = 'Edit';
 
     $c->forward('details');
 
@@ -150,8 +174,8 @@ sub edit : Chained('get_tank') :PathPart('edit') Args(0) {
 sub view : Chained('get_tank') Args(0) {
     my ( $self, $c ) = @_;
 
-    $c->stash->{tank_action}    = 'view';
-    $c->stash->{action_heading} = 'Details';
+    $c->stash->{'tank_action'}    = 'view';
+    $c->stash->{'action_heading'} = 'Details';
 
     $c->forward('details');
 }
@@ -168,38 +192,133 @@ sub _details_form : Private {
         {
             name  => 'tank_name',
             type  => 'Text',
-            constraints => [ 'Required' ],
+            constraints => [
+                {
+                    type    => 'Required',
+                    message => q{Tank name cannot be blank.},
+                },
+                {
+                    type    => 'Printable',
+                    message => q{Tank name must contain only printable characters.},
+                },
+            ],
         },
         {
             name  => 'water_type',
-            type  => 'Select',
-            empty_first       => 1,
-            empty_first_label => '- Water type -',
+            type  => 'Hidden',
+            value => $c->stash->{'water_type'},
+        },
+        {
+            name => 'capacity_units',
+            type => 'Select',
+            empty_first => 1,
+            empty_first_label => '- Select -',
             options => [
-                [ 'salt'  => 'Salt Water'  ],
-                [ 'fresh' => 'Fresh Water' ],
+                [ 'litres'      => 'L'       ],
+                [ 'gallons'     => 'Gal'     ],
+                [ 'us gallons'  => 'US Gal'  ],
             ],
-            constraints => [ 'Required' ],
+            constraints => [
+                {
+                    type    => 'Required',
+                    message => 'You must select capacity units',
+                },
+            ],
         },
         {
             name  => 'capacity',
             type  => 'Text',
-            constraints => [ 'Number' ],
+            constraints => [
+                {
+                    type    => 'Number',
+                    message => q{Capacity must be a number.},
+                },
+                {
+                    type    => 'MinRange',
+                    minimum => 0,
+                    message => q{Capacity must be zero or greater.},
+                },
+            ],
+        },
+        {
+            name => 'dimension_units',
+            type => 'Select',
+            empty_first => 1,
+            empty_first_label => '- Select -',
+            options => [
+                [ 'mm'     => 'mm'     ],
+                [ 'cm'     => 'cm'     ],
+                [ 'm'      => 'm'      ],
+                [ 'inches' => 'inches' ],
+                [ 'feet'   => 'feet'   ],
+            ],
+            constraints => [
+                {
+                    type    => 'Required',
+                    message => 'You must select dimension units',
+                },
+            ],
         },
         {
             name  => 'length',
             type  => 'Text',
-            constraints => [ 'Number' ],
+            constraints => [
+                {
+                    type    => 'Length',
+                    message => q{Length must be a number.},
+                },
+                {
+                    type    => 'MinRange',
+                    minimum => 0,
+                    message => q{Length must be zero or greater.},
+                },
+            ],
         },
         {
             name  => 'width',
             type  => 'Text',
-            constraints => [ 'Number' ],
+            constraints => [
+                {
+                    type    => 'Number',
+                    message => q{Width must be a number.},
+                },
+                {
+                    type    => 'MinRange',
+                    minimum => 0,
+                    message => q{Width must be zero or greater.},
+                },
+            ],
         },
         {
             name  => 'depth',
             type  => 'Text',
-            constraints => [ 'Number' ],
+            constraints => [
+                {
+                    type    => 'Number',
+                    message => q{Depth must be a number.},
+                },
+                {
+                    type    => 'MinRange',
+                    minimum => 0,
+                    message => q{Depth must be zero or greater.},
+                },
+            ],
+        },
+        {
+            name    => 'temperature_scale',
+            type    => 'Radiogroup',
+            label_attributes => { 'class' => 'radio-inline' },
+            options => [
+                [ 'C' => 'Celsius'    ],
+                [ 'F' => 'Fahrenheit' ],
+            ],
+            constraints => [
+                'AutoSet',
+                {
+                    type    => 'Required',
+                    message => 'You must select a temperature scale.',
+                },
+            ],
         },
         {
             name    => 'active',
@@ -213,16 +332,21 @@ sub _details_form : Private {
                 'AutoSet',
                 {
                     type    => 'Required',
-                    message => 'You must select an option.',
+                    message => 'Active? You must select an option (yes/no).',
                 },
             ],
         },
         {
             name => 'notes',
             type => 'Textarea',
-            rows => 15,
+            rows => 20,
             cols => 50,
-            constraints => [ 'ASCII' ],
+            constraints => [
+                {
+                    type    => 'ASCII',
+                    message => q{Notes must contain only ASCII characters.},
+                },
+            ],
             filter  => [
                 'TrimEdges',
                 'HTMLScrubber',
@@ -234,6 +358,90 @@ sub _details_form : Private {
             ],
         },
     ];
+
+    my $test_params = $c->stash->{'tank'}{'test_params'};
+
+    if ( ! $test_params or ! @{ $test_params } ) {
+        # must be adding a new tank - fetch some defaults:
+        my $type = $c->stash->{'water_type'}.'_water';
+        $test_params = $c->model('WaterTestParameter')->list(
+            {
+                $type => 1
+            },
+            {
+                'order_by' => { '-asc' => [ qw( parameter_id ) ] },
+            },
+        );
+
+        # set the active & show_chart flags to default for all params:
+        map { $_->{'active'} = $_->{'chart'} = 1 } @{ $test_params };
+
+        # since we have no tank with test params, put it on the stash
+        # so we can populate the form defaults from it:
+        $c->stash->{'tank'}{'test_params'} = $test_params;
+    }
+
+    my @wtp_id = ();
+
+    for my $param ( @{ $test_params } ) {
+       my $id = $param->{'parameter_id'};
+
+        push @wtp_id, $id;
+
+        push @$elements,
+        {
+            name        => "wtp_${id}_parameter_id",
+            type        => 'Hidden',
+        },
+        {
+            name        => "wtp_${id}_parameter",
+            type        => 'Hidden',
+        },
+        {
+            name        => "wtp_${id}_title",
+            type        => 'Text',
+            constraints => [
+                {
+                    type    => 'Required',
+                    message => qq{Title is required for parameter id #$id},
+                },
+            ],
+        },
+        {
+            name        => "wtp_${id}_label",
+            type        => 'Text',
+            constraints => [
+                {
+                    type    => 'Required',
+                    message => qq{Label is required for parameter id #$id},
+                },
+            ],
+        },
+        {
+            name        => "wtp_${id}_rgb_colour",
+            type        => 'Text',
+            constraints => [
+                {
+                    type    => 'Required',
+                    message => qq{RGB colour is required for parameter id #$id},
+                },
+                {
+                    type    => 'Regex',
+                    regex   => '^#[\da-fA-F]{6}$',
+                    message => qq{RGB colour for parameter id #id must be of the form '#ffffff'},
+                },
+            ],
+        },
+        {
+            name        => "wtp_${id}_active",
+            type        => 'Checkbox',
+        },
+        {
+            name        => "wtp_${id}_chart",
+            type        => 'Checkbox',
+        };
+    }
+    $c->stash->{'wtp_id'} = \@wtp_id;
 
     return { 'elements' => $elements };
 }
@@ -249,25 +457,35 @@ sub details : Chained('get_tank') Args(0) FormMethod('_details_form') {
         $params->{'owner_id'} = $c->user->user_id();
         delete $params->{'submit'};
 
+        my %wtp_fields = map  { $_ => delete $params->{$_} }
+                         grep { $_ =~ qr{^wtp_} }
+                         keys %$params;
+
         try {
             my ( $msg, $tank );
 
             my $tank_id = delete $params->{'tank_id'};
+
+            ## prepare the water test parameter fields for update:
+            my $wtp_fields = $c->forward(
+                '_prepare_water_test_params',
+                [ \%wtp_fields ]
+            );
 
             if ( $tank_id ) {
                 ## Don't propagate current user_id to the tank's owner!
                 ## FIXME: look at implementing a 'change tank owner'?
                 delete $params->{'owner_id'};
 
-                $tank = $c->model('Tank')->update($tank_id, $params);
+                $tank = $c->model('Tank')->update($tank_id, $params, $wtp_fields);
                 $msg  = q{Updated tank details.};
             }
             else {
-                $tank = $c->model('Tank')->add($params);
+                $tank = $c->model('Tank')->add($params, $wtp_fields);
                 $msg = q{Created new tank.};
             }
 
-            $c->stash->{message} = $msg;
+            $c->stash->{'message'} = $msg;
 
             # Edit complete - send user back to 'view' mode...
             my $path = qq{/tank/$tank->{'tank_id'}/view};
@@ -282,16 +500,42 @@ sub details : Chained('get_tank') Args(0) FormMethod('_details_form') {
         };
     }
 
-    ## FIXME: make sure this doesn't clobber newly-entered values
-    ##        if/when form redisplay
-#     if ( not $form->submitted() and my $tank = $c->stash->{'tank'} ) {
-#         $form->default_values($tank);
-#     }
-    $form->default_values($c->stash->{'tank'});
+    my %defaults = %{ $c->stash->{'tank'} };
 
-    $c->stash(template => 'tank/details.tt');
+    for my $param ( @{ delete $defaults{'test_params'} } ) {
+       my $id = $param->{'parameter_id'};
+       for my $key ( keys %{ $param } ) {
+           $defaults{'wtp_'.$id.'_'.$key} = $param->{$key};
+       }
+    }
+
+    $form->default_values(\%defaults);
+
+    $c->stash->{'template'} = 'tank/details.tt';
 
     return;
+}
+
+## Massages the water test parameter fields into a form suitable
+## for updating into the database:
+sub _prepare_water_test_params :Private {
+    my ( $self, $c, $fields ) = @_;
+
+    my %params = ();
+
+    my $field_rx = qr{ ^wtp_(\d+)_(.+)$ }xi;
+
+    for my $field ( keys %{ $fields } ) {
+        my ( $id, $param ) = ( $field =~ $field_rx );
+
+        $params{$id} ||= {
+            'parameter_id' => $id,
+        };
+
+        $params{$id}{$param} = $fields->{$field};
+    }
+
+    return [ map { $params{$_} } sort { $a <=> $b } keys %params ];
 }
 
 =encoding utf8

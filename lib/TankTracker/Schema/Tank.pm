@@ -33,14 +33,38 @@ __PACKAGE__->add_columns(
   { data_type => "text", is_nullable => 0 },
   "notes",
   { data_type => "text", is_nullable => 1 },
+  "capacity_units",
+  {
+    data_type => "enum",
+    extra => {
+      custom_type_name => "capacity_unit",
+      list => ["litres", "gallons", "us gallons"],
+    },
+    is_nullable => 0,
+  },
   "capacity",
   { data_type => "numeric", default_value => 0, is_nullable => 1 },
+  "dimension_units",
+  {
+    data_type => "enum",
+    extra => {
+      custom_type_name => "dimension_unit",
+      list => ["mm", "cm", "m", "inches", "feet"],
+    },
+    is_nullable => 0,
+  },
   "length",
   { data_type => "numeric", default_value => 0, is_nullable => 1 },
   "width",
   { data_type => "numeric", default_value => 0, is_nullable => 1 },
   "depth",
   { data_type => "numeric", default_value => 0, is_nullable => 1 },
+  "temperature_scale",
+  {
+    data_type => "enum",
+    extra => { custom_type_name => "temperature_scale", list => ["C", "F"] },
+    is_nullable => 0,
+  },
   "active",
   { data_type => "boolean", default_value => \"true", is_nullable => 1 },
   "created_on",
@@ -84,15 +108,15 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 __PACKAGE__->has_many(
-  "water_tests",
-  "TankTracker::Schema::WaterTest",
+  "tank_water_test_parameters",
+  "TankTracker::Schema::TankWaterTestParameter",
   { "foreign.tank_id" => "self.tank_id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-07-29 11:57:47
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Hx/VUi3GW3OlanFb9qnwsQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-11 13:36:47
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:TerVWGn4Ft2Ycd9ZKkXcvw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

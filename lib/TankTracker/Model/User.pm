@@ -18,14 +18,13 @@ has 'rs_name' => (
 sub get {
     my ( $self, $user_id ) = @_;
 
-#     my $user_obj = $self->resultset->find($user_id, { 'prefetch' => 'preference' });
-    my $user_obj = $self->resultset->find($user_id);
+    my $user_obj = $self->resultset->find($user_id, { 'prefetch' => 'user_preference' });
 
-#     my $prefs = $self->deflate($user_obj->preference());
+    my $prefs = $self->deflate($user_obj->user_preference());
     my $user  = $self->deflate($user_obj);
 
     delete $user->{'password'};
-my $prefs;
+
     $user->{'preferences'} = $prefs;
 
     return $user;
@@ -97,7 +96,7 @@ sub update {
 
         $prefs->{'user_id'} = $user->user_id();
 
-        $self->schema->resultset('Preference')->update_or_create($prefs);
+        $self->schema->resultset('UserPreference')->update_or_create($prefs);
     }
     catch {
         $self->rollback();

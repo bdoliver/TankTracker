@@ -86,31 +86,6 @@
                 <div class="col-md-6">
                     <div class="row">
                         <div class="col-md-3">
-                            <label for="dimension_units">Dimension units</label>
-                        </div>
-                        <div class="col-md-3 form-group">
-                            [% form.get_element('dimension_units') %]
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-3">
-                            <label for="capacity_units">Capacity units</label>
-                        </div>
-                        <div class="col-md-3 form-group">
-                            [% form.get_element('capacity_units') %]
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-3">
-                            <label for="temperature_scale">Temp. scale</label>
-                        </div>
-                        <div class="col-md-3 form-group">
-                            [% form.get_element('temperature_scale') %]
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-3">
                             <label for="recs_per_page">Recs per page</label>
                         </div>
                         <div class="col-md-3 form-group number">

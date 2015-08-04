@@ -18,106 +18,44 @@ has 'rs_name' => (
     default => 'WaterTest',
 );
 
-# $WaterTest_attributes:
-#      label + color: used by jquery.flot when charting test results
-#      title: used when rendering the test results table
-our $WaterTest_attributes = Hash::Ordered->new(
-    test_id => {
-        title => 'Test Id',
-    },
-    tank_id => {
-        title => 'Tank Id',
-        hide  => 1, # don't show in list table
-    },
-    user_id => {
-        title => 'User Id',
-        hide  => 1, # don't show in list table
-    },
-    test_date => {
-        title => 'Test Date',
-    },
-    temperature => {
-        title => 'Temperature',
-        label => 'Temperature',
-        color => '#FFFFFF',
-    },
-    water_change => {
-        title => 'Water Change',
-    },
-# Notes will require some client-side javascript to make available:
-#     notes => {
-#         title => 'Notes',
-#     },
-    result_salinity   => {
-        title => 'Salinity',
-        label => 'Salinity',
-        color => '#7633BD',
-    },
-    result_ph => {
-        title => 'Ph',
-        label => 'Ph',
-        color => '#A23C3C',
-    },
-    result_ammonia => {
-        title => 'Ammonia<br />(NH<sub>4</sub>)',
-        label => 'NH<sub>4</sub>',
-        color => '#AFD8F8',
-    },
-    result_nitrite => {
-        title => 'Nitrite<br />NO<sub>2</sub>)',
-        label => 'NO<sub>2</sub>',
-        color => '#8CACC6',
-    },
-    result_nitrate => {
-        title => 'Nitrate<br />(NO<sub>3</sub>)',
-        label => 'NO<sub>3</sub>',
-        color => '#BD9B33',
-    },
-    result_calcium => {
-        label => 'Ca',
-        color => '#CB4B4B',
-    },
-    result_phosphate => {
-        title => 'Phosphate<br />PO<sub>4</sub>)',
-        label => 'PO<sub>4</sub>',
-        color => '#3D853D',
-    },
-    result_magnesium => {
-        title => 'Magnesium<br />(Mg)',
-        label => 'Mg',
-        color => '#9440ED',
-    },
-    result_kh => {
-        title => 'Carbonate<br />Hardness<br />(&deg;KH)',
-        label => '&deg;KH',
-        color => '#4DA74D',
-    },
-    result_alkalinity => {
-        title => 'Alkalinity',
-        label => 'Alkalinity',
-        color => '#EDC240',
-    },
-);
-
-sub fields {
-    return [ $WaterTest_attributes->keys() ];
-}
-
-sub attributes {
-    return { $WaterTest_attributes->as_list() };
-}
-
 sub add {
     my ( $self, $params ) = @_;
 
-    my $test = $self->resultset->create($params);
+    my $details = delete $params->{'details'} or
+        die qq{WaterTest::add() requires hashref with 'details' key\n};
+    my $results = delete $params->{'results'} or
+        die qq{WaterTest::add() requires hashref with 'results' key\n};
 
-    $self->add_diary({
-        'tank_id'    => $test->tank_id(),
-        'user_id'    => $test->user_id(),
-        'diary_note' => 'Added water test results',
-        'test_id'    => $test->test_id(),
-    });
+    my $test;
+
+    try {
+        my $test_id;
+        my $notes = delete $details->{'notes'};
+
+        $self->schema->txn_do(
+            sub {
+                $test    = $self->resultset->create($details);
+                $test_id = $test->test_id();
+
+                my $rs = $self->schema->resultset('WaterTestResult');
+
+                for my $result ( @{ $results } ) {
+                    $result->{'test_id'} = $test_id;
+                    $rs->create($result);
+                }
+            }
+        );
+
+        $self->add_diary({
+            'tank_id'    => $results->[0]{'tank_id'},
+            'user_id'    => $test->user_id(),
+            'diary_note' => $notes || q{Recorded water test results},
+            'test_id'    => $test->test_id(),
+        });
+    }
+    catch {
+        die $_;
+    };
 
     return $self->deflate($test);
 }
@@ -125,29 +63,203 @@ sub add {
 sub update {
     my ( $self, $test_id, $params ) = @_;
 
-    my $test = $self->resultset->find($test_id);
+    my $details = delete $params->{'details'} or
+        die qq{WaterTest::update() requires hashref with 'details' key\n};
+    my $results = delete $params->{'results'} or
+        die qq{WaterTest::update() requires hashref with 'results' key\n};
 
-    $test->update($params);
+    my $test;
 
-    $self->add_diary({
-        'tank_id'    => $test->tank_id(),
-        'user_id'    => $params->{'user_id'},
-        'diary_note' => 'Updated water test results',
-        'test_id'    => $test_id,
-    });
+    try {
+        my $notes = delete $details->{'notes'};
 
-    return $self->deflate($test);
+        my $tank_id;
+
+        $self->schema->txn_do(
+            sub {
+                $test = $self->resultset->find($test_id);
+
+                $test->update($details);
+
+                my $rs = $self->schema->resultset('WaterTestResult');
+
+                my @result_ids = grep { $_->{'test_result_id'} } @{ $results };
+
+                if ( @result_ids == @{ $results } ) {
+                    ## all results have an existing test_result_id
+                    ## so we can update the records:
+                    for my $result ( @{ $results } ) {
+                        my $test_rec = $rs->find({
+                            'test_result_id' => $result->{'test_result_id'},
+                        }) or
+                            die "Cannot find test_result_id #$result->{'test_result_id'}\n";
+
+                        # sanity check:
+                        $test_rec->tank_id() == $result->{'tank_id'} or
+                            die "test_result_id #$result->{'test_result_id'} does not belong to current tank!\n";
+                        $test_rec->test_id() == $result->{'test_id'} or
+                            die "test_result_id #$result->{'test_result_id'} does not belong to current test!\n";
+
+                        $test_rec->test_result($result->{'test_result'});
+
+                        # only save if something has changed...
+                        $test_rec->update() if $test_rec->is_changed();
+
+                        # keep track of which tank these results are for so we
+                        # can do a diary note for the update
+                        $tank_id ||= $result->{'tank_id'};
+                    }
+                }
+                else {
+                    ## the list of test results don't all have existing
+                    ## test_result_id to match, so delete existing records
+                    ## & insert new (this will likely be the case when
+                    ## using the import facility):
+                    $rs->search({'test_id' => $test_id})->delete();
+                    for my $result ( @{ $results } ) {
+                        $result->{'test_id'} = $test_id;
+                        $rs->create($result);
+                    }
+                }
+            }
+        );
+
+        $self->add_diary({
+            'tank_id'    => $tank_id,
+            'user_id'    => $details->{'user_id'},
+            'diary_note' => $notes || 'Updated water test results',
+            'test_id'    => $test_id,
+        });
+    }
+    catch {
+        die $_;
+    };
+
+    return 1;
 }
 
-sub _get_headings {
+sub get {
+    my ( $self, $test_id ) = @_;
+
+    my ( $rec, undef ) = @{ $self->list({'me.test_id' => $test_id}) };
+
+    return undef if ( ! $rec or ! @$rec );
+
+    my $test = $rec->[0];
+
+    ## Munge test into something suitable for providing the form default
+    ## values:
+    my $results = delete $test->{'water_test_results'} || [];
+
+    for my $result ( @{ $results } ) {
+        my $param_id = $result->{'parameter_id'};
+
+        $test->{'tank_id'}             ||= $result->{'tank_id'};
+        $test->{"test_result_$param_id"} = $result->{'test_result_id'};
+        $test->{"parameter_$param_id"}   = $result->{'test_result'};
+    }
+
+    return $test;
+}
+
+sub _list_args {
+    my ( $self, $search, $args ) = @_;
+
+    # in case we get passed nothing, we will attempt to return
+    # sane stuffs...
+    $search ||= {};
+    $args   ||= {};
+
+    # tank_id & parameter are actually on the water_test_results record,
+    # so adjust search params accordingly:
+    for my $col ( qw(tank_id parameter_id) ) {
+        if ( my $attr = delete $search->{$col} ) {
+            $search->{"water_test_results.$col"} = $attr;
+        }
+    }
+
+    $args->{'prefetch'} ||= [
+        { 'water_test_results' => 'tank_water_test_parameter' },
+        'diaries',
+    ];
+
+    ## Ensure results are orderd by param_order / param_id.
+    my $order_by = delete $args->{'order_by'};
+
+    if ( ! $order_by or ref($order_by) eq 'HASH' ) {
+        $order_by = [ $order_by ];
+    }
+
+    # need to ensure the results are in the correct order:
+    push @{ $order_by },
+        { '-asc'  =>
+            [
+                'tank_water_test_parameter.param_order',
+                'tank_water_test_parameter.parameter_id'
+            ]
+        };
+
+    $args->{'order_by'} = $order_by;
+
+    return ( $search, $args );
+}
+
+## We override the Base class' list() method because we need to munge
+## the test results into something more useful. It also saves us from
+## having to have the ugly search criteria for tank_id (which is on the
+## water_test_result record NOT the water_test record!); AND the ugly
+## prefetch crap we need (to make sure we get all the col headings & notes)
+## all jammed into the caller's arg list.
+sub list {
+    my ( $self, $search, $args ) = @_;
+
+    ( $search, $args ) = $self->_list_args($search, $args);
+
+    if ( $args->{'no_deflate'} ) {
+        return $self->SUPER::list($search,$args);
+    }
+
+    my $has_pager = $args->{'page'} || 0;
+
+    my $list = $self->SUPER::list($search,$args);
+
+    my ( $rows, $pager );
+
+    if ( $has_pager ) {
+        ( $rows, $pager ) = @{ $list };
+    }
+    else {
+        $rows = $list;
+    }
+
+    ## When list() is called by get() there will only be one row
+    ## returned as hashref instead of an arrayref (of one hashref):
+    $rows = [ $rows ] if ref($rows) eq 'HASH';
+
+    for my $row ( @{ $rows } ) {
+        for my $result ( @{ $row->{'water_test_results'} } ) {
+            my $params = delete $result->{'tank_water_test_parameter'};
+
+            $result = {
+                %{ $result },
+                %{ $params },
+            };
+        }
+    }
+
+    return $has_pager ? [ $rows, $pager ] : $rows;
+}
+
+sub _get_import_headings {
     my ( $self, $row ) = @_;
 
-    my @cols = $self->columns();
+    # import mirrors export:
+    my $cols = $self->export_column_names();
 
     my ( @headings, @errors );
 
     for my $hdg ( @{ $row } ) {
-        if ( grep { lc $hdg eq $_ } @cols ) {
+        if ( grep { lc $hdg eq $_ } @{ $cols } ) {
             push @headings, $hdg;
         }
         else {
@@ -157,49 +269,57 @@ sub _get_headings {
 
     die "Invalid column names: ".join(", ", @errors) if @errors;
 
-    # make sure we have at least date + 1 result column:
-    die "No 'test_date' column in upload"
-        if not grep { $_ eq 'test_date' } @headings;
+    # check for mandatory columns:
+    for my $hdg ( qw( test_date parameter test_result ) ) {
+        if ( not grep { $_ eq $hdg } @headings ) {
+            push @errors, $hdg;
+        }
+    }
 
-    die "Need at least one result_* column in upload"
-        if not grep { $_ =~ qr{ \A result_ }msix } @headings;
-
-    ## FIXME: should also check for duplicate columns?
+    die "Missing mandatory columns in import:".join(", ", @errors) if @errors;
 
     return \@headings;
 }
 
-## NB: load_tests() is expected to be called within an eval{} or
+## NB: import_tests() is expected to be called within an eval{} or
 ##     try/catch block in order to simplify error reporting to the
 ##     caller.
-sub load_tests {
+sub import_tests {
     my ( $self, $args ) = @_;
 
     for my $arg ( qw( tank_id user_id fh ) ) {
         $args->{$arg} or
-        die qq{load_tests() missing '$arg' parameter!};
+        die qq{import_tests() missing '$arg' parameter!};
     }
 
     my $fh      = $args->{'fh'};
     my $user_id = $args->{'user_id'};
-    my $current_tank_id = $args->{'tank_id'};
+    my $tank_id = $args->{'tank_id'};
 
     my $csv = Text::CSV_XS->new({ binary => 1, empty_is_undef => 1});
 
     # first line s/be headings:
-    my $headings = $self->_get_headings($csv->getline($fh));
+    my $headings = $self->_get_import_headings($csv->getline($fh));
 
     $csv->column_names($headings);
 
     my $rec_no;
 
-    $self->txn_begin();
+    try {
+        $self->txn_begin();
 
-    eval {
+        my $current_test    = {};
+        my $tank_parameters = {};
+        my $current_tank_id;
+
         ## FIXME: should we set an upper limit on records loaded?
         CSV: while ( my $row = $csv->getline_hr($fh) ) {
 
             $rec_no = $csv->record_number();
+
+            # test records default to currently-selected tank if not
+            # otherwise provided in the import record:
+            $row->{'tank_id'} ||= $tank_id;
 
             try {
                 my $dt = DateTime::Format::Pg->parse_datetime($row->{'test_date'});
@@ -208,118 +328,157 @@ sub load_tests {
                 die "Record #$rec_no: has invalid test_date.";
             };
 
-            if ( my $test_id = delete $row->{'test_id'} ) {
-                my $test = $self->get($test_id);
-
-                $test or
-                    die "Record #$rec_no: test ID $test_id not found in database.";
-
-                my $tank_id = delete $row->{'tank_id'};
-
-                if ( $tank_id ) {
-                    ( $tank_id == $test->{'tank_id'} ) or
-                        die "Record #$rec_no: test with ID $test_id belongs to different tank in database.";
-
-                    my $tank = $self->schema->resultset('Tank')->find($tank_id);
-
-                    ( $user_id == $tank->owner_id() ) or
-                        die "Record #$rec_no: you do not own the tank for test ID $test_id.";
-                }
-
-                $self->update($test_id, $row) or
-                    die "Record #$rec_no: failed to update test ID $test_id.";
-
-                next CSV;
+            if ( $row->{'test_id'} and
+                 $row->{'test_id'} != $current_test->{'test_id'} ) {
+                # updating an existing test record:
+                $self->update($current_test);
+                delete $current_test->{'details'};
+            }
+            elsif ( $row->{'test_date'} ne $current_test->{'test_date'} ) {
+                # adding a new test record:
+                $self->add($current_test);
+                delete $current_test->{'details'};
             }
 
-            ## If the test is not for a specific tank, then assume the currently
-            ## selected tank:
+            if ( ! $tank_parameters or ( $row->{'tank_id'} != $current_tank_id ) ) {
+                # get parameters for current tank:
+                $current_tank_id = $row->{'tank_id'};
+                $tank_parameters = {};
+                my $param = $self->schema->resultset('WaterTestParameterView')
+                                 ->search({'tank_id' => $row->{'tank_id'}});
+                while ( my $p = $param->next() ) {
+                    $tank_parameters->{$p->parameter()} = $p->parameter_id();
+                }
+            }
 
-            my $tank_id = delete $row->{'tank_id'} || $current_tank_id;
+            if ( ! $current_test->{'details'} ) {
+               $current_test->{'details'} = {
+                    'test_id'   => $row->{'test_id'},
+                    'test_date' => $row->{'test_date'},
+                    'user_id'   => $row->{'user_id'} || $user_id,
+                    'notes'     => 'Imported water test',
+                };
+                $current_test->{'results'} = [],
+            }
 
-            my $tank = $self->schema->resultset('Tank')->find($tank_id);
-
-            $tank or
-                die "Record #$rec_no: tank #$tank_id not found in database.";
-
-            ( $user_id == $tank->owner_id() ) or
-                die "Record #$rec_no: you do not own tank #$tank_id.";
-
-            # make sure the row has a valid tank_id
-            $row->{'tank_id'} = $tank_id;
-            $row->{'user_id'} = $user_id;
-
-            $self->add($row) or
-                die  "record #$rec_no: failed to import test results.";
+            push @{ $current_test->{'results'} },
+                {
+                    'tank_id'      => $row->{'tank_id'},
+                    'test_id'      => $row->{'test_id'},
+                    'parameter_id' => $tank_parameters->{$row->{'parameter'}},
+                    'test_result'  => $row->{'test_result'},
+                };
         }
+
+        # flush remaining record to DB:
+        if ( $current_test->{'test_id'} ) {
+             # updating an existing test record:
+             $self->update($current_test);
+        }
+        else {
+            # adding a new test record:
+            $self->add($current_test);
+        }
+
+        $self->txn_commit();
+    }
+    catch {
+        $self->rollback();
+        die $_;
     };
 
-    if ( my $error = $@ ) {
-        $self->rollback();
-        die $error;
-    }
-
-    $self->txn_commit();
-
     return "Imported $rec_no test records.";
+}
+
+sub export_column_names {
+    return [ qw(
+            tank_id
+            tank_name
+            owner_id
+            owner_first_name
+            owner_last_name
+            test_id
+            test_date
+            user_id
+            tester_first_name
+            tester_last_name
+            parameter
+            test_result
+        ) ];
+}
+
+sub export_tests {
+    my ( $self, $search ) = @_;
+
+    my $args = {
+        order_by => { '-asc' => [ qw(tank_id test_date) ] },
+        columns  => $self->export_column_names(),
+    };
+
+    return $self->schema->resultset('TankWaterTestResultView')->search(
+        $search,
+        $args,
+    );
 }
 
 ## ============================================================================
 ## The following methods are exclusively used when generating test result data
 ## suitable for graphing by jquery.flot:
 ## -------------------------------------
-sub chart_columns {
-    return [ grep { $_ =~ qr{^result_} } $WaterTest_attributes->keys() ];
+## Return the active list of columns for water tests or charting:
+sub test_columns {
+    my ( $self, $search ) = @_;
+
+
+    my $cols = $self->schema->resultset('WaterTestParameterView')->search(
+        $search,
+        {
+            order_by => {
+                '-asc' => [ qw( param_order parameter_id ) ],
+            },
+        },
+    );
+
+    $cols->result_class('DBIx::Class::ResultClass::HashRefInflator');
+    my @cols = $cols->all();
+
+    return { map { $_->{'parameter_id'} => $_ } @cols };
 }
 
-sub chart_legend {
-    my ( $self, $col ) = @_;
-
-    $col or die "chart_legend() missing argument!";
-
-    my $legend = $WaterTest_attributes->get($col);
-
-    return { map { $_ => $legend->{$_} } (qw(label color)) };
-}
-
+## chart_data() is requested via callback from the generateChart() javascript
+## function which is attached to the checkbox change handlers on the chart
+## page (refer TankTrackerChart.js)
 sub chart_data {
-    my ( $self, @args ) = @_;
+    my ( $self, $search, $show_notes ) = @_;
 
-    # chart_data() is always passed an attributes hashref,
-    # so the following is safe.  We don't want to deflate
-    # the resultset into a hashref.  We need the test_date
-    # as an inflated DateTime object so that we can get its
-    # epoch seconds (required by jquery.flot's time series):
-    $args[1]{'no_deflate'} = 1;
-
-    my $tests = $self->list(@args);
+    my $tests = $self->list(
+        $search,
+        {
+            # NB: jquery.flot's time series requires the test_date to
+            # be in epoch milliseconds, so add a column to the search
+            # query to calculate the value.  The scalarref is required
+            # otherwise DBIx thinks it is a column name & prepends 'me.'
+            # to it!
+            '+select'  => [ \'extract(epoch from test_date) * 1000' ],
+            '+as'      => [ 'timestamp' ],
+            'order_by' => { '-asc' => 'test_date' },
+        },
+    );
 
     my %results = ();
     my $axis    = 0;
 
-    my %want_col;
-
     ## massage test results into format required for charting.
+    for my $test ( @{ $tests } ) {
+        my $notes = join('<br />',
+                         map { $_->{'diary_note'} } @{ $test->{'diaries'} } );
 
-    ## the order of @cols from the web page is not deterministic,
-    ## so we process the requested fields in a fixed order which
-    ## matches the checkboxes on the chart page:
-    my @cols = grep { $_ ne 'notes' } @{ $args[1]{'columns'} };
+        for my $result ( @{ $test->{'water_test_results'} } ) {
+            my $parameter = $result->{'parameter'};
 
-    my $want_notes = grep { $_ eq 'notes' } @{ $args[1]{'columns'} };
-
-    @want_col{@cols} = ( 1 ) x @cols;
-
-    my $chart_cols = $self->chart_columns();
-
-    while ( my $rec = $tests->next() ) {
-        for my $col ( @{ $chart_cols } ) {
-
-            # skip columns which were not requested:
-            $want_col{$col} or next;
-
-            $results{$col} ||= {
-                %{ $self->chart_legend($col) },
+            $results{$parameter} ||= {
+                'label' => $result->{'label'},
+                'color' => $result->{'rgb_colour'},
                 'xaxis' => 1,
                 'yaxis' => ++$axis,
                 'grid'  => { 'hoverable' => 1 },
@@ -327,15 +486,13 @@ sub chart_data {
             };
 
             my $row_data = [
-                # NB: jquery.flot.js requires date
-                #     as epoch time in milliseconds:
-                $rec->test_date->epoch() * 1000,
-                $rec->$col()
+                $test->{'timestamp'},
+                $result->{'test_result'},
             ];
 
-            push @$row_data, $rec->notes() if $want_notes;
+            push @$row_data, $notes if ( $show_notes and $notes );
 
-            push @{ $results{$col}{'data'} }, $row_data;
+            push @{ $results{$result->{'parameter'}}{'data'} }, $row_data;
         }
     }
 

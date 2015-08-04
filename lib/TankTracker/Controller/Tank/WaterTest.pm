@@ -42,7 +42,7 @@ sub list :Chained('get_tank') PathPart('water_test/list') {
 
     my ( $tests, $pager ) = @{ $c->model('WaterTest')->list(
         {
-            tank_id => $tank_id,
+             'tank_id' => $tank_id,
         },
         {
             order_by => { '-desc' => 'test_date' },
@@ -56,6 +56,8 @@ sub list :Chained('get_tank') PathPart('water_test/list') {
         $pager->{'path'} = [ '/tank', $tank_id, 'water_test/list' ];
     }
 
+    $c->stash->{'col_headings'} = $c->model('TankWaterTestParameter')
+                                    ->get_headings($c->stash->{'tank'}{'tank_id'});
     $c->stash->{'tests'} = $tests;
     $c->stash->{'pager'} = $pager;
 
@@ -72,84 +74,79 @@ sub list :Chained('get_tank') PathPart('water_test/list') {
 sub _test_form :Private {
     my ($self, $c) = @_;
 
-    my $elements = [
+    my $tank_id     = $c->stash->{'tank'}{'tank_id'};
+    my $test_fields = $c->model('TankWaterTestParameter')->list(
+        {
+            tank_id => $tank_id,
+            active  => 1,
+        },
+        {
+            order_by => {
+                -asc => [ qw( tank_id param_order me.parameter_id ) ]
+            },
+        },
+    );
+
+    # stash these so we can get the field titles into the template:
+    $c->stash->{'test_fields'} = $test_fields;
+
+    my @elements = (
         {
             name  => 'tank_id',
             type  => 'Hidden',
-            value => $c->stash->{'tank'}{'tank_id'},
+            value => $tank_id,
         },
         {
             name  => 'test_date',
             type  => 'Text',
-            constraints => [ 'Required' ],
+            constraints => [
+                {
+                    type    => 'Required',
+                    message => q{You must enter a test date.},
+                },
+            ],
         },
-        {
-            name        => 'result_ph',
-            type        => 'Text',
-            constraints => [ 'Required', 'Number' ],
-        },
-        {
-            name        => 'result_ammonia',
-            type        => 'Text',
-            constraints => [ 'Required', 'Number' ],
-        },
-        {
-            name        => 'result_nitrite',
-            type        => 'Text',
-            constraints => [ 'Required', 'Number' ],
-        },
-        {
-            name        => 'result_nitrate',
-            type        => 'Text',
-            constraints => [ 'Required', 'Number' ],
-        },
-    ];
+    );
 
-    if ( $c->stash->{'tank'}{'water_type'} eq 'salt' ) {
-        push @$elements,
-        {
-            name        => 'result_salinity',
-            type        => 'Text',
-            constraints => [ 'Required', 'Number' ],
-        },
-        {
-            name        => 'result_calcium',
-            type        => 'Text',
-            constraints => [ 'Required', 'Number' ],
-        },
-        {
-            name        => 'result_phosphate',
-            type        => 'Text',
-            constraints => [ 'Required', 'Number' ],
-        },
-        {
-            name        => 'result_magnesium',
-            type        => 'Text',
-            constraints => [ 'Required', 'Number' ],
-        },
-        {
-            name        => 'result_kh',
-            type        => 'Text',
-            constraints => [ 'Required', 'Number' ],
-        },
-        {
-            name        => 'result_alkalinity',
-            type        => 'Text',
-            constraints => [ 'Required', 'Number' ],
-        };
+    if ( $c->stash->{'edit_test'} ) {
+        push @elements,
+            {
+                name => 'test_id',
+                type => 'Hidden',
+            };
     }
 
-    push @$elements,
-        {
-            name        => 'temperature',
-            type        => 'Text',
-            constraints => [ 'Required', 'Number' ],
-        },
-        {
-            name        => 'water_change',
-            type        => 'Text',
-            constraints => [ 'Required', 'Number' ],
-        },
+    for my $field ( @{ $test_fields } ) {
+        my $param_id = $field->{'parameter_id'};
+
+        if ( $c->stash->{'edit_test'} ) {
+            push @elements,
+                # if we're editing an existing test, this is the test_result_id
+                # of the individual test result to be updated
+                {
+                    name  => "test_result_$param_id",
+                    type  => 'Hidden',
+                };
+        }
+
+        push @elements,
+            {
+                name        => "parameter_$param_id",
+                type        => 'Text',
+                constraints => [
+                    {
+                        type    => 'Required',
+                        message => qq{$field->{'title'} is a required input.},
+                    },
+                    {
+                        type    => 'Number',
+                        message => qq{$field->{'title'} must be a number.},
+                    },
+                ],
+            };
+    }
+
+    push @elements,
         {
             name => 'notes',
             type => 'Textarea',
@@ -164,20 +161,16 @@ sub _test_form :Private {
                     replace => '',
                 }
             ],
-        },
-        {
-            type => 'Submit',
-            name => 'submit',
         };
 
-    return { elements => $elements };
+    return { elements => \@elements };
 }
 
 sub add :Chained('get_tank') PathPart('water_test/add') Args(0) {
     my ($self, $c) = @_;
 
     $c->stash->{'action_heading'} = 'Add Test';
-
+    $c->stash->{'add_test'}       = 1;
     $c->forward('details');
 
     return;
@@ -204,13 +197,15 @@ sub get_test :Chained('get_tank') PathPart('water_test') CaptureArgs(1) {
     }
 
     if ( my $test = $c->model('WaterTest')->get($test_id) ) {
-        if ( $test->{'tank_id'} != $c->stash->{'tank'}{'tank_id'} ) {
+        my $results = $test->{'water_test_results'};
+        if ( $results and $results->[0]{'tank_id'} != $c->stash->{'tank'}{'tank_id'} ) {
             my $error = qq{Test requested ($test_id) does not belong to current tank!};
             $c->log->fatal("get_test() $error");
             $c->error($error);
             $c->detach();
             return;
         }
+
         $c->stash->{'water_test'} = $test;
     }
     else {
@@ -228,7 +223,7 @@ sub edit :Chained('get_test') PathPart('edit') Args(0) {
     my ( $self, $c ) = @_;
 
     $c->stash->{'action_heading'} = 'Edit Test';
-
+    $c->stash->{'edit_test'}      = 1;
     $c->forward('details');
 
     return;
@@ -242,59 +237,88 @@ sub details :Chained('get_test') PathPart('water_test/details') Args(0) FormMeth
     my $form = $c->stash->{'form'};
 
     if ( $form->submitted_and_valid() ) {
-        my $params = $form->params();
-
-        $params->{'user_id'} = $c->user->user_id();
-        delete $params->{'submit'};
+        my $params = $c->forward('_water_test_params', [ $form->params() ]);
 
         try {
             my $test;
-
-            my $tank_id = $c->stash->{'tank'}{'tank_id'};
 
             if ( my $test_id = $c->stash->{'water_test'}{'test_id'} ) {
                 $test = $c->model('WaterTest')->update($test_id, $params);
             }
             else {
-                $params->{'tank_id'} = $tank_id;
                 $test = $c->model('WaterTest')->add($params);
             }
 
-           $c->stash->{message} = qq{Saved test results (test no. $test->{'test_id'}).};
-
-            my $path = qq{/tank/$tank_id/water_test/list};
+            $c->stash->{'message'} = qq{Saved test results (test no. $test->{'test_id'}).};
+            my $tank_id = $c->stash->{'tank'}{'tank_id'};
+            my $path    = qq{/tank/$tank_id/water_test/list};
 
             $c->response->redirect($c->uri_for($path));
             $c->detach();
             return;
         }
         catch {
-            my $err = qq{Error saving test results: $_};
-            $c->stash->{error} = $err;
+            $c->stash->{'error'} = qq{Error saving test results: $_};
         };
     }
 
-    ## FIXME: make sure this doesn't clobber newly-entered values
-    ##        if/when form redisplay
-#     if ( not $form->submitted() and my $test = $c->stash->{'water_test'} ) {
-#         $form->default_values($test);
-#     }
     $form->default_values($c->stash->{'water_test'});
 
-    $c->stash(template => 'tank/watertest/details.tt');
+    $c->stash->{'template'} = 'tank/watertest/details.tt';
+}
+
+sub _water_test_params :Private {
+    my ( $self, $c, $params ) = @_;
+
+    my $test = {
+        details => {
+            'user_id'   => $c->user->user_id(),
+            'test_date' => $params->{'test_date'},
+            'notes'     => $params->{'notes'},
+        },
+    };
+
+    my @results = ();
+
+    my $tank_id = $c->stash->{'tank'}{'tank_id'};
+
+    if ( $c->stash->{edit_test} ) {
+        for my $p ( keys %{ $params } ) {
+            if ( my ( $id ) = ( $p =~ qr{^test_result_(\d+)$} ) ) {
+                push @results,
+                    {
+                        'tank_id'        => $params->{'tank_id'},
+                        'test_id'        => $params->{'test_id'},
+                        'test_result_id' => $params->{$p},
+                        'test_result'    => $params->{"parameter_$id"},
+                    };
+            }
+        }
+    }
+    else {
+        for my $p ( keys %{ $params } ) {
+            if ( my ( $id ) = ( $p =~ qr{^parameter_(\d+)$} ) ) {
+                push @results,
+                    {
+                        'tank_id'      => $tank_id,
+                        'parameter_id' => $id,
+                        'test_result'  => $params->{$p},
+                    };
+            }
+        }
+    }
+
+    $test->{'results'} = \@results;
+
+    return $test;
 }
 
 sub view :Chained('get_test') PathPart('view') Args(0) {
     my ( $self, $c ) = @_;
 
-    # test is already on the stash by virtue of get_test()
-    # so just add the meta-data so we can display it nicely:
-    $c->stash->{'fields'}     = $c->model('WaterTest')->fields();
-    $c->stash->{'attributes'} = $c->model('WaterTest')->attributes();
-
     $c->stash->{'action_heading'} = 'View Test Details';
 
-    $c->stash(template => 'tank/watertest/details.tt');
+    $c->stash->{'template'} = 'tank/watertest/details.tt';
 }
 
 =pod

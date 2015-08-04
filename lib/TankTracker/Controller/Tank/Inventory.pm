@@ -269,7 +269,7 @@ sub details: Chained('get_inventory') PathPart('details') Args(0) FormMethod('_i
                 $inventory = $c->model('Inventory')->add($params);
             }
 
-           $c->stash->{message} = qq{Saved inventory item (no. $inventory->{'inventory_id'}).};
+           $c->stash->{'message'} = qq{Saved inventory item (no. $inventory->{'inventory_id'}).};
 
             my $path = qq{/tank/$tank_id/inventory/list};
 
@@ -279,7 +279,7 @@ sub details: Chained('get_inventory') PathPart('details') Args(0) FormMethod('_i
         }
         catch {
             my $err = qq{Error saving inventory results: $_};
-            $c->stash->{error} = $err;
+            $c->stash->{'error'} = $err;
         };
     }
 
