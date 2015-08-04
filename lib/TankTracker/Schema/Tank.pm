@@ -78,6 +78,12 @@ __PACKAGE__->belongs_to(
   { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
 __PACKAGE__->has_many(
+  "tank_parameters",
+  "TankTracker::Schema::TankParameter",
+  { "foreign.tank_id" => "self.tank_id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+__PACKAGE__->has_many(
   "tank_user_accesses",
   "TankTracker::Schema::TankUserAccess",
   { "foreign.tank_id" => "self.tank_id" },
@@ -91,8 +97,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-07-29 11:57:47
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Hx/VUi3GW3OlanFb9qnwsQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-04 11:51:00
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:gM7/CaFqb+ioXRxJ1qVu8A
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

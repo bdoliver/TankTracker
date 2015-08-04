@@ -98,6 +98,140 @@ CREATE TABLE tank_user_access (
     PRIMARY KEY ( tank_id, user_id )
 );
 
+CREATE TYPE parameter_type AS ENUM (
+    'salinity',
+    'ph',
+    'ammonia',
+    'nitrite',
+    'nitrate',
+    'calcium',
+    'phosphate',
+    'magnesium',
+    'kh',
+    'gh',
+    'copper',
+    'iodine',
+    'strontium',
+    'temperature',
+    'water_change',
+    'tds'
+);
+
+-- useful query, list contents of an enum:
+-- SELECT unnest(enum_range(NULL::parameter_type))
+
+CREATE TABLE parameters (
+    parameter_id      SERIAL
+                      NOT NULL
+                      PRIMARY KEY,
+    parameter         parameter_type NOT NULL UNIQUE,
+
+    description       TEXT NOT NULL,
+    title             TEXT NOT NULL,
+    label             TEXT NOT NULL,
+    rgb_colour        CHAR(7)
+                      NOT NULL
+                      CHECK ( rgb_colour ~* '^#[\da-f]{6}$' )
+);
+
+INSERT INTO parameters VALUES ( default, 'salinity', 'Salinity', 'NaCl',           '#7633BD' );
+INSERT INTO parameters VALUES ( default, 'ph',       'Ph',       'Ph',             '#A23C3C' );
+INSERT INTO parameters VALUES ( default, 'ammonia',  'Ammonia',  'NH<sub>4</sub>', '#AFD8F8' );
+INSERT INTO parameters VALUES ( default, 'nitrite',  'Nitrite',  'NO<sub>2</sub>', '#8CACC6' );
+INSERT INTO parameters VALUES ( default, 'nitrate',  'Nitrate',  'NO<sub>3</sub>', '#BD9B33' );
+INSERT INTO parameters VALUES ( default, 'calcium',  'Calcium',  'Ca',             '#CB4B4B' );
+INSERT INTO parameters VALUES ( default, 'phosphate','Phosphate','PO<sub>4</sub>', '#3D853D' );
+INSERT INTO parameters VALUES ( default, 'magnesium','Magnesium','Mg',             '#9440ED' );
+INSERT INTO parameters VALUES ( default, 'kh',       'Carbonate Hardness', '&deg;KH', '#4DA74D' );
+-- FIXME: get unique default colours for the next rows:
+INSERT INTO parameters VALUES ( default, 'gh',       'General Hardness',   'GH',   '#4DA74D' );
+INSERT INTO parameters VALUES ( default, 'copper',   'Copper',    'Cu', '#4DA74D' );
+INSERT INTO parameters VALUES ( default, 'iodine',   'Iodine',    'I',   '#4DA74D' );
+INSERT INTO parameters VALUES ( default, 'strontium','Strontium', 'Sr',  '#4DA74D' );
+INSERT INTO parameters VALUES ( default, 'temperature','Temperature',    'Temp', '#4DA74D' );
+INSERT INTO parameters VALUES ( default, 'water_change', 'Water Change', 'Water Change', '#4DA74D' );
+INSERT INTO parameters VALUES ( default, 'tds', 'Total Dissolved Solids', 'TDS', '#4DA74D' );
+
+--     result_salinity   BOOLEAN NOT NULL DEFAULT TRUE,
+--     result_ph         BOOLEAN NOT NULL DEFAULT TRUE,
+--     result_ammonia    BOOLEAN NOT NULL DEFAULT TRUE,
+--     result_nitrite    BOOLEAN NOT NULL DEFAULT TRUE,
+--     result_nitrate    BOOLEAN NOT NULL DEFAULT TRUE,
+--     result_calcium    BOOLEAN NOT NULL DEFAULT TRUE,
+--     result_phosphate  BOOLEAN NOT NULL DEFAULT TRUE,
+--     result_magnesium  BOOLEAN NOT NULL DEFAULT TRUE,
+--     result_kh         BOOLEAN NOT NULL DEFAULT TRUE,
+--     result_gh         BOOLEAN NOT NULL DEFAULT TRUE,
+--     result_copper     BOOLEAN NOT NULL DEFAULT TRUE,
+--     result_iodine     BOOLEAN NOT NULL DEFAULT TRUE,
+--     result_strontium  BOOLEAN NOT NULL DEFAULT TRUE,
+
+);
+
+CREATE TABLE tank_parameters (
+    tank_id           INTEGER
+                      NOT NULL
+                      REFERENCES tank ( tank_id ),
+
+    parameter_id      INTEGER
+                      NOT NULL
+                      REFERENCES parameters ( parameter_id ),
+
+    -- the following provide overrides from the parameter defaults:
+    title             TEXT NOT NULL,
+    label             TEXT NOT NULL,
+    rgb_colour        CHAR(7)
+                      NOT NULL
+                      CHECK ( rgb_colour ~* '^#[\da-f]{6}$' ),
+
+    active            BOOLEAN DEFAULT TRUE,
+    chart             BOOLEAN DEFAULT TRUE,
+
+    PRIMARY KEY ( tank_id, parameter_id )
+);
+
+CREATE OR REPLACE FUNCTION upd_tank_parameters() RETURNS TRIGGER AS
+$$
+DECLARE
+    param_rec parameters%ROWTYPE;
+
+BEGIN
+    IF NEW.title IS NULL OR
+       NEW.label IS NULL OR
+       NEW.rgb_colour IS NULL THEN
+        SELECT INTO param_rec * FROM parameters
+                                WHERE parameter_id = NEW.parameter_id;
+        IF NEW.title IS NULL THEN
+            NEW.title = param_rec.title;
+        END IF;
+        IF NEW.label IS NULL THEN
+            NEW.label = param_rec.label;
+        END IF;
+        IF NEW.title IS NULL THEN
+            NEW.rgb_colour = param_rec.rgb_colour;
+        END IF;
+
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER chk_tank_parameters
+    BEFORE INSERT OR UPDATE ON tank_parameters
+    FOR EACH ROW EXECUTE PROCEDURE upd_tank_parameters();
+
+CREATE VIEW water_test_parameters AS (
+    SELECT tp.tank_id,
+           p.parameter,
+           tp.title,
+           tp.label,
+           tp.rgb_colour,
+           tp.chart
+      FROM tank_parameters tp JOIN parameters p USING ( parameter_id )
+     WHERE tp.active IS TRUE
+);
+
 CREATE TABLE water_test (
     test_id           SERIAL
                       NOT NULL
