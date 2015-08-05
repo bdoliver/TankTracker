@@ -47,6 +47,10 @@ __PACKAGE__->add_columns(
     },
     is_nullable => 0,
   },
+  "salt_water",
+  { data_type => "boolean", is_nullable => 0 },
+  "fresh_water",
+  { data_type => "boolean", is_nullable => 0 },
   "title",
   { data_type => "text", is_nullable => 0 },
   "label",
@@ -64,8 +68,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-05 09:14:39
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:BHjKn0PMTStBlH109YPV3w
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-05 15:43:28
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:eZ4HoyzFTDYy5PdFsPen1A
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

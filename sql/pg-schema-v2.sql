@@ -126,6 +126,8 @@ CREATE TABLE parameters (
                       PRIMARY KEY,
     parameter         parameter_type NOT NULL UNIQUE,
 
+    salt_water        BOOLEAN NOT NULL,
+    fresh_water       BOOLEAN NOT NULL,
     title             TEXT NOT NULL,
     label             TEXT NOT NULL,
     rgb_colour        CHAR(7)
@@ -133,39 +135,23 @@ CREATE TABLE parameters (
                       CHECK ( rgb_colour ~* '^#[\da-f]{6}$' )
 );
 
-INSERT INTO parameters VALUES ( default, 'salinity', 'Salinity', 'NaCl',           '#7633BD' );
-INSERT INTO parameters VALUES ( default, 'ph',       'Ph',       'Ph',             '#A23C3C' );
-INSERT INTO parameters VALUES ( default, 'ammonia',  'Ammonia',  'NH<sub>4</sub>', '#AFD8F8' );
-INSERT INTO parameters VALUES ( default, 'nitrite',  'Nitrite',  'NO<sub>2</sub>', '#8CACC6' );
-INSERT INTO parameters VALUES ( default, 'nitrate',  'Nitrate',  'NO<sub>3</sub>', '#BD9B33' );
-INSERT INTO parameters VALUES ( default, 'calcium',  'Calcium',  'Ca',             '#CB4B4B' );
-INSERT INTO parameters VALUES ( default, 'phosphate','Phosphate','PO<sub>4</sub>', '#3D853D' );
-INSERT INTO parameters VALUES ( default, 'magnesium','Magnesium','Mg',             '#9440ED' );
-INSERT INTO parameters VALUES ( default, 'kh',       'Carbonate Hardness', '&deg;KH', '#4DA74D' );
+INSERT INTO parameters VALUES ( default, 'salinity', true, false, 'Salinity', 'NaCl',           '#7633BD' );
+INSERT INTO parameters VALUES ( default, 'ph',       true, true,  'Ph',       'Ph',             '#A23C3C' );
+INSERT INTO parameters VALUES ( default, 'ammonia',  true, true,  'Ammonia',  'NH<sub>4</sub>', '#AFD8F8' );
+INSERT INTO parameters VALUES ( default, 'nitrite',  true, true,  'Nitrite',  'NO<sub>2</sub>', '#8CACC6' );
+INSERT INTO parameters VALUES ( default, 'nitrate',  true, true,  'Nitrate',  'NO<sub>3</sub>', '#BD9B33' );
+INSERT INTO parameters VALUES ( default, 'calcium',  true, false, 'Calcium',  'Ca',             '#CB4B4B' );
+INSERT INTO parameters VALUES ( default, 'phosphate',true, false, 'Phosphate','PO<sub>4</sub>', '#3D853D' );
+INSERT INTO parameters VALUES ( default, 'magnesium',true, false, 'Magnesium','Mg',             '#9440ED' );
+INSERT INTO parameters VALUES ( default, 'kh',       true, false, 'Carbonate Hardness', '&deg;KH', '#4DA74D' );
 -- FIXME: get unique default colours for the next rows:
-INSERT INTO parameters VALUES ( default, 'gh',       'General Hardness',   'GH',   '#4DA74D' );
-INSERT INTO parameters VALUES ( default, 'copper',   'Copper',    'Cu', '#4DA74D' );
-INSERT INTO parameters VALUES ( default, 'iodine',   'Iodine',    'I',   '#4DA74D' );
-INSERT INTO parameters VALUES ( default, 'strontium','Strontium', 'Sr',  '#4DA74D' );
-INSERT INTO parameters VALUES ( default, 'temperature','Temperature',    'Temp', '#4DA74D' );
-INSERT INTO parameters VALUES ( default, 'water_change', 'Water Change', 'Water Change', '#4DA74D' );
-INSERT INTO parameters VALUES ( default, 'tds', 'Total Dissolved Solids', 'TDS', '#4DA74D' );
-
---     result_salinity   BOOLEAN NOT NULL DEFAULT TRUE,
---     result_ph         BOOLEAN NOT NULL DEFAULT TRUE,
---     result_ammonia    BOOLEAN NOT NULL DEFAULT TRUE,
---     result_nitrite    BOOLEAN NOT NULL DEFAULT TRUE,
---     result_nitrate    BOOLEAN NOT NULL DEFAULT TRUE,
---     result_calcium    BOOLEAN NOT NULL DEFAULT TRUE,
---     result_phosphate  BOOLEAN NOT NULL DEFAULT TRUE,
---     result_magnesium  BOOLEAN NOT NULL DEFAULT TRUE,
---     result_kh         BOOLEAN NOT NULL DEFAULT TRUE,
---     result_gh         BOOLEAN NOT NULL DEFAULT TRUE,
---     result_copper     BOOLEAN NOT NULL DEFAULT TRUE,
---     result_iodine     BOOLEAN NOT NULL DEFAULT TRUE,
---     result_strontium  BOOLEAN NOT NULL DEFAULT TRUE,
-
-);
+INSERT INTO parameters VALUES ( default, 'gh',       false, true, 'General Hardness',   'GH',   '#4DA74D' );
+INSERT INTO parameters VALUES ( default, 'copper',   false, false, 'Copper',    'Cu', '#4DA74D' );
+INSERT INTO parameters VALUES ( default, 'iodine',   false, false,'Iodine',    'I',   '#4DA74D' );
+INSERT INTO parameters VALUES ( default, 'strontium',false, false,'Strontium', 'Sr',  '#4DA74D' );
+INSERT INTO parameters VALUES ( default, 'temperature',  true, true, 'Temperature',    'Temp', '#4DA74D' );
+INSERT INTO parameters VALUES ( default, 'water_change', true, true, 'Water Change', 'Water Change', '#4DA74D' );
+INSERT INTO parameters VALUES ( default, 'tds', false, false, 'Total Dissolved Solids', 'TDS', '#4DA74D' );
 
 CREATE TABLE tank_parameters (
     tank_id           INTEGER
@@ -239,6 +225,19 @@ UNION
             true
        FROM tank t, parameters p
       WHERE t.tank_id NOT IN (SELECT DISTINCT tank_id FROM tank_parameters)
+        AND t.water_type = 'salt'
+        AND p.salt_water
+UNION
+     SELECT t.tank_id,
+            p.parameter,
+            p.title,
+            p.label,
+            p.rgb_colour,
+            true
+       FROM tank t, parameters p
+      WHERE t.tank_id NOT IN (SELECT DISTINCT tank_id FROM tank_parameters)
+        AND t.water_type = 'fresh'
+        AND p.fresh_water
   ) AS wtp
   ORDER BY 1, 2
 );
