@@ -221,6 +221,7 @@ CREATE TRIGGER chk_tank_parameters
     FOR EACH ROW EXECUTE PROCEDURE upd_tank_parameters();
 
 CREATE VIEW water_test_parameters AS (
+  SELECT * FROM (
     SELECT tp.tank_id,
            p.parameter,
            tp.title,
@@ -229,6 +230,17 @@ CREATE VIEW water_test_parameters AS (
            tp.chart
       FROM tank_parameters tp JOIN parameters p USING ( parameter_id )
      WHERE tp.active IS TRUE
+UNION
+     SELECT t.tank_id,
+            p.parameter,
+            p.title,
+            p.label,
+            p.rgb_colour,
+            true
+       FROM tank t, parameters p
+      WHERE t.tank_id NOT IN (SELECT DISTINCT tank_id FROM tank_parameters)
+  ) AS wtp
+  ORDER BY 1, 2
 );
 
 CREATE TABLE water_test (
