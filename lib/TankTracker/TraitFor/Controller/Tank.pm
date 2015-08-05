@@ -43,6 +43,12 @@ sub get_tank :Chained('base') :PathPart('') CaptureArgs(1) {
             $c->detach();
             return;
         }
+
+        # fetch the test attributes for this tank:
+        my $params = $c->model('WaterTestParameter')->list({ tank_id => $tank_id });
+
+        $tank->{'test_params'} = $params || [];
+
         $c->stash->{'tank'} = $tank;
     }
     else {
