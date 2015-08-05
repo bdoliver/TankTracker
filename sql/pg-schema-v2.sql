@@ -209,6 +209,7 @@ CREATE TRIGGER chk_tank_parameters
 CREATE VIEW water_test_parameters AS (
   SELECT * FROM (
     SELECT tp.tank_id,
+           tp.parameter_id,
            p.parameter,
            tp.title,
            tp.label,
@@ -219,6 +220,7 @@ CREATE VIEW water_test_parameters AS (
      WHERE tp.active IS TRUE
 UNION
      SELECT t.tank_id,
+            p.parameter_id,
             p.parameter,
             p.title,
             p.label,
@@ -231,6 +233,7 @@ UNION
         AND p.salt_water
 UNION
      SELECT t.tank_id,
+            p.parameter_id,
             p.parameter,
             p.title,
             p.label,
