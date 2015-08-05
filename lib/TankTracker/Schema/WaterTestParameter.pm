@@ -49,13 +49,15 @@ __PACKAGE__->add_columns(
   { data_type => "text", is_nullable => 1 },
   "rgb_colour",
   { data_type => "char", is_nullable => 1, size => 7 },
+  "active",
+  { data_type => "boolean", is_nullable => 1 },
   "chart",
   { data_type => "boolean", is_nullable => 1 },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-04 11:51:00
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:eOEtQRZsEGlXuaUPgKv6Fw
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-05 16:10:47
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:o+0bH802u27d5vFjDahMRw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

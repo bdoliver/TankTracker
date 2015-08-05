@@ -213,6 +213,7 @@ CREATE VIEW water_test_parameters AS (
            tp.title,
            tp.label,
            tp.rgb_colour,
+           tp.active,
            tp.chart
       FROM tank_parameters tp JOIN parameters p USING ( parameter_id )
      WHERE tp.active IS TRUE
@@ -222,6 +223,7 @@ UNION
             p.title,
             p.label,
             p.rgb_colour,
+            true,
             true
        FROM tank t, parameters p
       WHERE t.tank_id NOT IN (SELECT DISTINCT tank_id FROM tank_parameters)
@@ -233,6 +235,7 @@ UNION
             p.title,
             p.label,
             p.rgb_colour,
+            true,
             true
        FROM tank t, parameters p
       WHERE t.tank_id NOT IN (SELECT DISTINCT tank_id FROM tank_parameters)
