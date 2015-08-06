@@ -63,16 +63,17 @@ sub _select_form :Private {
             empty_first       => 1,
             empty_first_label => '- Select Tank -',
             default           => $c->session->{'tank_id'},
-            constraints       => [
-                {
-                    type    => 'Required',
-                    when    => { field => 'tank_action',
-                                 value => 'add',
-                                 not   => 1,
-                               },
-                    message => 'You must select a tank.',
-                },
-            ],
+## FIXME: 'when' doesn't seem to be working properly with multi-values
+#             constraints       => [
+#                 {
+#                     type    => 'Required',
+#                     when    => { field => 'tank_action',
+#                                  value => [ 'add/fresh', 'add/salt' ],
+#                                  not   => 1,
+#                                },
+#                     message => 'You must select a tank.',
+#                 },
+#             ],
         },
         {
             name    => 'tank_action',
@@ -81,7 +82,8 @@ sub _select_form :Private {
             options => [
                 [ 'water_test/list' => 'Water tests' ],
                 [ 'view'            => 'View / edit tank details' ],
-                [ 'add'             => 'Add a new tank' ],
+                [ 'add/salt'        => 'Add a new saltwater tank' ],
+                [ 'add/fresh'       => 'Add a new freshwater tank' ],
                 [ 'inventory/list'  => 'Inventory'   ],
                 [ 'diary/list'      => 'Diary'       ],
             ],
@@ -109,10 +111,10 @@ sub select : Chained('base') :PathPart('') Args(0) FormMethod('_select_form') {
 
         # remember the currently-selected tank & action:
         $c->session->{tank_id}     = $tank_id;
-        $c->session->{tank_action} = $action if $action ne 'add';
+        $c->session->{tank_action} = $action if $action !~ qr{^add};
 
         my $path  = q{/tank/};
-           $path .= "$tank_id/" if $action ne 'add';
+           $path .= "$tank_id/" if $action !~ qr{^add};
            $path .= $action;
 
         $c->response->redirect($c->uri_for($path));
@@ -125,11 +127,12 @@ sub select : Chained('base') :PathPart('') Args(0) FormMethod('_select_form') {
     return;
 }
 
-sub add : Chained('base') :PathPart('add') Args(0) {
-    my ( $self, $c ) = @_;
+sub add : Chained('base') :PathPart('add') Args(1) {
+    my ( $self, $c, $water_type ) = @_;
 
     $c->stash->{tank_action}    = 'add';
     $c->stash->{action_heading} = 'Add Tank';
+    $c->stash->{water_type}     = $water_type;
 
     $c->forward('details');
 
@@ -235,6 +238,65 @@ sub _details_form : Private {
         },
     ];
 
+    my $test_params = $c->stash->{'tank'}{'test_params'};
+
+    if ( ! $test_params or ! @{ $test_params } ) {
+        # must be adding a new tank - fetch some defaults:
+        my $type = $c->stash->{'water_type'}.'_water';
+        $test_params = $c->model('Parameter')->list({ $type => 1 });
+
+        # since we have no tank with test params, put it on the stash
+        # so we can populate the form defaults from it:
+        $c->stash->{'tank'}{'test_params'} = $test_params;
+    }
+
+    my @wtp_id = ();
+
+
+    for my $param ( @{ $test_params } ) {
+       my $id = $param->{'parameter_id'};
+
+        push @wtp_id, $id;
+
+        push @$elements,
+        {
+            name        => "wtp_${id}_parameter_id",
+            type        => 'Hidden',
+            constraints => [ 'Required' ],
+        },
+        {
+            name        => "wtp_${id}_parameter",
+            type        => 'Hidden',
+            constraints => [ 'Required' ],
+        },
+        {
+            name        => "wtp_${id}_title",
+            type        => 'Text',
+            constraints => [ 'Required' ],
+        },
+        {
+            name        => "wtp_${id}_label",
+            type        => 'Text',
+            constraints => [ 'Required' ],
+        },
+        {
+            name        => "wtp_${id}_rgb_colour",
+            type        => 'Text',
+            constraints => [ 'Required' ],
+        },
+        {
+            name        => "wtp_${id}_active",
+            type        => 'Checkbox',
+            constraints => [ 'Required' ],
+        },
+        {
+            name        => "wtp_${id}_chart",
+            type        => 'Checkbox',
+            constraints => [ 'Required' ],
+        };
+    }
+    $c->stash->{'wtp_id'} = \@wtp_id;
+
     return { 'elements' => $elements };
 }
 
@@ -282,12 +344,16 @@ sub details : Chained('get_tank') Args(0) FormMethod('_details_form') {
         };
     }
 
-    ## FIXME: make sure this doesn't clobber newly-entered values
-    ##        if/when form redisplay
-#     if ( not $form->submitted() and my $tank = $c->stash->{'tank'} ) {
-#         $form->default_values($tank);
-#     }
-    $form->default_values($c->stash->{'tank'});
+    my %defaults = %{ $c->stash->{'tank'} };
+
+    for my $param ( @{ delete $defaults{'test_params'} } ) {
+       my $id = $param->{'parameter_id'};
+       for my $key ( keys %{ $param } ) {
+           $defaults{'wtp_'.$id.'_'.$key} = $param->{$key};
+       }
+    }
+
+    $form->default_values(\%defaults);
 
     $c->stash(template => 'tank/details.tt2');
 
