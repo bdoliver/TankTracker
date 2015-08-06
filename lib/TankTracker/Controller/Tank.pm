@@ -63,17 +63,16 @@ sub _select_form :Private {
             empty_first       => 1,
             empty_first_label => '- Select Tank -',
             default           => $c->session->{'tank_id'},
-## FIXME: 'when' doesn't seem to be working properly with multi-values
-#             constraints       => [
-#                 {
-#                     type    => 'Required',
-#                     when    => { field => 'tank_action',
-#                                  value => [ 'add/fresh', 'add/salt' ],
-#                                  not   => 1,
-#                                },
-#                     message => 'You must select a tank.',
-#                 },
-#             ],
+            constraints       => [
+                {
+                    type    => 'Required',
+                    when    => { field => 'tank_action',
+                                 values => [ 'add/fresh', 'add/salt' ],
+                                 not   => 1,
+                               },
+                    message => 'You must select a tank.',
+                },
+            ],
         },
         {
             name    => 'tank_action',
