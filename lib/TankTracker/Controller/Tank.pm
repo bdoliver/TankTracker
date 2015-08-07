@@ -281,7 +281,13 @@ sub _details_form : Private {
         {
             name        => "wtp_${id}_rgb_colour",
             type        => 'Text',
-            constraints => [ 'Required' ],
+            constraints => [
+                'Required',
+                {
+                    type => 'Regex',
+                    regex => '^#[\da-fA-F]{6}$',
+                },
+            ],
         },
         {
             name        => "wtp_${id}_active",
