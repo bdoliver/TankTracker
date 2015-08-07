@@ -128,7 +128,7 @@ sub params : Chained('base') :PathPart('parameters') Args(0) FormMethod('_parame
 
         try {
             $c->model('Parameter')->update(\@params);
-            $c->stash->{message} = q{Saved parameters ok};
+            $c->stash->{'message'} = q{Saved parameters ok};
 
             ## FIXME: see if default_values() will work to populate the form?
             # Because of the way in which the form is constructed,

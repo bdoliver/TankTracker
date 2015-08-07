@@ -178,7 +178,7 @@ sub add: Chained('get_tank') PathPart('diary/add') Args(0) FormMethod('_diary_fo
 
             my $note = $c->model('Diary')->add_diary($params);
 
-            $c->stash->{message} = qq{Saved diary note (no. $note->{'diary_id'}).};
+            $c->stash->{'message'} = qq{Saved diary note (no. $note->{'diary_id'}).};
 
             my $path = qq{/tank/$tank_id/diary/list};
 
@@ -188,7 +188,7 @@ sub add: Chained('get_tank') PathPart('diary/add') Args(0) FormMethod('_diary_fo
         }
         catch {
             my $err = qq{Error saving diary note: $_};
-            $c->stash->{error} = $err;
+            $c->stash->{'error'} = $err;
         };
     }
 

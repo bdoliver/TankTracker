@@ -124,8 +124,8 @@ sub login : Local FormMethod('_login_form') Args(0) {
 
     if ( $form->submitted_and_valid() ) {
 
-        my $username = $c->request->params->{username};
-        my $password = $c->request->params->{password};
+        my $username = $c->request->params->{'username'};
+        my $password = $c->request->params->{'password'};
 
         # If the username and password values were found in form
         if ( $username and $password ) {

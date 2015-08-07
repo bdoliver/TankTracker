@@ -77,7 +77,7 @@ sub _select_form :Private {
         {
             name    => 'tank_action',
             type    => 'Radiogroup',
-            default => $c->session->{tank_action},
+            default => $c->session->{'tank_action'},
             options => [
                 [ 'water_test/list' => 'Water tests' ],
                 [ 'view'            => 'View / edit tank details' ],
@@ -129,9 +129,9 @@ sub select : Chained('base') :PathPart('') Args(0) FormMethod('_select_form') {
 sub add : Chained('base') :PathPart('add') Args(1) {
     my ( $self, $c, $water_type ) = @_;
 
-    $c->stash->{tank_action}    = 'add';
-    $c->stash->{action_heading} = 'Add Tank';
-    $c->stash->{water_type}     = $water_type;
+    $c->stash->{'tank_action'}    = 'add';
+    $c->stash->{'action_heading'} = 'Add Tank';
+    $c->stash->{'water_type'}     = $water_type;
 
     $c->forward('details');
 
@@ -141,8 +141,8 @@ sub add : Chained('base') :PathPart('add') Args(1) {
 sub edit : Chained('get_tank') :PathPart('edit') Args(0) {
     my ( $self, $c ) = @_;
 
-    $c->stash->{tank_action}    = 'edit';
-    $c->stash->{action_heading} = 'Edit';
+    $c->stash->{'tank_action'}    = 'edit';
+    $c->stash->{'action_heading'} = 'Edit';
 
     $c->forward('details');
 
@@ -152,8 +152,8 @@ sub edit : Chained('get_tank') :PathPart('edit') Args(0) {
 sub view : Chained('get_tank') Args(0) {
     my ( $self, $c ) = @_;
 
-    $c->stash->{tank_action}    = 'view';
-    $c->stash->{action_heading} = 'Details';
+    $c->stash->{'tank_action'}    = 'view';
+    $c->stash->{'action_heading'} = 'Details';
 
     $c->forward('details');
 }
@@ -328,7 +328,7 @@ sub details : Chained('get_tank') Args(0) FormMethod('_details_form') {
                 $msg = q{Created new tank.};
             }
 
-            $c->stash->{message} = $msg;
+            $c->stash->{'message'} = $msg;
 
             # Edit complete - send user back to 'view' mode...
             my $path = qq{/tank/$tank->{'tank_id'}/view};
@@ -354,7 +354,7 @@ sub details : Chained('get_tank') Args(0) FormMethod('_details_form') {
 
     $form->default_values(\%defaults);
 
-    $c->stash(template => 'tank/details.tt2');
+    $c->stash->{'template'} = 'tank/details.tt2';
 
     return;
 }

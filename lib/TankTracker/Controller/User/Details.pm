@@ -265,8 +265,8 @@ sub add : Chained('base') :PathPart('add') Args(0) {
 sub edit : Chained('get_user') :PathPart('edit') Args(0) {
     my ( $self, $c ) = @_;
 
-    $c->stash->{tank_action}    = 'edit';
-    $c->stash->{action_heading} = 'Edit';
+    $c->stash->{'tank_action'}    = 'edit';
+    $c->stash->{'action_heading'} = 'Edit';
 
     $c->forward('details');
 
@@ -277,8 +277,8 @@ sub edit : Chained('get_user') :PathPart('edit') Args(0) {
 sub view : Chained('get_user') Args(0) {
     my ( $self, $c ) = @_;
 
-    $c->stash->{tank_action}    = 'view';
-    $c->stash->{action_heading} = 'Details';
+    $c->stash->{'tank_action'}    = 'view';
+    $c->stash->{'action_heading'} = 'Details';
 
     $c->forward('details');
 }
@@ -337,7 +337,7 @@ sub details :Args(0) FormMethod('_details') {
        my $defaults = {};
 
         if ( $c->stash->{'action_heading'} eq 'Add' ) {
-            $defaults = { recs_per_page => 10 };
+            $defaults = { 'recs_per_page' => 10 };
         }
         else {
             my $prefs = delete $c->stash->{'edit_user'}{'preferences'};

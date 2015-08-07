@@ -260,7 +260,7 @@ sub details :Chained('get_test') PathPart('water_test/details') Args(0) FormMeth
                 $test = $c->model('WaterTest')->add($params);
             }
 
-           $c->stash->{message} = qq{Saved test results (test no. $test->{'test_id'}).};
+           $c->stash->{'message'} = qq{Saved test results (test no. $test->{'test_id'}).};
 
             my $path = qq{/tank/$tank_id/water_test/list};
 
@@ -270,7 +270,7 @@ sub details :Chained('get_test') PathPart('water_test/details') Args(0) FormMeth
         }
         catch {
             my $err = qq{Error saving test results: $_};
-            $c->stash->{error} = $err;
+            $c->stash->{'error'} = $err;
         };
     }
 
@@ -281,7 +281,7 @@ sub details :Chained('get_test') PathPart('water_test/details') Args(0) FormMeth
 #     }
     $form->default_values($c->stash->{'water_test'});
 
-    $c->stash(template => 'tank/watertest/details.tt2');
+    $c->stash->{'template'} = 'tank/watertest/details.tt2';
 }
 
 sub view :Chained('get_test') PathPart('view') Args(0) {
@@ -294,7 +294,7 @@ sub view :Chained('get_test') PathPart('view') Args(0) {
 
     $c->stash->{'action_heading'} = 'View Test Details';
 
-    $c->stash(template => 'tank/watertest/details.tt2');
+    $c->stash->{'template'} = 'tank/watertest/details.tt2';
 }
 
 =pod
