@@ -65,10 +65,10 @@ sub _parameter_form :Private {
             value => $param->{'rgb_colour'},
             constraints => [
                 'Required',
-#                 {
-#                     type => 'Regex',
-#                     regex => '^#[\da-f]{6}$',
-#                 },
+                {
+                    type => 'Regex',
+                    regex => '^#[\da-fA-F]{6}$',
+                },
             ]
         },
     }
