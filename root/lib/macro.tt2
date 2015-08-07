@@ -56,7 +56,7 @@ href="[% path %]"
   [% END %]
 [% END%]
 
-[% MACRO form_errors BLOCK %]
+[% MACRO form_errors_ORIG BLOCK %]
     [% IF form.get_errors.size %]
         <div class="row form_errors">
             <div class="col col-md-6 text-danger bg-danger form_errors">
@@ -80,6 +80,34 @@ href="[% path %]"
         [% END %]
     [% END %]
 [% END %]
+
+
+[% MACRO form_errors BLOCK %]
+    [% IF form.get_errors.size %]
+        <div class="row form_errors">
+            <div class="alert alert-danger fade in">
+            [% # FOR error IN form.get_errors %]
+            [% # only render the first form error... %]
+            [% error = form.get_errors.shift %]
+                [% error.message | html_line_break | html_para %]
+            [% # END %]
+            </div>
+        </div>
+    [% ELSE %]
+        [% IF message %]
+        <div class="row form_errors">
+            <div class="alert alert-success fade in">[% message %]</div>
+        </div>
+        [% END %]
+        [% IF error %]
+        <div class="row form_errors">
+            <div class="alert alert-danger fade in">[% error %]</div>
+        </div>
+        [% END %]
+    [% END %]
+[% END %]
+
+
 
 [% MACRO submit_btn(btn_value, size) BLOCK %]
    [% IF ! size %][% SET size = 'md' %][% END %]
