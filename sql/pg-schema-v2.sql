@@ -206,8 +206,15 @@ CREATE TRIGGER chk_tank_parameters
     BEFORE INSERT OR UPDATE ON tank_parameters
     FOR EACH ROW EXECUTE PROCEDURE upd_tank_parameters();
 
+/*
+ This gives us a view which returns either all tank-specific
+ water test parameters (if set); or if there's no tank-specific
+ params, we get the system-default settings for either salt or
+ freshwater (depending on the requested tank)
+*/
 CREATE VIEW water_test_parameters AS (
   SELECT * FROM (
+    -- existing tank-specific parameters:
     SELECT tp.tank_id,
            tp.parameter_id,
            p.parameter,
@@ -219,28 +226,30 @@ CREATE VIEW water_test_parameters AS (
       FROM tank_parameters tp JOIN parameters p USING ( parameter_id )
      WHERE tp.active IS TRUE
 UNION
+     -- ... plus all default salt-specific params (for saltwater tanks)
      SELECT t.tank_id,
             p.parameter_id,
             p.parameter,
             p.title,
             p.label,
             p.rgb_colour,
-            true,
-            true
-       FROM tank t, parameters p
+            true,  -- default active
+            true   -- default chart
+       FROM tank t, parameters p --wheee! cartesian product ftw! :-)
       WHERE t.tank_id NOT IN (SELECT DISTINCT tank_id FROM tank_parameters)
         AND t.water_type = 'salt'
         AND p.salt_water
 UNION
+     -- ... plus all default fresh-specific params (for freshwater tanks)
      SELECT t.tank_id,
             p.parameter_id,
             p.parameter,
             p.title,
             p.label,
             p.rgb_colour,
-            true,
-            true
-       FROM tank t, parameters p
+            true,  -- default active
+            true   -- default chart
+       FROM tank t, parameters p --wheee! cartesian product ftw! :-)
       WHERE t.tank_id NOT IN (SELECT DISTINCT tank_id FROM tank_parameters)
         AND t.water_type = 'fresh'
         AND p.fresh_water
