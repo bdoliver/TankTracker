@@ -31,36 +31,6 @@ sub _parameter_form :Private {
 
     my @elements = ();
 
-#     for my $param ( @{ $params } ) {
-#         my $id = $param->{'parameter_id'};
-#
-#         push @elements,
-#         {
-#             name  => "parameter_id_$id",
-#             type  => 'Hidden',
-#             value => $id,
-#         },
-#         {
-#             name  => "parameter_$id",
-#             type  => 'Hidden',
-#             value => $param->{'parameter'},
-#         },
-#         {
-#             name  => "title_$id",
-#             type  => 'Text',
-#             value => $param->{'title'},
-#         },
-#         {
-#             name  => "label_$id",
-#             type  => 'Text',
-#             value => $param->{'label'},
-#         },
-#         {
-#             name  => "rgb_colour_$id",
-#             type  => 'Text',
-#             value => $param->{'rgb_colour'},
-#         },
-#     }
     for my $param ( @{ $params } ) {
         push @elements,
         {
