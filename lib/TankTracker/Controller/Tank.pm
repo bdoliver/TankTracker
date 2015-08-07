@@ -130,7 +130,10 @@ sub add : Chained('base') :PathPart('add') Args(1) {
     my ( $self, $c, $water_type ) = @_;
 
     $c->stash->{'tank_action'}    = 'add';
-    $c->stash->{'action_heading'} = 'Add Tank';
+    $c->stash->{'action_heading'} = sprintf(
+                                        'Add %s Water Tank',
+                                        ucfirst($water_type)
+                                    );
     $c->stash->{'water_type'}     = $water_type;
 
     $c->forward('details');
@@ -170,38 +173,81 @@ sub _details_form : Private {
         {
             name  => 'tank_name',
             type  => 'Text',
-            constraints => [ 'Required' ],
+            constraints => [
+                {
+                    type    => 'Required',
+                    message => q{Tank name cannot be blank.},
+                },
+                {
+                    type    => 'Printable',
+                    message => q{Tank name must contain only printable characters.},
+                },
+            ],
         },
         {
             name  => 'water_type',
-            type  => 'Select',
-            empty_first       => 1,
-            empty_first_label => '- Water type -',
-            options => [
-                [ 'salt'  => 'Salt Water'  ],
-                [ 'fresh' => 'Fresh Water' ],
-            ],
-            constraints => [ 'Required' ],
+            type  => 'Hidden',
+            value => $c->stash->{'water_type'},
         },
         {
             name  => 'capacity',
             type  => 'Text',
-            constraints => [ 'Number' ],
+            constraints => [
+                {
+                    type    => 'Number',
+                    message => q{Capacity must be a number.},
+                },
+                {
+                    type    => 'MinRange',
+                    minimum => 0,
+                    message => q{Capacity must be zero or greater.},
+                },
+            ],
         },
         {
             name  => 'length',
             type  => 'Text',
-            constraints => [ 'Number' ],
+            constraints => [
+                {
+                    type    => 'Length',
+                    message => q{Capacity must be a number.},
+                },
+                {
+                    type    => 'MinRange',
+                    minimum => 0,
+                    message => q{Length must be zero or greater.},
+                },
+            ],
         },
         {
             name  => 'width',
             type  => 'Text',
-            constraints => [ 'Number' ],
+            constraints => [
+                {
+                    type    => 'Number',
+                    message => q{Width must be a number.},
+                },
+                {
+                    type    => 'MinRange',
+                    minimum => 0,
+                    message => q{Width must be zero or greater.},
+                },
+            ],
         },
         {
             name  => 'depth',
             type  => 'Text',
-            constraints => [ 'Number' ],
+            constraints => [
+                {
+                    type    => 'Number',
+                    message => q{Depth must be a number.},
+                },
+                {
+                    type    => 'MinRange',
+                    minimum => 0,
+                    message => q{Depth must be zero or greater.},
+                },
+            ],
         },
         {
             name    => 'active',
@@ -215,7 +261,7 @@ sub _details_form : Private {
                 'AutoSet',
                 {
                     type    => 'Required',
-                    message => 'You must select an option.',
+                    message => 'Active? You must select an option (yes/no).',
                 },
             ],
         },
@@ -224,7 +270,12 @@ sub _details_form : Private {
             type => 'Textarea',
             rows => 15,
             cols => 50,
-            constraints => [ 'ASCII' ],
+            constraints => [
+                {
+                    type    => 'ASCII',
+                    message => q{Notes must contain only ASCII characters.},
+                },
+            ],
             filter  => [
                 'TrimEdges',
                 'HTMLScrubber',
@@ -261,43 +312,53 @@ sub _details_form : Private {
         {
             name        => "wtp_${id}_parameter_id",
             type        => 'Hidden',
-            constraints => [ 'Required' ],
         },
         {
             name        => "wtp_${id}_parameter",
             type        => 'Hidden',
-            constraints => [ 'Required' ],
         },
         {
             name        => "wtp_${id}_title",
             type        => 'Text',
-            constraints => [ 'Required' ],
+            constraints => [
+                {
+                    type    => 'Required',
+                    message => qq{Title is required for parameter id #$id},
+                },
+            ],
         },
         {
             name        => "wtp_${id}_label",
             type        => 'Text',
-            constraints => [ 'Required' ],
+            constraints => [
+                {
+                    type    => 'Required',
+                    message => qq{Label is required for parameter id #$id},
+                },
+            ],
         },
         {
             name        => "wtp_${id}_rgb_colour",
             type        => 'Text',
             constraints => [
-                'Required',
                 {
-                    type => 'Regex',
-                    regex => '^#[\da-fA-F]{6}$',
+                    type    => 'Required',
+                    message => qq{RGB colour is required for parameter id #$id},
+                },
+                {
+                    type    => 'Regex',
+                    regex   => '^#[\da-fA-F]{6}$',
+                    message => qq{RGB colour for parameter id #id must be of the form '#ffffff'},
                 },
             ],
         },
         {
             name        => "wtp_${id}_active",
             type        => 'Checkbox',
-            constraints => [ 'Required' ],
         },
         {
             name        => "wtp_${id}_chart",
             type        => 'Checkbox',
-            constraints => [ 'Required' ],
         };
     }
     $c->stash->{'wtp_id'} = \@wtp_id;
@@ -316,6 +377,10 @@ sub details : Chained('get_tank') Args(0) FormMethod('_details_form') {
         $params->{'owner_id'} = $c->user->user_id();
         delete $params->{'submit'};
 
+        my %wtp_fields = map  { $_ => delete $params->{$_} }
+                         grep { $_ =~ qr{^wtp_} }
+                         keys %$params;
+
         try {
             my ( $msg, $tank );
 
@@ -333,6 +398,12 @@ sub details : Chained('get_tank') Args(0) FormMethod('_details_form') {
                 $tank = $c->model('Tank')->add($params);
                 $msg = q{Created new tank.};
             }
+
+            ## water test param fields need to be updated separately:
+            $c->forward(
+                '_update_water_test_params',
+                [ $tank->{'tank_id'}, \%wtp_fields ]
+            );
 
             $c->stash->{'message'} = $msg;
 
@@ -363,6 +434,31 @@ sub details : Chained('get_tank') Args(0) FormMethod('_details_form') {
     $c->stash->{'template'} = 'tank/details.tt2';
 
     return;
+}
+
+sub _update_water_test_params :Private {
+    my ( $self, $c, $tank_id, $fields ) = @_;
+
+    my %params = ();
+
+    my $field_rx = qr{ ^wtp_(\d+)_(.+)$ }xi;
+
+    for my $field ( keys %{ $fields } ) {
+        my ( $id, $param ) = ( $field =~ $field_rx );
+
+        $params{$id} ||= {
+            'tank_id'      => $tank_id,
+            'parameter_id' => $id,
+        };
+
+        $params{$id}{$param} = $fields->{$field};
+    }
+
+    my $params = [ map { $params{$_} } sort { $a <=> $b } keys %params ];
+
+    $c->model('TankParameter')->update($params);
+
+    return 1;
 }
 
 =encoding utf8

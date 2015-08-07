@@ -10,7 +10,8 @@
 [% END %]
 
 <form class="form" method="[% form.method %]" action="[% form.action %]" >
-    [% form.get_element('tank_id') %]
+    [% form.get_element('tank_id')    %]
+    [% form.get_element('water_type') %]
     <div class="row">
         <div class="col-md-12">
 
@@ -25,12 +26,6 @@
                         <div class="form-group col-md-5">
                             [% form.get_element('tank_name').placeholder('Name') %]
                         </div>
-                        <div class="col-md-2">
-                            <label for="water_type">Water type</label>
-                        </div>
-                        <div class="form-group col-md-3 type">
-                            [% form.get_element('water_type') %]
-                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-4">
