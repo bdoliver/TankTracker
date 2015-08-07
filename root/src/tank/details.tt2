@@ -143,11 +143,11 @@
             <tr>
                 <th class="text-right">ID</th>
                 <th>Description</th>
+                <th>Active?</th>
                 <th>Title</th>
                 <th>Label</th>
-                <th>Chart Colour</th>
-                <th>Active?</th>
                 <th>Show on chart?</th>
+                <th>Chart Colour</th>
             </tr>
             </thead>
             <tbody>
@@ -156,15 +156,15 @@
             <tr>
                 <td>[% form.get_element("wtp_" _ i _ "_parameter_id").value  %]</td>
                 <td>[% form.get_element("wtp_" _ i _ "_parameter").value |ucfirst|replace('_', ' ') %]</td>
-                <td>[% form.get_element("wtp_" _ i _ "_title")      %]</td>
-                <td>[% form.get_element("wtp_" _ i _ "_label")      %]</td>
-                <td>[% form.get_element("wtp_" _ i _ "_rgb_colour") %]</td>
                 <td class="text-center">
                    [% form.get_element("wtp_" _ i _ "_active") %]
                 </td>
+                <td>[% form.get_element("wtp_" _ i _ "_title")      %]</td>
+                <td>[% form.get_element("wtp_" _ i _ "_label")      %]</td>
                 <td class="text-center">
                    [% form.get_element("wtp_" _ i _ "_chart")  %]
                 </td>
+                <td>[% form.get_element("wtp_" _ i _ "_rgb_colour") %]</td>
             </tr>
       [% END %]
 
@@ -248,6 +248,31 @@ $(function() {
                 break;
         }
         $('input[name="capacity"]').val((volume * capacity_factor).toFixed(2));
+    });
+
+    [% # set bg colout for all rgb_colour inputs %]
+    $('input[name*="_rgb_colour"]').each(function(idx,obj) {
+        $(obj).css('background-color', $(obj).val());
+    });
+
+    $('#test_attrs').on('shown.bs.modal', function() {
+        [% # when the modal dialog is showing, turn all rgb_colour inputs
+           # into a colour picker (if enabled) %]
+
+        $('input[name*="_rgb_colour"]').each(function(idx,obj) {
+            if ( $(obj).is(':enabled') ) {
+                $(obj).colpick({
+                    colorScheme:'light',
+                    layout: 'hex',
+                    color: $(obj).val(),
+                    onSubmit:function(hsb,hex,rgb,el) {
+                        $(el).css('background-color', '#'+hex)
+                             .val(('#'+hex).toUpperCase());
+                        $(el).colpickHide();
+                    },
+                });
+            }
+        });
     });
 
 });
