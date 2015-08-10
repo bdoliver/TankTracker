@@ -264,7 +264,7 @@ $(function() {
                         $(el).css('background-color', '#'+hex)
                              .val(('#'+hex).toUpperCase());
                         $(el).colpickHide();
-                    },
+                    }
                 });
             }
         });
