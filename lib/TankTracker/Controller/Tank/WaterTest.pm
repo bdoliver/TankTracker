@@ -72,84 +72,45 @@ sub list :Chained('get_tank') PathPart('water_test/list') {
 sub _test_form :Private {
     my ($self, $c) = @_;
 
-    my $elements = [
+    my $tank_id     = $c->stash->{'tank'}{'tank_id'};
+    my $test_fields = $c->model('WaterTestParameter')->list(
+        {
+            tank_id => $tank_id,
+            active  => 1,
+        },
+        {
+            order_by => {
+                -asc => [ qw( tank_id param_order parameter_id ) ]
+            },
+        },
+    );
+
+    # stash these so we can get the field titles into the template:
+    $c->stash->{'test_fields'} = $test_fields;
+
+    my @elements = (
         {
             name  => 'tank_id',
             type  => 'Hidden',
-            value => $c->stash->{'tank'}{'tank_id'},
+            value => $tank_id,
         },
         {
             name  => 'test_date',
             type  => 'Text',
             constraints => [ 'Required' ],
         },
-        {
-            name        => 'result_ph',
-            type        => 'Text',
-            constraints => [ 'Required', 'Number' ],
-        },
-        {
-            name        => 'result_ammonia',
-            type        => 'Text',
-            constraints => [ 'Required', 'Number' ],
-        },
-        {
-            name        => 'result_nitrite',
-            type        => 'Text',
-            constraints => [ 'Required', 'Number' ],
-        },
-        {
-            name        => 'result_nitrate',
-            type        => 'Text',
-            constraints => [ 'Required', 'Number' ],
-        },
-    ];
+    );
 
-    if ( $c->stash->{'tank'}{'water_type'} eq 'salt' ) {
-        push @$elements,
-        {
-            name        => 'result_salinity',
-            type        => 'Text',
-            constraints => [ 'Required', 'Number' ],
-        },
-        {
-            name        => 'result_calcium',
-            type        => 'Text',
-            constraints => [ 'Required', 'Number' ],
-        },
-        {
-            name        => 'result_phosphate',
-            type        => 'Text',
-            constraints => [ 'Required', 'Number' ],
-        },
-        {
-            name        => 'result_magnesium',
-            type        => 'Text',
-            constraints => [ 'Required', 'Number' ],
-        },
-        {
-            name        => 'result_kh',
-            type        => 'Text',
-            constraints => [ 'Required', 'Number' ],
-        },
-        {
-            name        => 'result_alkalinity',
-            type        => 'Text',
-            constraints => [ 'Required', 'Number' ],
-        };
+    for my $field ( @{ $test_fields } ) {
+        push @elements,
+            {
+                name        => $field->{'parameter'},
+                type        => 'Text',
+                constraints => [ 'Required', 'Number' ],
+            };
     }
 
-    push @$elements,
-        {
-            name        => 'temperature',
-            type        => 'Text',
-            constraints => [ 'Required', 'Number' ],
-        },
-        {
-            name        => 'water_change',
-            type        => 'Text',
-            constraints => [ 'Required', 'Number' ],
-        },
+    push @elements,
         {
             name => 'notes',
             type => 'Textarea',
@@ -164,13 +125,9 @@ sub _test_form :Private {
                     replace => '',
                 }
             ],
-        },
-        {
-            type => 'Submit',
-            name => 'submit',
         };
 
-    return { elements => $elements };
+    return { elements => \@elements };
 }
 
 sub add :Chained('get_tank') PathPart('water_test/add') Args(0) {

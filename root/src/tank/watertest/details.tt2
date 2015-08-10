@@ -37,147 +37,20 @@
 
                     </div>
 
+                    [% FOR field IN test_fields %]
                     <div class="row">
                         <div class="form-group col-md-4">
-                            <label for="result_ph">Ph</label>
+                            <label for="[% field.parameter %]">[% field.title %] ([% field.label %])</label>
                         </div>
                         <div class="form-group col-md-4 number">
-                            [% form.get_element('result_ph').placeholder('0.00') %]
+                            [% form.get_element(field.parameter).placeholder('0.00') %]
                         </div>
                     </div>
-
-                    <div class="row">
-                        <div class="form-group col-md-4">
-                            <label for="result_ammonia">Ammonia</label>
-                        </div>
-                        <div class="form-group col-md-4 number">
-                            [% form.get_element('result_ammonia').placeholder('0.00') %]
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="form-group col-md-4">
-                            <label for="result_nitrite">Nitrite</label>
-                        </div>
-                        <div class="form-group col-md-4 number">
-                            [% form.get_element('result_nitrite').placeholder('0.00') %]
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="form-group col-md-4">
-                            <label for="result_nitrate">Nitrate</label>
-                        </div>
-                        <div class="form-group col-md-4 number">
-                            [% form.get_element('result_nitrate').placeholder('0.00') %]
-                        </div>
-                    </div>
-
+                    [% END %]
                 </div>
                 <div class="form-group col-md-6">
                     <label for="notes">Notes:</label>
                     [% form.get_element('notes').placeholder('Notes') %]
-                </div>
-            </div>
-
-        [% IF tank.water_type == 'salt' %]
-            <div class="row">
-                <div class="col-md-4">
-
-                    <div class="row">
-                        <div class="form-group col-md-4">
-                            <label for="result_salinity">Salinity</label>
-                        </div>
-                        <div class="form-group col-md-4 number">
-                            [% form.get_element('result_salinity').placeholder('0.00') %]
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="form-group col-md-4">
-                            <label for="result_calcium">Calcium</label>
-                        </div>
-                        <div class="form-group col-md-4 number">
-                            [% form.get_element('result_calcium').placeholder('0.00') %]
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="form-group col-md-4">
-                             <label for="result_phosphate">Phosphate</label>
-                        </div>
-                        <div class="form-group col-md-4 number">
-                            [% form.get_element('result_phosphate').placeholder('0.00') %]
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="form-group col-md-4">
-                            <label for="result_magnesium">Magnesium</label>
-                        </div>
-                        <div class="form-group col-md-4 number">
-                            [% form.get_element('result_magnesium').placeholder('0.00') %]
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="form-group col-md-4">
-                            <label for="result_kh">&deg;Kh</label>
-                        </div>
-                        <div class="form-group col-md-4 number">
-                            [% form.get_element('result_kh').placeholder('0.00') %]
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="form-group col-md-4">
-                            <label for="result_alkalinity">Alkalinity</label>
-                        </div>
-                        <div class="form-group col-md-4 number">
-                            [% form.get_element('result_alkalinity').placeholder('0.00') %]
-                        </div>
-                    </div>
-
-                </div>
-                <div class="form-group col-md-6">
-                    &nbsp; [% # this div is for alignment purposes only! %]
-                </div>
-            </div>
-
-        [% END %]
-            <div class="row">
-                <div class="col-md-4">
-
-                    <div class="row">
-                        <div class="form-group col-md-4">
-                            <label for="temperature">Temperature</label>
-                        </div>
-                        <div class="form-group col-md-4 number">
-                            [% form.get_element('temperature').placeholder('0.00') %]
-                        </div>
-                    </div>
-
-                </div>
-                <div class="form-group col-md-6">
-                    &nbsp; [% # this div is for alignment purposes only! %]
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-4">
-
-                    <div class="row">
-                        <div class="form-group col-md-4">
-                            <label for="water_change">Water change</label>
-                        </div>
-                        <div class="form-group col-md-4 number">
-                            [% form.get_element('water_change').placeholder('0.00') %]
-                        </div>
-                    </div>
-
-                </div>
-                <div class="form-group col-md-6">
-                    &nbsp; [% # this div is for alignment purposes only! %]
                 </div>
             </div>
         </div>
