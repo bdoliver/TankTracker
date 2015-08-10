@@ -99,14 +99,6 @@ our $WaterTest_attributes = Hash::Ordered->new(
     },
 );
 
-sub fields {
-    return [ $WaterTest_attributes->keys() ];
-}
-
-sub attributes {
-    return { $WaterTest_attributes->as_list() };
-}
-
 sub add {
     my ( $self, $params ) = @_;
 

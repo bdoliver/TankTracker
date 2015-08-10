@@ -287,11 +287,6 @@ sub details :Chained('get_test') PathPart('water_test/details') Args(0) FormMeth
 sub view :Chained('get_test') PathPart('view') Args(0) {
     my ( $self, $c ) = @_;
 
-    # test is already on the stash by virtue of get_test()
-    # so just add the meta-data so we can display it nicely:
-    $c->stash->{'fields'}     = $c->model('WaterTest')->fields();
-    $c->stash->{'attributes'} = $c->model('WaterTest')->attributes();
-
     $c->stash->{'action_heading'} = 'View Test Details';
 
     $c->stash->{'template'} = 'tank/watertest/details.tt2';
