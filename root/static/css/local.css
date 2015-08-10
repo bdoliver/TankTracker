@@ -95,3 +95,11 @@ div#testChartDiv {
     height: 450px;
     margin: 15px 0px;
 }
+
+/* this is necessary so that the colour picker will be
+ * displayed *above* the modal pane (otherwise, it remains
+ * hidden behind the modal pane).
+ */
+div.colpick {
+    z-index: 3000;
+}
