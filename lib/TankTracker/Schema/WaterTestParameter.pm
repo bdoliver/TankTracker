@@ -17,6 +17,8 @@ __PACKAGE__->table("public.water_test_parameters");
 __PACKAGE__->add_columns(
   "tank_id",
   { data_type => "integer", is_nullable => 1 },
+  "param_order",
+  { data_type => "integer", is_nullable => 1 },
   "parameter_id",
   { data_type => "integer", is_nullable => 1 },
   "parameter",
@@ -58,8 +60,8 @@ __PACKAGE__->add_columns(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-06 08:51:13
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:2aFw3Rtzb4RU4PFUiF5DuQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-10 15:04:20
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:8WS4XKriQkgmrhFjzdNVfQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

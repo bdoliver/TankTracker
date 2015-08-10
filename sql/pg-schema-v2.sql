@@ -171,6 +171,7 @@ CREATE TABLE tank_parameters (
 
     active            BOOLEAN DEFAULT TRUE,
     chart             BOOLEAN DEFAULT TRUE,
+    param_order       INTEGER,
 
     PRIMARY KEY ( tank_id, parameter_id )
 );
@@ -195,7 +196,9 @@ BEGIN
         IF NEW.title IS NULL THEN
             NEW.rgb_colour = param_rec.rgb_colour;
         END IF;
-
+        IF NEW.param_order IS NULL THEN
+            NEW.param_order = NEW.parameter_id - 1;
+        END IF;
     END IF;
 
     RETURN NEW;
@@ -216,6 +219,7 @@ CREATE VIEW water_test_parameters AS (
   SELECT * FROM (
     -- existing tank-specific parameters:
     SELECT tp.tank_id,
+           tp.param_order,
            tp.parameter_id,
            p.parameter,
            tp.title,
@@ -228,6 +232,7 @@ CREATE VIEW water_test_parameters AS (
 UNION
      -- ... plus all default salt-specific params (for saltwater tanks)
      SELECT t.tank_id,
+            null,  -- parameter order
             p.parameter_id,
             p.parameter,
             p.title,
@@ -242,6 +247,7 @@ UNION
 UNION
      -- ... plus all default fresh-specific params (for freshwater tanks)
      SELECT t.tank_id,
+            null,  -- parameter order
             p.parameter_id,
             p.parameter,
             p.title,
@@ -254,7 +260,7 @@ UNION
         AND t.water_type = 'fresh'
         AND p.fresh_water
   ) AS wtp
-  ORDER BY 1, 2
+  ORDER BY 1, 2, 3
 );
 
 CREATE TABLE water_test (
