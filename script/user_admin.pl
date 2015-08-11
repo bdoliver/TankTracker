@@ -13,7 +13,7 @@ use Getopt::Long qw(:config no_ignore_case bundling);
 
 use TankTracker::Schema::TrackerUser;
 
-our ( $add, $edit, $user, $pass, $email, $first_name, $last_name );
+our ( $add, $edit, $user, $pass, $email, $first_name, $last_name, $parent_id );
 
 Getopt::Long::GetOptions(
     'user=s'       => \$user,
@@ -22,6 +22,7 @@ Getopt::Long::GetOptions(
     'first_name=s' => \$first_name,
     'last_name=s'  => \$last_name,
     'add'          => \$add,
+    'parent_id=i'  => \$parent_id,
 );
 
 DBICx::Sugar::config(
@@ -53,6 +54,7 @@ if ( $add ) {
         password   => $hash,
         first_name => $first_name,
         last_name  => $last_name,
+        parent_id  => $parent_id,
     });
 
     $user->update() or die "Failed to save new user\n";
