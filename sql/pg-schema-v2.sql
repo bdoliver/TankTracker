@@ -120,7 +120,7 @@ CREATE TYPE parameter_type AS ENUM (
 -- useful query, list contents of an enum:
 -- SELECT unnest(enum_range(NULL::parameter_type))
 
-CREATE TABLE parameters (
+CREATE TABLE water_test_parameter (
     parameter_id      SERIAL
                       NOT NULL
                       PRIMARY KEY,
@@ -135,32 +135,32 @@ CREATE TABLE parameters (
                       CHECK ( rgb_colour ~* '^#[\da-f]{6}$' )
 );
 
-INSERT INTO parameters VALUES ( default, 'salinity', true, false, 'Salinity', 'NaCl',           '#7633BD' );
-INSERT INTO parameters VALUES ( default, 'ph',       true, true,  'Ph',       'Ph',             '#A23C3C' );
-INSERT INTO parameters VALUES ( default, 'ammonia',  true, true,  'Ammonia',  'NH<sub>4</sub>', '#AFD8F8' );
-INSERT INTO parameters VALUES ( default, 'nitrite',  true, true,  'Nitrite',  'NO<sub>2</sub>', '#8CACC6' );
-INSERT INTO parameters VALUES ( default, 'nitrate',  true, true,  'Nitrate',  'NO<sub>3</sub>', '#BD9B33' );
-INSERT INTO parameters VALUES ( default, 'calcium',  true, false, 'Calcium',  'Ca',             '#CB4B4B' );
-INSERT INTO parameters VALUES ( default, 'phosphate',true, false, 'Phosphate','PO<sub>4</sub>', '#3D853D' );
-INSERT INTO parameters VALUES ( default, 'magnesium',true, false, 'Magnesium','Mg',             '#9440ED' );
-INSERT INTO parameters VALUES ( default, 'kh',       true, false, 'Carbonate Hardness', '&deg;KH', '#4DA74D' );
+INSERT INTO water_test_parameter VALUES ( default, 'salinity', true, false, 'Salinity', 'NaCl',           '#7633BD' );
+INSERT INTO water_test_parameter VALUES ( default, 'ph',       true, true,  'Ph',       'Ph',             '#A23C3C' );
+INSERT INTO water_test_parameter VALUES ( default, 'ammonia',  true, true,  'Ammonia',  'NH<sub>4</sub>', '#AFD8F8' );
+INSERT INTO water_test_parameter VALUES ( default, 'nitrite',  true, true,  'Nitrite',  'NO<sub>2</sub>', '#8CACC6' );
+INSERT INTO water_test_parameter VALUES ( default, 'nitrate',  true, true,  'Nitrate',  'NO<sub>3</sub>', '#BD9B33' );
+INSERT INTO water_test_parameter VALUES ( default, 'calcium',  true, false, 'Calcium',  'Ca',             '#CB4B4B' );
+INSERT INTO water_test_parameter VALUES ( default, 'phosphate',true, false, 'Phosphate','PO<sub>4</sub>', '#3D853D' );
+INSERT INTO water_test_parameter VALUES ( default, 'magnesium',true, false, 'Magnesium','Mg',             '#9440ED' );
+INSERT INTO water_test_parameter VALUES ( default, 'kh',       true, false, 'Carbonate Hardness', '&deg;KH', '#4DA74D' );
 -- FIXME: get unique default colours for the next rows:
-INSERT INTO parameters VALUES ( default, 'gh',       false, true, 'General Hardness',   'GH',   '#4DA74D' );
-INSERT INTO parameters VALUES ( default, 'copper',   false, false, 'Copper',    'Cu', '#4DA74D' );
-INSERT INTO parameters VALUES ( default, 'iodine',   false, false,'Iodine',    'I',   '#4DA74D' );
-INSERT INTO parameters VALUES ( default, 'strontium',false, false,'Strontium', 'Sr',  '#4DA74D' );
-INSERT INTO parameters VALUES ( default, 'temperature',  true, true, 'Temperature',    'Temp', '#4DA74D' );
-INSERT INTO parameters VALUES ( default, 'water_change', true, true, 'Water Change', 'Water Change', '#4DA74D' );
-INSERT INTO parameters VALUES ( default, 'tds', false, false, 'Total Dissolved Solids', 'TDS', '#4DA74D' );
+INSERT INTO water_test_parameter VALUES ( default, 'gh',       false, true, 'General Hardness',   'GH',   '#4DA74D' );
+INSERT INTO water_test_parameter VALUES ( default, 'copper',   false, false, 'Copper',    'Cu', '#4DA74D' );
+INSERT INTO water_test_parameter VALUES ( default, 'iodine',   false, false,'Iodine',    'I',   '#4DA74D' );
+INSERT INTO water_test_parameter VALUES ( default, 'strontium',false, false,'Strontium', 'Sr',  '#4DA74D' );
+INSERT INTO water_test_parameter VALUES ( default, 'temperature',  true, true, 'Temperature',    'Temp', '#4DA74D' );
+INSERT INTO water_test_parameter VALUES ( default, 'water_change', true, true, 'Water Change', 'Water Change', '#4DA74D' );
+INSERT INTO water_test_parameter VALUES ( default, 'tds', false, false, 'Total Dissolved Solids', 'TDS', '#4DA74D' );
 
-CREATE TABLE tank_parameters (
+CREATE TABLE tank_water_test_parameter (
     tank_id           INTEGER
                       NOT NULL
                       REFERENCES tank ( tank_id ),
 
     parameter_id      INTEGER
                       NOT NULL
-                      REFERENCES parameters ( parameter_id ),
+                      REFERENCES water_test_parameter ( parameter_id ),
 
     -- the following provide overrides from the parameter defaults:
     title             TEXT NOT NULL,
@@ -176,16 +176,16 @@ CREATE TABLE tank_parameters (
     PRIMARY KEY ( tank_id, parameter_id )
 );
 
-CREATE OR REPLACE FUNCTION upd_tank_parameters() RETURNS TRIGGER AS
+CREATE OR REPLACE FUNCTION upd_tank_water_test_parameter() RETURNS TRIGGER AS
 $$
 DECLARE
-    param_rec parameters%ROWTYPE;
+    param_rec water_test_parameter%ROWTYPE;
 
 BEGIN
     IF NEW.title IS NULL OR
        NEW.label IS NULL OR
        NEW.rgb_colour IS NULL THEN
-        SELECT INTO param_rec * FROM parameters
+        SELECT INTO param_rec * FROM water_test_parameter
                                 WHERE parameter_id = NEW.parameter_id;
         IF NEW.title IS NULL THEN
             NEW.title = param_rec.title;
@@ -205,19 +205,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER chk_tank_parameters
-    BEFORE INSERT OR UPDATE ON tank_parameters
-    FOR EACH ROW EXECUTE PROCEDURE upd_tank_parameters();
+CREATE TRIGGER chk_tank_water_test_parameter
+    BEFORE INSERT OR UPDATE ON tank_water_test_parameter
+    FOR EACH ROW EXECUTE PROCEDURE upd_tank_water_test_parameter();
 
 /*
  This gives us a view which returns either all tank-specific
- water test parameters (if set); or if there's no tank-specific
+ water test water_test_parameter (if set); or if there's no tank-specific
  params, we get the system-default settings for either salt or
  freshwater (depending on the requested tank)
 */
-CREATE VIEW water_test_parameters AS (
+CREATE VIEW water_test_parameter_view AS (
   SELECT * FROM (
-    -- existing tank-specific parameters:
+    -- existing tank-specific water_test_parameter:
     SELECT tp.tank_id,
            tp.param_order,
            tp.parameter_id,
@@ -227,7 +227,8 @@ CREATE VIEW water_test_parameters AS (
            tp.rgb_colour,
            tp.active,
            tp.chart
-      FROM tank_parameters tp JOIN parameters p USING ( parameter_id )
+      FROM tank_water_test_parameter tp
+      JOIN water_test_parameter      p USING ( parameter_id )
      WHERE tp.active IS TRUE
 UNION
      -- ... plus all default salt-specific params (for saltwater tanks)
@@ -240,8 +241,8 @@ UNION
             p.rgb_colour,
             true,  -- default active
             true   -- default chart
-       FROM tank t, parameters p --wheee! cartesian product ftw! :-)
-      WHERE t.tank_id NOT IN (SELECT DISTINCT tank_id FROM tank_parameters)
+       FROM tank t, water_test_parameter p --wheee! cartesian product ftw! :-)
+      WHERE t.tank_id NOT IN (SELECT DISTINCT tank_id FROM tank_water_test_parameter)
         AND t.water_type = 'salt'
         AND p.salt_water
 UNION
@@ -255,44 +256,13 @@ UNION
             p.rgb_colour,
             true,  -- default active
             true   -- default chart
-       FROM tank t, parameters p --wheee! cartesian product ftw! :-)
-      WHERE t.tank_id NOT IN (SELECT DISTINCT tank_id FROM tank_parameters)
+       FROM tank t, water_test_parameter p --wheee! cartesian product ftw! :-)
+      WHERE t.tank_id NOT IN (SELECT DISTINCT tank_id FROM tank_water_test_parameter)
         AND t.water_type = 'fresh'
         AND p.fresh_water
   ) AS wtp
   ORDER BY 1, 2, 3
 );
-
-CREATE TABLE water_test (
-    test_id           SERIAL
-                      NOT NULL
-                      PRIMARY KEY,
-
-    tank_id           INTEGER
-                      NOT NULL
-                      REFERENCES tank ( tank_id ),
-
-    user_id           INTEGER
-                      NOT NULL
-                      REFERENCES tracker_user ( user_id ),
-
-    test_date         TIMESTAMP(0) NULL DEFAULT current_date,
-    result_salinity   NUMERIC,
-    result_ph         NUMERIC,
-    result_ammonia    NUMERIC,
-    result_nitrite    NUMERIC,
-    result_nitrate    NUMERIC,
-    result_calcium    NUMERIC,
-    result_phosphate  NUMERIC,
-    result_magnesium  NUMERIC,
-    result_kh         NUMERIC,
-    result_alkalinity NUMERIC,
-    temperature       NUMERIC,
-    water_change      NUMERIC,
-    notes             TEXT
-);
-/* Not sure whether to allow multiple tests to be run on same day/date: */
-CREATE UNIQUE INDEX ON water_test (tank_id, ( test_date::date ));
 
 CREATE TABLE diary (
     diary_id    SERIAL
@@ -308,12 +278,75 @@ CREATE TABLE diary (
                 REFERENCES tracker_user ( user_id ),
 
     diary_date  TIMESTAMP(0) NOT NULL DEFAULT now(),
-    diary_note  TEXT NOT NULL,
+    diary_note  TEXT,
     updated_on  TIMESTAMP(0) NOT NULL DEFAULT now(),
     test_id     INT
-                REFERENCES water_test  ( test_id ) ON DELETE CASCADE
+                UNIQUE
 );
 CREATE INDEX tank_diary_date ON diary ( tank_id, diary_date );
+
+CREATE OR REPLACE FUNCTION chk_diary_note() RETURNS TRIGGER AS
+$$
+BEGIN
+    -- diary_note can be null if this is associated with a water test.
+    -- otherwise, diary_note cannot be null.
+    IF NEW.test_id IS NULL AND NEW.diary_note IS NULL THEN
+        RAISE EXCEPTION 'diary_note cannot be null';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER chk_diary_note
+    BEFORE INSERT OR UPDATE ON diary
+    FOR EACH ROW EXECUTE PROCEDURE chk_diary_note();
+
+
+CREATE TABLE water_test (
+    test_id           SERIAL
+                      NOT NULL
+                      PRIMARY KEY,
+
+    user_id           INTEGER
+                      NOT NULL
+                      REFERENCES tracker_user ( user_id ),
+
+    test_date         TIMESTAMP(0) NOT NULL DEFAULT current_date
+);
+
+ALTER TABLE diary ADD FOREIGN KEY ( test_id )
+      REFERENCES water_test ( test_id ) ON DELETE CASCADE;
+
+CREATE TABLE water_test_result (
+    test_result_id   SERIAL
+                     NOT NULL
+                     PRIMARY KEY,
+
+    test_id          INTEGER
+                     NOT NULL
+                     REFERENCES water_test ( test_id ),
+
+    tank_id          INTEGER NOT NULL,
+    parameter_id     INTEGER NOT NULL,
+    test_result      NUMERIC,
+
+    FOREIGN KEY ( tank_id, parameter_id )
+     REFERENCES tank_water_test_parameter ( tank_id, parameter_id )
+);
+
+CREATE VIEW tank_water_test_result_view AS (
+    SELECT wtr.tank_id,
+           wt.test_id,
+           wt.test_date,
+           wt.user_id,
+           wtp.parameter,
+           wtr.test_result
+      FROM water_test_result    wtr
+      JOIN water_test           wt  USING ( test_id )
+      JOIN water_test_parameter wtp USING ( parameter_id )
+  ORDER BY wtr.tank_id, wt.test_date, wtr.parameter_id
+);
 
 CREATE TYPE inventory_type AS ENUM (
     'consumable',

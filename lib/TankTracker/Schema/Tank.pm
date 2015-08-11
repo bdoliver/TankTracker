@@ -90,15 +90,14 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 __PACKAGE__->has_many(
-  "water_tests",
-  "TankTracker::Schema::WaterTest",
+  "tank_water_test_parameters",
+  "TankTracker::Schema::TankWaterTestParameter",
   { "foreign.tank_id" => "self.tank_id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
-
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-04 11:51:00
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:gM7/CaFqb+ioXRxJ1qVu8A
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-11 11:31:17
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:R5d4nDYt2kG9Ka+Nymkm6Q
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

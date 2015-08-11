@@ -21,55 +21,21 @@ __PACKAGE__->add_columns(
     is_nullable       => 0,
     sequence          => "water_test_test_id_seq",
   },
-  "tank_id",
-  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "user_id",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "test_date",
   {
     data_type     => "timestamp",
     default_value => \"('now'::text)::date",
-    is_nullable   => 1,
+    is_nullable   => 0,
   },
-  "result_salinity",
-  { data_type => "numeric", is_nullable => 1 },
-  "result_ph",
-  { data_type => "numeric", is_nullable => 1 },
-  "result_ammonia",
-  { data_type => "numeric", is_nullable => 1 },
-  "result_nitrite",
-  { data_type => "numeric", is_nullable => 1 },
-  "result_nitrate",
-  { data_type => "numeric", is_nullable => 1 },
-  "result_calcium",
-  { data_type => "numeric", is_nullable => 1 },
-  "result_phosphate",
-  { data_type => "numeric", is_nullable => 1 },
-  "result_magnesium",
-  { data_type => "numeric", is_nullable => 1 },
-  "result_kh",
-  { data_type => "numeric", is_nullable => 1 },
-  "result_alkalinity",
-  { data_type => "numeric", is_nullable => 1 },
-  "temperature",
-  { data_type => "numeric", is_nullable => 1 },
-  "water_change",
-  { data_type => "numeric", is_nullable => 1 },
-  "notes",
-  { data_type => "text", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("test_id");
-__PACKAGE__->has_many(
-  "diaries",
+__PACKAGE__->might_have(
+  "diary",
   "TankTracker::Schema::Diary",
   { "foreign.test_id" => "self.test_id" },
   { cascade_copy => 0, cascade_delete => 0 },
-);
-__PACKAGE__->belongs_to(
-  "tank",
-  "TankTracker::Schema::Tank",
-  { tank_id => "tank_id" },
-  { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
 __PACKAGE__->belongs_to(
   "tracker_user",
@@ -77,10 +43,16 @@ __PACKAGE__->belongs_to(
   { user_id => "user_id" },
   { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
+__PACKAGE__->has_many(
+  "water_test_results",
+  "TankTracker::Schema::WaterTestResult",
+  { "foreign.test_id" => "self.test_id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-07-29 11:59:28
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:zEE9aa24N/dj4gkvlKEv5w
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-11 11:31:17
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:/3kDYe29xvt4FAGZ0osrHg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
