@@ -71,12 +71,6 @@ __PACKAGE__->belongs_to(
   { user_id => "parent_id" },
   { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
-__PACKAGE__->might_have(
-  "preference",
-  "TankTracker::Schema::Preference",
-  { "foreign.user_id" => "self.user_id" },
-  { cascade_copy => 0, cascade_delete => 0 },
-);
 __PACKAGE__->has_many(
   "tank_user_accesses",
   "TankTracker::Schema::TankUserAccess",
@@ -101,6 +95,12 @@ __PACKAGE__->has_many(
   { "foreign.parent_id" => "self.user_id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
+__PACKAGE__->might_have(
+  "user_preference",
+  "TankTracker::Schema::UserPreference",
+  { "foreign.user_id" => "self.user_id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
 __PACKAGE__->has_many(
   "water_tests",
   "TankTracker::Schema::WaterTest",
@@ -110,8 +110,8 @@ __PACKAGE__->has_many(
 __PACKAGE__->many_to_many("roles", "tracker_user_roles", "role");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-07-28 12:17:18
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:oCJuTjcyG/C9jLKbci4Zmw
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-11 11:58:05
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:7nad55c27uywZUPgsW2pDA
 
 use Crypt::Eksblowfish::Bcrypt qw(bcrypt_hash en_base64);
 sub hash_pw {

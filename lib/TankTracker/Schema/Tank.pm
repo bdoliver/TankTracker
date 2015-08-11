@@ -77,9 +77,9 @@ __PACKAGE__->belongs_to(
   { user_id => "owner_id" },
   { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
-__PACKAGE__->has_many(
-  "tank_parameters",
-  "TankTracker::Schema::TankParameter",
+__PACKAGE__->might_have(
+  "tank_preference",
+  "TankTracker::Schema::TankPreference",
   { "foreign.tank_id" => "self.tank_id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -96,8 +96,9 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-11 11:31:17
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:R5d4nDYt2kG9Ka+Nymkm6Q
+
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-11 11:58:05
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:RV2YXV51MwJiM5LBMOAK3g
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

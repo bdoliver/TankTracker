@@ -397,15 +397,25 @@ CREATE TYPE temperature_scale AS ENUM (
     'F'
 );
 
-CREATE TABLE preferences (
-    user_id         INTEGER
+CREATE TABLE tank_preferences (
+    tank_id         INTEGER
                     NOT NULL
-                    REFERENCES tracker_user ( user_id )
+                    REFERENCES tank ( tank_id )
                     ON DELETE CASCADE,
 
     capacity_units    capacity_unit NOT NULL,
     dimension_units   dimension_unit NOT NULL,
     temperature_scale temperature_scale NOT NULL,
+
+    updated_on      TIMESTAMP(0) DEFAULT now(),
+    PRIMARY KEY ( tank_id )
+);
+
+CREATE TABLE user_preferences (
+    user_id         INTEGER
+                    NOT NULL
+                    REFERENCES tracker_user ( user_id )
+                    ON DELETE CASCADE,
 
     recs_per_page   INTEGER
                     NOT NULL
