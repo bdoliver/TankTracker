@@ -12,14 +12,6 @@
             [% form.get_element('tank_id') %]
         </div>
     </div>
-    <div class="row">
-        <div class="form-group col-md-2">
-             <label for="tank_action">Choose action:</label>
-        </div>
-        <div class="col-md-4">
-            [% form.get_element('tank_action') %]
-        </div>
-    </div>
     [% ELSE %]
     <div class="row">
         <div class="col-md-12">
@@ -29,6 +21,14 @@
         </div>
     </div>
     [% END %]
+    <div class="row">
+        <div class="form-group col-md-2">
+             <label for="tank_action">Choose action:</label>
+        </div>
+        <div class="col-md-4">
+            [% form.get_element('tank_action') %]
+        </div>
+    </div>
 
     [% form_errors %]
 

@@ -1,6 +1,7 @@
 package TankTracker::TraitFor::Controller::User;
 
 use MooseX::MethodAttributes::Role;
+use namespace::autoclean;
 
 sub base :Chained('/') :PathPart('user') :CaptureArgs(0) {
     my ( $self, $c ) = @_;
@@ -40,7 +41,5 @@ sub get_user :Chained('base') :PathPart('') CaptureArgs(1) {
 
     return 1;
 }
-
-use namespace::autoclean;
 
 1;

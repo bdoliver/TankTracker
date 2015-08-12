@@ -61,6 +61,25 @@ CREATE TYPE water_type AS ENUM (
     'fresh'
 );
 
+CREATE TYPE capacity_unit AS ENUM (
+    'litres',
+    'gallons',
+    'us gallons'
+);
+
+CREATE TYPE dimension_unit AS ENUM (
+    'mm',
+    'cm',
+    'm',
+    'inches',
+    'feet'
+);
+
+CREATE TYPE temperature_scale AS ENUM (
+    'C',
+    'F'
+);
+
 CREATE TABLE tank (
     tank_id         SERIAL
                     NOT NULL
@@ -74,10 +93,16 @@ CREATE TABLE tank (
     tank_name       TEXT NOT NULL,
 
     notes           TEXT,
+    capacity_units  capacity_unit NOT NULL,
     capacity        NUMERIC DEFAULT 0,
+
+    dimension_units dimension_unit NOT NULL,
     length          NUMERIC DEFAULT 0,
     width           NUMERIC DEFAULT 0,
     depth           NUMERIC DEFAULT 0,
+
+    temperature_scale temperature_scale NOT NULL,
+
     active          BOOLEAN DEFAULT TRUE,
     created_on      TIMESTAMP(0) NOT NULL DEFAULT now(),
     updated_on      TIMESTAMP(0) DEFAULT now()
@@ -161,6 +186,8 @@ CREATE TABLE tank_water_test_parameter (
     parameter_id      INTEGER
                       NOT NULL
                       REFERENCES water_test_parameter ( parameter_id ),
+    -- this is redundant but saves an awkward 'prefetch'
+    parameter         TEXT NOT NULL,
 
     -- the following provide overrides from the parameter defaults:
     title             TEXT NOT NULL,
@@ -341,11 +368,18 @@ CREATE VIEW tank_water_test_result_view AS (
            wt.test_date,
            wt.user_id,
            wtp.parameter,
+           t.param_order,
+           t.title,
+           t.label,
+           t.rgb_colour,
+           t.active,
+           t.chart,
            wtr.test_result
       FROM water_test_result    wtr
       JOIN water_test           wt  USING ( test_id )
       JOIN water_test_parameter wtp USING ( parameter_id )
-  ORDER BY wtr.tank_id, wt.test_date, wtr.parameter_id
+      JOIN tank_water_test_parameter t USING ( tank_id, parameter_id )
+  ORDER BY wtr.tank_id, wt.test_date, wt.test_id, t.param_order, wtr.parameter_id
 );
 
 CREATE TYPE inventory_type AS ENUM (
@@ -376,39 +410,6 @@ CREATE TABLE inventory (
     purchase_price    MONEY NOT NULL,
     created_on        TIMESTAMP(0) NOT NULL DEFAULT now(),
     updated_on        TIMESTAMP(0) DEFAULT now()
-);
-
-CREATE TYPE capacity_unit AS ENUM (
-    'litres',
-    'gallons',
-    'us gallons'
-);
-
-CREATE TYPE dimension_unit AS ENUM (
-    'mm',
-    'cm',
-    'm',
-    'inches',
-    'feet'
-);
-
-CREATE TYPE temperature_scale AS ENUM (
-    'C',
-    'F'
-);
-
-CREATE TABLE tank_preferences (
-    tank_id         INTEGER
-                    NOT NULL
-                    REFERENCES tank ( tank_id )
-                    ON DELETE CASCADE,
-
-    capacity_units    capacity_unit NOT NULL,
-    dimension_units   dimension_unit NOT NULL,
-    temperature_scale temperature_scale NOT NULL,
-
-    updated_on      TIMESTAMP(0) DEFAULT now(),
-    PRIMARY KEY ( tank_id )
 );
 
 CREATE TABLE user_preferences (

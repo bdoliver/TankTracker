@@ -2,6 +2,7 @@ package TankTracker::TraitFor::Controller::Tank;
 
 use MooseX::MethodAttributes::Role;
 use DateTime::Format::Pg;
+use namespace::autoclean;
 
 sub base :Chained('/') :PathPart('tank') :CaptureArgs(0) {
     my ( $self, $c ) = @_;
@@ -45,7 +46,7 @@ sub get_tank :Chained('base') :PathPart('') CaptureArgs(1) {
         }
 
         # fetch the test attributes for this tank:
-        my $params = $c->model('WaterTestParameter')->list({ tank_id => $tank_id });
+        my $params = $c->model('TankWaterTestParameter')->list({ tank_id => $tank_id });
 
         $tank->{'test_params'} = $params || [];
 
@@ -61,7 +62,5 @@ sub get_tank :Chained('base') :PathPart('') CaptureArgs(1) {
 
     return 1;
 }
-
-use namespace::autoclean;
 
 1;

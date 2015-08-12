@@ -1,14 +1,3 @@
-[% IF ! user.preferences.dimension_units OR ! user.preferences.capacity_units %]
-<div class="row">
-  <div class="col-md-4 text-danger bg-danger">
-  <p>Your preferences have not yet been set up.</p>
-  <p>Please go to the User tab and select the units of measure for your
-     tank's dimensions and capacity.</p>
-  </div>
-</div>
-    [% RETURN %]
-[% END %]
-
 <form class="form" method="[% form.method %]" action="[% form.action %]" >
     [% form.get_element('tank_id')    %]
     [% form.get_element('water_type') %]
@@ -39,8 +28,8 @@
                         <div class="form-group col-md-2 number">
                              [% form.get_element('length').placeholder('Length') %]
                         </div>
-                        <div class="col-md-1">
-                            [% preferences.dimension_units %]
+                        <div class="col-md-3">
+                            [% form.get_element('dimension_units') %]
                         </div>
                     </div>
                     <div class="row">
@@ -51,7 +40,7 @@
                             [% form.get_element('width').placeholder('Width') %]
                         </div>
                         <div class="col-md-1">
-                            [% preferences.dimension_units %]
+                            &nbsp; <!-- [% preferences.dimension_units %] -->
                         </div>
                     </div>
                     <div class="row">
@@ -62,7 +51,7 @@
                             [% form.get_element('depth').placeholder('Depth') %]
                         </div>
                         <div class="col-md-1">
-                            [% user.preferences.dimension_units %]
+                            &nbsp; <!-- [% preferences.dimension_units %] -->
                         </div>
                     </div>
                     <div class="row">
@@ -72,11 +61,19 @@
                         <div class="form-group col-md-2 number">
                             [% form.get_element('capacity').placeholder('Capacity') %]
                         </div>
-                        <div class="col-md-1">
-                            [% user.preferences.capacity_units %]
+                        <div class="col-md-3">
+                            [% form.get_element('capacity_units') %]
                         </div>
                         <div class="col-md-1">
                             <input type="button" id="calc_capacity" value="Calculate" class="btn btn-md btn-primary" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label for="temperature_scale">Temp. Scale</label>
+                        </div>
+                        <div class="form-group col-md-2">
+                            [% form.get_element('temperature_scale') %]
                         </div>
                     </div>
                     <div class="row">
@@ -127,7 +124,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">Water Test Attributes</h4>
+        <h4 class="modal-title">Water Test Parameters</h4>
       </div>
       <div class="modal-body">
         <div class="row content">
@@ -136,7 +133,7 @@
             <table class="table table-striped table-hover">
             <thead>
             <tr>
-                <th class="text-right">ID</th>
+                <!-- <th class="text-right">ID</th> -->
                 <th>Description</th>
                 <th>Active?</th>
                 <th>Title</th>
@@ -149,8 +146,10 @@
 
       [% FOR i IN wtp_id %]
             <tr>
-                <td>[% form.get_element("wtp_" _ i _ "_parameter_id").value  %]</td>
-                <td>[% form.get_element("wtp_" _ i _ "_parameter").value |ucfirst|replace('_', ' ') %]</td>
+                <!-- <td>[% form.get_element("wtp_" _ i _ "_parameter_id").value  %]</td> -->
+                <td>[% form.get_element("wtp_" _ i _ "_parameter").value |ucfirst|replace('_', ' ') %]
+                    [% form.get_element("wtp_" _ i _ "_parameter") %]
+                </td>
                 <td class="text-center">
                    [% form.get_element("wtp_" _ i _ "_active") %]
                 </td>
@@ -191,7 +190,7 @@
 $(function() {
     $('#calc_capacity').click(function() {
 
-        var dimension_units  = '[% preferences.dimension_units %]';
+        var dimension_units  = $('select[name="dimension_units"]').val();
         var dimension_factor = 1;
         var dimension_metric = true;
 
@@ -211,6 +210,9 @@ $(function() {
             case 'feet':
                 dimension_metric = false;
                 break;
+            default:
+                alert('You must select dimension units before calculating capacity');
+                return false;
         }
 
         // volume here is either cubic metre, or cubic feet:
@@ -218,7 +220,7 @@ $(function() {
                      ($('input[name="width"]').val()  * dimension_factor) *
                      ($('input[name="depth"]').val()  * dimension_factor);
 
-        var capacity_units = '[% preferences.capacity_units %]';
+        var capacity_units = $('select[name="capacity_units"]').val();
         var capacity_factor;
 
         /* volume conversion rates:
@@ -241,6 +243,9 @@ $(function() {
             case 'us gallons':
                 capacity_factor = dimension_metric ? 264.17205236 : 7.4805194805;
                 break;
+            default:
+                alert('You must select capacity units before calculating.');
+                return false;
         }
         $('input[name="capacity"]').val((volume * capacity_factor).toFixed(2));
     });

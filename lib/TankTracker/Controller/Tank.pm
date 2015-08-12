@@ -95,6 +95,25 @@ sub _select_form :Private {
             ],
         },
     }
+    else {
+        push @elements,
+        {
+            name    => 'tank_action',
+            type    => 'Radiogroup',
+            default => $c->session->{'tank_action'},
+            options => [
+                [ 'add/salt'        => 'Add a new saltwater tank' ],
+                [ 'add/fresh'       => 'Add a new freshwater tank' ],
+            ],
+            constraints => [
+                'AutoSet',
+                {
+                    type    => 'Required',
+                    message => 'You must select an action.',
+                },
+            ],
+        },
+    }
 
     return { 'elements' => \@elements };
 }
@@ -190,6 +209,23 @@ sub _details_form : Private {
             value => $c->stash->{'water_type'},
         },
         {
+            name => 'capacity_units',
+            type => 'Select',
+            empty_first => 1,
+            empty_first_label => '- Select -',
+            options => [
+                [ 'litres'      => 'L'       ],
+                [ 'gallons'     => 'Gal'     ],
+                [ 'us gallons'  => 'US Gal'  ],
+            ],
+            constraints => [
+                {
+                    type    => 'Required',
+                    message => 'You must select capacity units',
+                },
+            ],
+        },
+        {
             name  => 'capacity',
             type  => 'Text',
             constraints => [
@@ -205,12 +241,31 @@ sub _details_form : Private {
             ],
         },
         {
+            name => 'dimension_units',
+            type => 'Select',
+            empty_first => 1,
+            empty_first_label => '- Select -',
+            options => [
+                [ 'mm'     => 'mm'     ],
+                [ 'cm'     => 'cm'     ],
+                [ 'm'      => 'm'      ],
+                [ 'inches' => 'inches' ],
+                [ 'feet'   => 'feet'   ],
+            ],
+            constraints => [
+                {
+                    type    => 'Required',
+                    message => 'You must select dimension units',
+                },
+            ],
+        },
+        {
             name  => 'length',
             type  => 'Text',
             constraints => [
                 {
                     type    => 'Length',
-                    message => q{Capacity must be a number.},
+                    message => q{Length must be a number.},
                 },
                 {
                     type    => 'MinRange',
@@ -250,6 +305,22 @@ sub _details_form : Private {
             ],
         },
         {
+            name    => 'temperature_scale',
+            type    => 'Radiogroup',
+            label_attributes => { 'class' => 'radio-inline' },
+            options => [
+                [ 'C' => 'Celsius'    ],
+                [ 'F' => 'Fahrenheit' ],
+            ],
+            constraints => [
+                'AutoSet',
+                {
+                    type    => 'Required',
+                    message => 'You must select a temperature scale.',
+                },
+            ],
+        },
+        {
             name    => 'active',
             type    => 'Radiogroup',
             label_attributes => { 'class' => 'radio-inline' },
@@ -268,7 +339,7 @@ sub _details_form : Private {
         {
             name => 'notes',
             type => 'Textarea',
-            rows => 15,
+            rows => 20,
             cols => 50,
             constraints => [
                 {
@@ -293,7 +364,10 @@ sub _details_form : Private {
     if ( ! $test_params or ! @{ $test_params } ) {
         # must be adding a new tank - fetch some defaults:
         my $type = $c->stash->{'water_type'}.'_water';
-        $test_params = $c->model('Parameter')->list({ $type => 1 });
+        $test_params = $c->model('WaterTestParameter')->list({ $type => 1 });
+
+        # set the active & show_chart flags to default for all params:
+        map { $_->{'active'} = $_->{'chart'} = 1 } @{ $test_params };
 
         # since we have no tank with test params, put it on the stash
         # so we can populate the form defaults from it:
@@ -301,7 +375,6 @@ sub _details_form : Private {
     }
 
     my @wtp_id = ();
-
 
     for my $param ( @{ $test_params } ) {
        my $id = $param->{'parameter_id'};
@@ -386,24 +459,24 @@ sub details : Chained('get_tank') Args(0) FormMethod('_details_form') {
 
             my $tank_id = delete $params->{'tank_id'};
 
+            ## prepare the water test parameter fields for update:
+            my $wtp_fields = $c->forward(
+                '_prepare_water_test_params',
+                [ \%wtp_fields ]
+            );
+
             if ( $tank_id ) {
                 ## Don't propagate current user_id to the tank's owner!
                 ## FIXME: look at implementing a 'change tank owner'?
                 delete $params->{'owner_id'};
 
-                $tank = $c->model('Tank')->update($tank_id, $params);
+                $tank = $c->model('Tank')->update($tank_id, $params, $wtp_fields);
                 $msg  = q{Updated tank details.};
             }
             else {
-                $tank = $c->model('Tank')->add($params);
+                $tank = $c->model('Tank')->add($params, $wtp_fields);
                 $msg = q{Created new tank.};
             }
-
-            ## water test param fields need to be updated separately:
-            $c->forward(
-                '_update_water_test_params',
-                [ $tank->{'tank_id'}, \%wtp_fields ]
-            );
 
             $c->stash->{'message'} = $msg;
 
@@ -436,8 +509,10 @@ sub details : Chained('get_tank') Args(0) FormMethod('_details_form') {
     return;
 }
 
-sub _update_water_test_params :Private {
-    my ( $self, $c, $tank_id, $fields ) = @_;
+## Massages the water test parameter fields into a form suitable
+## for updating into the database:
+sub _prepare_water_test_params :Private {
+    my ( $self, $c, $fields ) = @_;
 
     my %params = ();
 
@@ -447,18 +522,13 @@ sub _update_water_test_params :Private {
         my ( $id, $param ) = ( $field =~ $field_rx );
 
         $params{$id} ||= {
-            'tank_id'      => $tank_id,
             'parameter_id' => $id,
         };
 
         $params{$id}{$param} = $fields->{$field};
     }
 
-    my $params = [ map { $params{$_} } sort { $a <=> $b } keys %params ];
-
-    $c->model('TankParameter')->update($params);
-
-    return 1;
+    return [ map { $params{$_} } sort { $a <=> $b } keys %params ];
 }
 
 =encoding utf8

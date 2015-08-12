@@ -49,13 +49,25 @@ __PACKAGE__->add_columns(
     },
     is_nullable => 1,
   },
+  "param_order",
+  { data_type => "integer", is_nullable => 1 },
+  "title",
+  { data_type => "text", is_nullable => 1 },
+  "label",
+  { data_type => "text", is_nullable => 1 },
+  "rgb_colour",
+  { data_type => "char", is_nullable => 1, size => 7 },
+  "active",
+  { data_type => "boolean", is_nullable => 1 },
+  "chart",
+  { data_type => "boolean", is_nullable => 1 },
   "test_result",
   { data_type => "numeric", is_nullable => 1 },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-11 11:31:17
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:OYG/yLBJDZGjeWu+h0tGvw
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-12 10:47:39
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:KtavRvIF0OffZ9Uw+98pCg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

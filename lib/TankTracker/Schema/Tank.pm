@@ -33,14 +33,38 @@ __PACKAGE__->add_columns(
   { data_type => "text", is_nullable => 0 },
   "notes",
   { data_type => "text", is_nullable => 1 },
+  "capacity_units",
+  {
+    data_type => "enum",
+    extra => {
+      custom_type_name => "capacity_unit",
+      list => ["litres", "gallons", "us gallons"],
+    },
+    is_nullable => 0,
+  },
   "capacity",
   { data_type => "numeric", default_value => 0, is_nullable => 1 },
+  "dimension_units",
+  {
+    data_type => "enum",
+    extra => {
+      custom_type_name => "dimension_unit",
+      list => ["mm", "cm", "m", "inches", "feet"],
+    },
+    is_nullable => 0,
+  },
   "length",
   { data_type => "numeric", default_value => 0, is_nullable => 1 },
   "width",
   { data_type => "numeric", default_value => 0, is_nullable => 1 },
   "depth",
   { data_type => "numeric", default_value => 0, is_nullable => 1 },
+  "temperature_scale",
+  {
+    data_type => "enum",
+    extra => { custom_type_name => "temperature_scale", list => ["C", "F"] },
+    is_nullable => 0,
+  },
   "active",
   { data_type => "boolean", default_value => \"true", is_nullable => 1 },
   "created_on",
@@ -77,12 +101,6 @@ __PACKAGE__->belongs_to(
   { user_id => "owner_id" },
   { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
-__PACKAGE__->might_have(
-  "tank_preference",
-  "TankTracker::Schema::TankPreference",
-  { "foreign.tank_id" => "self.tank_id" },
-  { cascade_copy => 0, cascade_delete => 0 },
-);
 __PACKAGE__->has_many(
   "tank_user_accesses",
   "TankTracker::Schema::TankUserAccess",
@@ -97,8 +115,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-11 11:58:05
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:RV2YXV51MwJiM5LBMOAK3g
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-11 13:36:47
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:TerVWGn4Ft2Ycd9ZKkXcvw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

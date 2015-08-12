@@ -18,6 +18,8 @@ __PACKAGE__->add_columns(
   { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "parameter_id",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
+  "parameter",
+  { data_type => "text", is_nullable => 0 },
   "title",
   { data_type => "text", is_nullable => 0 },
   "label",
@@ -55,8 +57,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-11 11:31:17
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:FV4n4136aIEmvTOT/bj9+g
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-11 15:39:43
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:V+Q2M65Bek1VxyEAfS9Xjg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

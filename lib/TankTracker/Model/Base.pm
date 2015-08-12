@@ -31,9 +31,13 @@ sub rs_name {
 }
 
 sub resultset {
-    my $self = shift;
+    my  ( $self, $rs_list ) = @_;
 
-    my $resultset = $self->schema->resultset($self->rs_name());
+    my $rs_name = ( $rs_list and $self->can($rs_list) )
+                    ? $self->rs_list()
+                    : $self->rs_name();
+
+    my $resultset = $self->schema->resultset($rs_name);
 
     return $resultset;
 }
@@ -65,7 +69,7 @@ sub list {
         $no_deflate = delete $args[1]{'no_deflate'};
     }
 
-    my $result = $self->resultset->search(@args);
+    my $result = $self->resultset('rs_list')->search(@args);
 
     return $no_deflate ? $result : $self->deflate($result);
 }

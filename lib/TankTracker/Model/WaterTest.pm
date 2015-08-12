@@ -18,98 +18,125 @@ has 'rs_name' => (
     default => 'WaterTest',
 );
 
-# $WaterTest_attributes:
-#      label + color: used by jquery.flot when charting test results
-#      title: used when rendering the test results table
-our $WaterTest_attributes = Hash::Ordered->new(
-    test_id => {
-        title => 'Test Id',
-    },
-    tank_id => {
-        title => 'Tank Id',
-        hide  => 1, # don't show in list table
-    },
-    user_id => {
-        title => 'User Id',
-        hide  => 1, # don't show in list table
-    },
-    test_date => {
-        title => 'Test Date',
-    },
-    temperature => {
-        title => 'Temperature',
-        label => 'Temperature',
-        color => '#FFFFFF',
-    },
-    water_change => {
-        title => 'Water Change',
-    },
-# Notes will require some client-side javascript to make available:
-#     notes => {
-#         title => 'Notes',
+# # $WaterTest_attributes:
+# #      label + color: used by jquery.flot when charting test results
+# #      title: used when rendering the test results table
+# our $WaterTest_attributes = Hash::Ordered->new(
+#     test_id => {
+#         title => 'Test Id',
 #     },
-    result_salinity   => {
-        title => 'Salinity',
-        label => 'Salinity',
-        color => '#7633BD',
-    },
-    result_ph => {
-        title => 'Ph',
-        label => 'Ph',
-        color => '#A23C3C',
-    },
-    result_ammonia => {
-        title => 'Ammonia<br />(NH<sub>4</sub>)',
-        label => 'NH<sub>4</sub>',
-        color => '#AFD8F8',
-    },
-    result_nitrite => {
-        title => 'Nitrite<br />NO<sub>2</sub>)',
-        label => 'NO<sub>2</sub>',
-        color => '#8CACC6',
-    },
-    result_nitrate => {
-        title => 'Nitrate<br />(NO<sub>3</sub>)',
-        label => 'NO<sub>3</sub>',
-        color => '#BD9B33',
-    },
-    result_calcium => {
-        label => 'Ca',
-        color => '#CB4B4B',
-    },
-    result_phosphate => {
-        title => 'Phosphate<br />PO<sub>4</sub>)',
-        label => 'PO<sub>4</sub>',
-        color => '#3D853D',
-    },
-    result_magnesium => {
-        title => 'Magnesium<br />(Mg)',
-        label => 'Mg',
-        color => '#9440ED',
-    },
-    result_kh => {
-        title => 'Carbonate<br />Hardness<br />(&deg;KH)',
-        label => '&deg;KH',
-        color => '#4DA74D',
-    },
-    result_alkalinity => {
-        title => 'Alkalinity',
-        label => 'Alkalinity',
-        color => '#EDC240',
-    },
-);
+#     tank_id => {
+#         title => 'Tank Id',
+#         hide  => 1, # don't show in list table
+#     },
+#     user_id => {
+#         title => 'User Id',
+#         hide  => 1, # don't show in list table
+#     },
+#     test_date => {
+#         title => 'Test Date',
+#     },
+#     temperature => {
+#         title => 'Temperature',
+#         label => 'Temperature',
+#         color => '#FFFFFF',
+#     },
+#     water_change => {
+#         title => 'Water Change',
+#     },
+# # Notes will require some client-side javascript to make available:
+# #     notes => {
+# #         title => 'Notes',
+# #     },
+#     result_salinity   => {
+#         title => 'Salinity',
+#         label => 'Salinity',
+#         color => '#7633BD',
+#     },
+#     result_ph => {
+#         title => 'Ph',
+#         label => 'Ph',
+#         color => '#A23C3C',
+#     },
+#     result_ammonia => {
+#         title => 'Ammonia<br />(NH<sub>4</sub>)',
+#         label => 'NH<sub>4</sub>',
+#         color => '#AFD8F8',
+#     },
+#     result_nitrite => {
+#         title => 'Nitrite<br />NO<sub>2</sub>)',
+#         label => 'NO<sub>2</sub>',
+#         color => '#8CACC6',
+#     },
+#     result_nitrate => {
+#         title => 'Nitrate<br />(NO<sub>3</sub>)',
+#         label => 'NO<sub>3</sub>',
+#         color => '#BD9B33',
+#     },
+#     result_calcium => {
+#         label => 'Ca',
+#         color => '#CB4B4B',
+#     },
+#     result_phosphate => {
+#         title => 'Phosphate<br />PO<sub>4</sub>)',
+#         label => 'PO<sub>4</sub>',
+#         color => '#3D853D',
+#     },
+#     result_magnesium => {
+#         title => 'Magnesium<br />(Mg)',
+#         label => 'Mg',
+#         color => '#9440ED',
+#     },
+#     result_kh => {
+#         title => 'Carbonate<br />Hardness<br />(&deg;KH)',
+#         label => '&deg;KH',
+#         color => '#4DA74D',
+#     },
+#     result_alkalinity => {
+#         title => 'Alkalinity',
+#         label => 'Alkalinity',
+#         color => '#EDC240',
+#     },
+# );
 
 sub add {
     my ( $self, $params ) = @_;
 
-    my $test = $self->resultset->create($params);
+    my $details = delete $params->{'details'} or
+        die qq{WaterTest::add() requires hashref with 'details' key\n};
+    my $results = delete $params->{'results'} or
+        die qq{WaterTest::add() requires hashref with 'results' key\n};
 
-    $self->add_diary({
-        'tank_id'    => $test->tank_id(),
-        'user_id'    => $test->user_id(),
-        'diary_note' => 'Added water test results',
-        'test_id'    => $test->test_id(),
-    });
+    my $test;
+
+    try {
+        my $test_id;
+        my $notes = delete $details->{'notes'};
+
+        $self->schema->txn_do(
+            sub {
+                $test    = $self->resultset->create($details);
+                $test_id = $test->test_id();
+
+                my $rs = $self->schema->resultset('WaterTestResult');
+
+                for my $result ( @{ $results } ) {
+                    $result->{'test_id'} = $test_id;
+                    $rs->create($result);
+                }
+            }
+        );
+
+        $self->add_diary({
+            'tank_id'    => $results->[0]{'tank_id'},
+            'user_id'    => $test->user_id(),
+            'diary_note' => $notes || q{Recorded water test results},
+            'test_id'    => $test->test_id(),
+        });
+    }
+    catch {
+        die $_;
+    };
 
     return $self->deflate($test);
 }
@@ -117,18 +144,139 @@ sub add {
 sub update {
     my ( $self, $test_id, $params ) = @_;
 
-    my $test = $self->resultset->find($test_id);
+    my $details = delete $params->{'details'} or
+        die qq{WaterTest::update() requires hashref with 'details' key\n};
+    my $results = delete $params->{'results'} or
+        die qq{WaterTest::update() requires hashref with 'results' key\n};
 
-    $test->update($params);
+    my $test;
 
-    $self->add_diary({
-        'tank_id'    => $test->tank_id(),
-        'user_id'    => $params->{'user_id'},
-        'diary_note' => 'Updated water test results',
-        'test_id'    => $test_id,
-    });
+    try {
+        my $notes = delete $details->{'notes'};
 
-    return $self->deflate($test);
+        $self->schema->txn_do(
+            sub {
+                $test = $self->resultset->find($test_id);
+
+                $test->update($details);
+
+                my $rs = $self->schema->resultset('WaterTestResult');
+
+                for my $result ( @{ $results } ) {
+                    my $test_rec = $rs->find({
+                        'test_result_id' => $result->{'test_result_id'},
+                    }) or
+                        die "Cannot find test_result_id #$result->{'test_result_id'}\n";
+
+                    # sanity check:
+                    $test_rec->tank_id() == $result->{'tank_id'} or
+                        die "test_result_id #$result->{'test_result_id'} does not belong to current tank!\n";
+                    $test_rec->test_id() == $result->{'test_id'} or
+                        die "test_result_id #$result->{'test_result_id'} does not belong to current test!\n";
+
+                    $test_rec->test_result($result->{'test_result'});
+
+                    # only save if something has changed...
+                    $test_rec->update() if $test_rec->is_changed();
+                }
+            }
+        );
+
+        $self->add_diary({
+            'tank_id'    => $test->tank_id(),
+            'user_id'    => $params->{'user_id'},
+            'diary_note' => $notes || 'Updated water test results',
+            'test_id'    => $test_id,
+        });
+    }
+    catch {
+        die $_;
+    };
+
+    return 1;
+}
+
+sub get {
+    my ( $self, $test_id ) = @_;
+
+    my ( $rec, undef ) = @{ $self->list({'me.test_id' => $test_id}) };
+
+    return undef if ( ! $rec or ! @$rec );
+
+    my $test = $rec->[0];
+
+    ## Munge test into something suitable for providing the form default
+    ## values:
+    my $diary = delete $test->{'diary'};
+
+    $test->{'notes'} = $diary->{'diary_note'} if $diary;
+
+    my $results = delete $test->{'water_test_results'} || [];
+
+    for my $result ( @{ $results } ) {
+        my $param_id = $result->{'parameter_id'};
+
+        $test->{'tank_id'} ||= $result->{'tank_id'};
+        $test->{"test_result_$param_id"} = $result->{'test_result_id'};
+        $test->{"parameter_$param_id"}   = $result->{'test_result'};
+    }
+
+    return $test;
+}
+
+## We override the Base class' list() method because we need to munge
+## the test results into something more useful. It also saves us from
+## having to have the ugly search criteria for tank_id (which is on the
+## water_test_result record (NOT the water_test record); AND the ugly
+## prefetch crap we need to make sure we get all the col headings & notes.
+sub list {
+    my ( $self, $search, $args ) = @_;
+
+    # in case we get passed nothing, we will attempt to return
+    # sane stuffs...
+    $search ||= {};
+    $args   ||= {};
+
+    if ( my $tank_id = delete $search->{'tank_id'} ) {
+        $search->{'water_test_results.tank_id'} = $tank_id;
+    }
+
+    $args->{'prefetch'} ||= [
+        { 'water_test_results' =>  'tank_water_test_parameter' },
+        'diary',
+    ];
+
+    ## Ensure results are orderd by param_order / param_id.
+    my $order_by = $args->{'order_by'};
+
+    if ( ! $order_by or ref($order_by) eq 'HASH' ) {
+        $order_by = [ $order_by ];
+    }
+
+    push @{ $order_by },
+        { '-asc'  =>
+            [
+                'tank_water_test_parameter.param_order',
+                'tank_water_test_parameter.parameter_id'
+            ]
+        };
+
+    my ( $rows, $pager ) = @{ $self->SUPER::list($search,$args) };
+
+    $rows = [ $rows ] if ref($rows) eq 'HASH';
+
+    for my $row ( @{ $rows } ) {
+        for my $result ( @{ $row->{'water_test_results'} } ) {
+            my $params = delete $result->{'tank_water_test_parameter'};
+
+            $result = {
+                %{ $result },
+                %{ $params },
+            };
+        }
+    }
+
+    return [ $rows, $pager ];
 }
 
 sub _get_headings {
@@ -261,7 +409,7 @@ sub load_tests {
 ## suitable for graphing by jquery.flot:
 ## -------------------------------------
 sub chart_columns {
-    return [ grep { $_ =~ qr{^result_} } $WaterTest_attributes->keys() ];
+#    return [ grep { $_ =~ qr{^result_} } $WaterTest_attributes->keys() ];
 }
 
 sub chart_legend {
@@ -269,7 +417,7 @@ sub chart_legend {
 
     $col or die "chart_legend() missing argument!";
 
-    my $legend = $WaterTest_attributes->get($col);
+    my $legend = ''; #$WaterTest_attributes->get($col);
 
     return { map { $_ => $legend->{$_} } (qw(label color)) };
 }
