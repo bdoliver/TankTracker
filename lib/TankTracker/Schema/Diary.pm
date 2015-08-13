@@ -45,7 +45,6 @@ __PACKAGE__->add_columns(
   { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("diary_id");
-__PACKAGE__->add_unique_constraint("diary_test_id_key", ["test_id"]);
 __PACKAGE__->belongs_to(
   "tank",
   "TankTracker::Schema::Tank",
@@ -71,8 +70,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-11 11:31:17
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:PAxk+89iCI6iWjCLMRcvXg
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-13 10:47:52
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:dALBYG6zvRJDp1AcajFG8A
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

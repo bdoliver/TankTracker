@@ -308,9 +308,9 @@ CREATE TABLE diary (
     diary_note  TEXT,
     updated_on  TIMESTAMP(0) NOT NULL DEFAULT now(),
     test_id     INT
-                UNIQUE
 );
 CREATE INDEX tank_diary_date ON diary ( tank_id, diary_date );
+CREATE INDEX test_diary_note ON diary ( test_id );
 
 CREATE OR REPLACE FUNCTION chk_diary_note() RETURNS TRIGGER AS
 $$

@@ -31,8 +31,8 @@ __PACKAGE__->add_columns(
   },
 );
 __PACKAGE__->set_primary_key("test_id");
-__PACKAGE__->might_have(
-  "diary",
+__PACKAGE__->has_many(
+  "diaries",
   "TankTracker::Schema::Diary",
   { "foreign.test_id" => "self.test_id" },
   { cascade_copy => 0, cascade_delete => 0 },
@@ -51,8 +51,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-11 11:31:17
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:/3kDYe29xvt4FAGZ0osrHg
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-13 10:47:52
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:YNxGX1PLgbZuILMsVTRQzw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
