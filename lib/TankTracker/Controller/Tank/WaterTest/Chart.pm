@@ -66,20 +66,9 @@ sub chart_data :Chained('get_tank') PathPart('water_test/chart_data') Args(0) {
                     [ 'test_date' => { '>=', $params->{'sdate'} } ];
             }
 
-            # must always have the test_date (otherwise there's nothing
-            # to graph!)
-#             push @cols, 'test_date';
-#
-#             if ( $params->{'show_notes'} ) {
-#                 push @cols, 'notes';  # user wants notes in the tooltips
-#             }
-
             my $results = $c->model('WaterTest')->chart_data(
                 $search,
-                {
-#                     columns  => \@cols,
-                    order_by => { '-asc' => 'test_date' },
-                },
+                $params->{'show_notes'},
             );
 
             $c->stash->{'chart_data'} = $results;

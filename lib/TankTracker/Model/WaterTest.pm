@@ -194,11 +194,21 @@ sub list {
     $args->{'order_by'} = $order_by;
 
     if ( $args->{'no_deflate'} ) {
-warn "returning undeflated stuff\n";
         return $self->SUPER::list($search,$args);
     }
 
-    my ( $rows, $pager ) = (); #@{ $self->SUPER::list($search,$args) };
+    my $has_pager = $args->{'page'};
+
+    my $list = $self->SUPER::list($search,$args);
+
+    my ( $rows, $pager );
+
+    if ( $has_pager ) {
+        ( $rows, $pager ) = @{ $list };
+    }
+    else {
+        $rows = $list;
+    }
 
     ## When list() is called by get() there will only be one row
     ## returned as hashref instead of an arrayref (of one hashref):
@@ -215,7 +225,7 @@ warn "returning undeflated stuff\n";
         }
     }
 
-    return [ $rows, $pager ];
+    return $has_pager ? [ $rows, $pager ] : $rows;
 }
 
 sub _get_headings {
@@ -369,47 +379,49 @@ sub chart_columns {
 }
 
 sub chart_data {
-    my ( $self, @args ) = @_;
+    my ( $self, $search, $show_notes ) = @_;
 
-    # chart_data() is always passed an attributes hashref,
-    # so the following is safe.  We don't want to deflate
-    # the resultset into a hashref.  We need the test_date
-    # as an inflated DateTime object so that we can get its
-    # epoch seconds (required by jquery.flot's time series):
-    $args[1]{'no_deflate'} = 1;
+    my $tests = $self->list(
+        $search,
+        {
+            # NB: jquery.flot's time series requires the test_date to
+            # be in epoch milliseconds, so add a column to the search
+            # query.  The scalarref is required otherwise DBIx thinks
+            # it is a column name & prepends 'me.' to it!
+            '+select'  => [ \'extract(epoch from test_date) * 1000' ],
+            '+as'      => [ 'timestamp' ],
+            'order_by' => { '-asc' => 'test_date' },
+        },
+    );
 
-    my $tests   = $self->list(@args);
     my %results = ();
     my $axis    = 0;
-warn "tests are ", ref($tests), "\n";
-    my $chart_cols = $self->chart_columns($args[0]{'tank_id'});
-
-#warn "\n\n*** chart_data() got cols:\n", Dumper($chart_cols);
 
     ## massage test results into format required for charting.
-    while ( my $test = $tests->next() ) {
-warn "Test ID: ", $test->test_id(), " date: ", $test->test_date(), "\n";
-        while ( my $result = $test->water_test_results()->next() ) {
-warn "\t parameter: ", $result->parameter(), " result: ", $result->test_result(), "\n";
-#             $results{$col} ||= {
-#                 %{ $self->chart_legend($col) },
-#                 'xaxis' => 1,
-#                 'yaxis' => ++$axis,
-#                 'grid'  => { 'hoverable' => 1 },
-#                 'data'  => [],
-#             };
-#
-#             my $row_data = [
-#                 # NB: jquery.flot.js requires date
-#                 #     as epoch time in milliseconds:
-#                 $rec->test_date->epoch() * 1000,
-#                 $rec->$col()
-#             ];
-#
-#             push @$row_data, $rec->notes() if $want_notes;
-#
-#             push @{ $results{$col}{'data'} }, $row_data;
-#         }
+    for my $test ( @{ $tests } ) {
+        my $notes = join('<br />',
+                         map { $_->{'diary_note'} } @{ $test->{'diaries'} } );
+
+        for my $result ( @{ $test->{'water_test_results'} } ) {
+            my $parameter = $result->{'parameter'};
+
+            $results{$parameter} ||= {
+                'label' => $result->{'label'},
+                'color' => $result->{'rgb_colour'},
+                'xaxis' => 1,
+                'yaxis' => ++$axis,
+                'grid'  => { 'hoverable' => 1 },
+                'data'  => [],
+            };
+
+            my $row_data = [
+                $test->{'timestamp'},
+                $result->{'test_result'},
+            ];
+
+            push @$row_data, $notes if ( $show_notes and $notes );
+
+            push @{ $results{$result->{'parameter'}}{'data'} }, $row_data;
         }
     }
 
