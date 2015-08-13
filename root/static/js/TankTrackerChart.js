@@ -27,15 +27,16 @@ function _get_request_data() {
     }
 
     // ... and at least one of the checkboxes:
-    var result_selected = 0;
-    $('input[type="checkbox"][name^="result_"]').each(function(idx,obj) {
-        if ( $(obj).is(':checked') ) {
-            request_data[$(obj).attr('name')] = 1;
-            ++result_selected;
-        }
+    var param_ids = [];
+
+    $('input[type="checkbox"][name="parameter_id"]:checked').each(function(idx,obj) {
+        // the value of each checkbox represents the ID of the water test
+        // parameter selected for charting:
+        param_ids.push($(obj).val());
     });
 
-    if ( result_selected > 0 ) {
+    if ( param_ids.length > 0 ) {
+        request_data['parameter_id'] = param_ids;
         ret = request_data;
     }
     else {
@@ -188,7 +189,7 @@ function initChart(tank_id) {
 
     // reset the chart + selections on button click:
     $('#chart_reset').click(function() {
-        $('input[type="checkbox"][name^="result_"]').each(function(idx,obj) {
+        $('input[type="checkbox"][name="parameter_id"]').each(function(idx,obj) {
             $(obj).attr('checked', false);
         });
         $('#sdate').val('');
@@ -200,7 +201,7 @@ function initChart(tank_id) {
     });
 
     // bind an onChange handler to each chart option checkbox:
-    $('input[type="checkbox"][name^="result_"]').each(function(idx,obj) {
+    $('input[type="checkbox"][name="parameter_id"]').each(function(idx,obj) {
         $(obj).change( function() { generateChart(tank_id); } );
     });
     // ... and the chart_zoom option:

@@ -18,87 +18,6 @@ has 'rs_name' => (
     default => 'WaterTest',
 );
 
-# # $WaterTest_attributes:
-# #      label + color: used by jquery.flot when charting test results
-# #      title: used when rendering the test results table
-# our $WaterTest_attributes = Hash::Ordered->new(
-#     test_id => {
-#         title => 'Test Id',
-#     },
-#     tank_id => {
-#         title => 'Tank Id',
-#         hide  => 1, # don't show in list table
-#     },
-#     user_id => {
-#         title => 'User Id',
-#         hide  => 1, # don't show in list table
-#     },
-#     test_date => {
-#         title => 'Test Date',
-#     },
-#     temperature => {
-#         title => 'Temperature',
-#         label => 'Temperature',
-#         color => '#FFFFFF',
-#     },
-#     water_change => {
-#         title => 'Water Change',
-#     },
-# # Notes will require some client-side javascript to make available:
-# #     notes => {
-# #         title => 'Notes',
-# #     },
-#     result_salinity   => {
-#         title => 'Salinity',
-#         label => 'Salinity',
-#         color => '#7633BD',
-#     },
-#     result_ph => {
-#         title => 'Ph',
-#         label => 'Ph',
-#         color => '#A23C3C',
-#     },
-#     result_ammonia => {
-#         title => 'Ammonia<br />(NH<sub>4</sub>)',
-#         label => 'NH<sub>4</sub>',
-#         color => '#AFD8F8',
-#     },
-#     result_nitrite => {
-#         title => 'Nitrite<br />NO<sub>2</sub>)',
-#         label => 'NO<sub>2</sub>',
-#         color => '#8CACC6',
-#     },
-#     result_nitrate => {
-#         title => 'Nitrate<br />(NO<sub>3</sub>)',
-#         label => 'NO<sub>3</sub>',
-#         color => '#BD9B33',
-#     },
-#     result_calcium => {
-#         label => 'Ca',
-#         color => '#CB4B4B',
-#     },
-#     result_phosphate => {
-#         title => 'Phosphate<br />PO<sub>4</sub>)',
-#         label => 'PO<sub>4</sub>',
-#         color => '#3D853D',
-#     },
-#     result_magnesium => {
-#         title => 'Magnesium<br />(Mg)',
-#         label => 'Mg',
-#         color => '#9440ED',
-#     },
-#     result_kh => {
-#         title => 'Carbonate<br />Hardness<br />(&deg;KH)',
-#         label => '&deg;KH',
-#         color => '#4DA74D',
-#     },
-#     result_alkalinity => {
-#         title => 'Alkalinity',
-#         label => 'Alkalinity',
-#         color => '#EDC240',
-#     },
-# );
-
 sub add {
     my ( $self, $params ) = @_;
 
@@ -153,9 +72,7 @@ sub update {
 
     try {
         my $notes = delete $details->{'notes'};
-use Data::Dumper;
-warn "\n\n update details:\n", Dumper($details);
-warn "\n\n update results:\n", Dumper($results);
+
         my $tank_id;
 
         $self->schema->txn_do(
@@ -215,9 +132,9 @@ sub get {
 
     ## Munge test into something suitable for providing the form default
     ## values:
-    my $diary = delete $test->{'diary'};
-
-    $test->{'notes'} = $diary->{'diary_note'} if $diary;
+#     my $diary = delete $test->{'diary'};
+#
+#     $test->{'notes'} = $diary->{'diary_note'} if $diary;
 
     my $results = delete $test->{'water_test_results'} || [];
 
@@ -245,8 +162,12 @@ sub list {
     $search ||= {};
     $args   ||= {};
 
-    if ( my $tank_id = delete $search->{'tank_id'} ) {
-        $search->{'water_test_results.tank_id'} = $tank_id;
+    # tank_id & parameter are actually on the water_test_results record,
+    # so adjust search params accordingly:
+    for my $col ( qw(tank_id parameter_id) ) {
+        if ( my $attr = delete $search->{$col} ) {
+            $search->{"water_test_results.$col"} = $attr;
+        }
     }
 
     $args->{'prefetch'} ||= [
@@ -272,7 +193,12 @@ sub list {
 
     $args->{'order_by'} = $order_by;
 
-    my ( $rows, $pager ) = @{ $self->SUPER::list($search,$args) };
+    if ( $args->{'no_deflate'} ) {
+warn "returning undeflated stuff\n";
+        return $self->SUPER::list($search,$args);
+    }
+
+    my ( $rows, $pager ) = (); #@{ $self->SUPER::list($search,$args) };
 
     ## When list() is called by get() there will only be one row
     ## returned as hashref instead of an arrayref (of one hashref):
@@ -422,17 +348,24 @@ sub load_tests {
 ## suitable for graphing by jquery.flot:
 ## -------------------------------------
 sub chart_columns {
-#    return [ grep { $_ =~ qr{^result_} } $WaterTest_attributes->keys() ];
-}
+    my ( $self, $tank_id ) = @_;
 
-sub chart_legend {
-    my ( $self, $col ) = @_;
+    my $cols = $self->schema->resultset('WaterTestParameterView')->search(
+        {
+            tank_id  => $tank_id,
+            chart    => 1, ## only test parameters available for charting
+        },
+        {
+            order_by => {
+                '-asc' => [ qw( param_order parameter_id ) ],
+            },
+        },
+    );
 
-    $col or die "chart_legend() missing argument!";
+    $cols->result_class('DBIx::Class::ResultClass::HashRefInflator');
+    my @cols = $cols->all();
 
-    my $legend = ''; #$WaterTest_attributes->get($col);
-
-    return { map { $_ => $legend->{$_} } (qw(label color)) };
+    return { map { $_->{'parameter_id'} => $_ } @cols };
 }
 
 sub chart_data {
@@ -445,50 +378,38 @@ sub chart_data {
     # epoch seconds (required by jquery.flot's time series):
     $args[1]{'no_deflate'} = 1;
 
-    my $tests = $self->list(@args);
-
+    my $tests   = $self->list(@args);
     my %results = ();
     my $axis    = 0;
+warn "tests are ", ref($tests), "\n";
+    my $chart_cols = $self->chart_columns($args[0]{'tank_id'});
 
-    my %want_col;
+#warn "\n\n*** chart_data() got cols:\n", Dumper($chart_cols);
 
     ## massage test results into format required for charting.
-
-    ## the order of @cols from the web page is not deterministic,
-    ## so we process the requested fields in a fixed order which
-    ## matches the checkboxes on the chart page:
-    my @cols = grep { $_ ne 'notes' } @{ $args[1]{'columns'} };
-
-    my $want_notes = grep { $_ eq 'notes' } @{ $args[1]{'columns'} };
-
-    @want_col{@cols} = ( 1 ) x @cols;
-
-    my $chart_cols = $self->chart_columns();
-
-    while ( my $rec = $tests->next() ) {
-        for my $col ( @{ $chart_cols } ) {
-
-            # skip columns which were not requested:
-            $want_col{$col} or next;
-
-            $results{$col} ||= {
-                %{ $self->chart_legend($col) },
-                'xaxis' => 1,
-                'yaxis' => ++$axis,
-                'grid'  => { 'hoverable' => 1 },
-                'data'  => [],
-            };
-
-            my $row_data = [
-                # NB: jquery.flot.js requires date
-                #     as epoch time in milliseconds:
-                $rec->test_date->epoch() * 1000,
-                $rec->$col()
-            ];
-
-            push @$row_data, $rec->notes() if $want_notes;
-
-            push @{ $results{$col}{'data'} }, $row_data;
+    while ( my $test = $tests->next() ) {
+warn "Test ID: ", $test->test_id(), " date: ", $test->test_date(), "\n";
+        while ( my $result = $test->water_test_results()->next() ) {
+warn "\t parameter: ", $result->parameter(), " result: ", $result->test_result(), "\n";
+#             $results{$col} ||= {
+#                 %{ $self->chart_legend($col) },
+#                 'xaxis' => 1,
+#                 'yaxis' => ++$axis,
+#                 'grid'  => { 'hoverable' => 1 },
+#                 'data'  => [],
+#             };
+#
+#             my $row_data = [
+#                 # NB: jquery.flot.js requires date
+#                 #     as epoch time in milliseconds:
+#                 $rec->test_date->epoch() * 1000,
+#                 $rec->$col()
+#             ];
+#
+#             push @$row_data, $rec->notes() if $want_notes;
+#
+#             push @{ $results{$col}{'data'} }, $row_data;
+#         }
         }
     }
 

@@ -47,41 +47,11 @@
                 </tr>
                 <tr><td colspan="2">Select parameters to chart:
                   <span id="chart_opts">
-                    <label class="checkbox-inline" for="result_ph">
-                        <input type="checkbox" id="result_ph" name="result_ph" />Ph
+                    [% FOR p IN chart_columns %]
+                    <label class="checkbox-inline">
+                        <input type="checkbox" name="parameter_id" value="[% p.parameter_id %]" />[% p.label %]
                     </label>
-                    <label class="checkbox-inline" for="result_ammonia">
-                        <input type="checkbox" id="result_ammonia" name="result_ammonia" />NH<sub>4</sub>
-                    </label>
-                    <label class="checkbox-inline" for="result_nitrite">
-                        <input type="checkbox" id="result_nitrite" name="result_nitrite" />NO<sub>2</sub>
-                    </label>
-                    <label class="checkbox-inline" for="result_nitrate">
-                        <input type="checkbox" id="result_nitrate" name="result_nitrate" />NO<sub>3</sub>
-                    </label>
-                [% IF tank.water_type == 'salt' %]
-                    <label class="checkbox-inline" for="result_calcium">
-                        <input type="checkbox" id="result_calcium" name="result_calcium" />Ca
-                    </label>
-                    <label class="checkbox-inline" for="result_phosphate">
-                        <input type="checkbox" id="result_phosphate" name="result_phosphate" />PO<sub>4</sub>
-                    </label>
-                    <label class="checkbox-inline" for="result_magnesium">
-                        <input type="checkbox" id="result_magnesium" name="result_magnesium" />Mg
-                    </label>
-                    <label class="checkbox-inline" for="result_kh">
-                        <input type="checkbox" id="result_kh" name="result_kh" />&deg;KH
-                    </label>
-                    <label class="checkbox-inline" for="result_alkalinity">
-                        <input type="checkbox" id="result_alkalinity" name="result_alkalinity" />Alkalinity
-                    </label>
-                    <label class="checkbox-inline" for="result_salinity">
-                        <input type="checkbox" id="result_salinity" name="result_salinity" />Salinity
-                    </label>
-                [% END %]
-                    <label class="checkbox-inline" for="temperature">
-                        <input type="checkbox" id="temperature" name="temperature" />Temperature
-                    </label>
+                    [% END %]
                   </span>
                     </td>
                 </tr>
