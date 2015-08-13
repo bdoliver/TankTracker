@@ -68,6 +68,8 @@
         </div>
     </div>
 
+    [% form_errors %]
+
     </div>
 </div>
 </form>

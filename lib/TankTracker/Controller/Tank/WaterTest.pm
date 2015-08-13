@@ -45,8 +45,7 @@ sub list :Chained('get_tank') PathPart('water_test/list') {
              'tank_id' => $tank_id,
         },
         {
-            order_by =>
-                { '-desc' => 'test_date'},
+            order_by => { '-desc' => 'test_date' },
             page     => $page || 1,
             rows     => $c->stash->{'user'}{'preferences'}{'recs_per_page'} || 10,
         },
@@ -100,7 +99,12 @@ sub _test_form :Private {
         {
             name  => 'test_date',
             type  => 'Text',
-            constraints => [ 'Required' ],
+            constraints => [
+                {
+                    type    => 'Required',
+                    message => q{You must enter a test date.},
+                },
+            ],
         },
     );
 
@@ -129,7 +133,16 @@ sub _test_form :Private {
             {
                 name        => "parameter_$param_id",
                 type        => 'Text',
-                constraints => [ 'Required', 'Number' ],
+                constraints => [
+                    {
+                        type    => 'Required',
+                        message => qq{$field->{'title'} is a required input.},
+                    },
+                    {
+                        type    => 'Number',
+                        message => qq{$field->{'title'} must be a number.},
+                    },
+                ],
             };
     }
 
@@ -277,7 +290,7 @@ sub _water_test_params :Private {
                         'tank_id'        => $params->{'tank_id'},
                         'test_id'        => $params->{'test_id'},
                         'test_result_id' => $params->{$p},
-                        'test_result'    => $params->{"parameter_$p"},
+                        'test_result'    => $params->{"parameter_$id"},
                     };
             }
         }

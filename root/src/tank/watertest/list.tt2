@@ -47,16 +47,21 @@
                 </td>
                 [% END %]
                 <td class="text-center">
-                [% IF test.diary.diary_note %]
+                [% IF test.diaries.size %]
                     <a href="#"
                        data-title="Notes for test #[% test.test_id %]"
                        data-toggle="popover"
                        data-placement="left"
                        data-html="true"
-                       data-content="[% test.diary.diary_note FILTER html_line_break %]"
-                       title="Click to view notes">
-                           Notes
-                    </a>
+                       data-content="
+                       [% FOR d IN test.diaries %]
+                       <dl>
+                           [% NEXT IF ! d.diary_note %]
+                           <dt>[% d.diary_date %]</dt>
+                           <dd>[% d.diary_note %]</dd>
+                       [% END %]
+                       </dl>
+                       ">Notes</a>
                 [% ELSE %]
                     &nbsp;
                 [% END %]

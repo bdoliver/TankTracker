@@ -153,6 +153,10 @@ sub update {
 
     try {
         my $notes = delete $details->{'notes'};
+use Data::Dumper;
+warn "\n\n update details:\n", Dumper($details);
+warn "\n\n update results:\n", Dumper($results);
+        my $tank_id;
 
         $self->schema->txn_do(
             sub {
@@ -178,13 +182,17 @@ sub update {
 
                     # only save if something has changed...
                     $test_rec->update() if $test_rec->is_changed();
+
+                    # keep track of which tank these results are for so we
+                    # can do a diary note for the update
+                    $tank_id ||= $result->{'tank_id'};
                 }
             }
         );
 
         $self->add_diary({
-            'tank_id'    => $test->tank_id(),
-            'user_id'    => $params->{'user_id'},
+            'tank_id'    => $tank_id,
+            'user_id'    => $details->{'user_id'},
             'diary_note' => $notes || 'Updated water test results',
             'test_id'    => $test_id,
         });
@@ -242,17 +250,18 @@ sub list {
     }
 
     $args->{'prefetch'} ||= [
-        { 'water_test_results' =>  'tank_water_test_parameter' },
-        'diary',
+        { 'water_test_results' => 'tank_water_test_parameter' },
+        'diaries',
     ];
 
     ## Ensure results are orderd by param_order / param_id.
-    my $order_by = $args->{'order_by'};
+    my $order_by = delete $args->{'order_by'};
 
     if ( ! $order_by or ref($order_by) eq 'HASH' ) {
         $order_by = [ $order_by ];
     }
 
+    # need to ensure the results are in the correct order:
     push @{ $order_by },
         { '-asc'  =>
             [
@@ -261,8 +270,12 @@ sub list {
             ]
         };
 
+    $args->{'order_by'} = $order_by;
+
     my ( $rows, $pager ) = @{ $self->SUPER::list($search,$args) };
 
+    ## When list() is called by get() there will only be one row
+    ## returned as hashref instead of an arrayref (of one hashref):
     $rows = [ $rows ] if ref($rows) eq 'HASH';
 
     for my $row ( @{ $rows } ) {
