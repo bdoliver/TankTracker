@@ -123,7 +123,7 @@ sub export :Chained('get_tank') PathPart('water_test/tools/export') Args(0) Form
 
         $export_file =~ s{/}{}g;
 
-        my $tests = $c->model('WaterTest')->export($search, $order);
+        my $tests = $c->model('WaterTest')->export($search);
 
         $c->stash( columns      => [ $c->model('WaterTest')->columns() ],
                    cursor       => $tests->cursor(),
