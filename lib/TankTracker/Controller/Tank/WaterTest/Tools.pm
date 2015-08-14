@@ -77,10 +77,6 @@ sub export :Chained('get_tank') PathPart('water_test/tools/export') Args(0) Form
 
     if ( $form->submitted_and_valid() ) {
         my $search = {};
-        my $order  = {
-            order_by   => [ qw(tank_id test_date) ],
-            no_deflate => 1, # we want the raw resultset for export
-        };
 
         my $export_file = q{water_tests};
 
@@ -90,8 +86,7 @@ sub export :Chained('get_tank') PathPart('water_test/tools/export') Args(0) Form
             ## other users.  Instead, we lookup all tanks owned by the
             ## current user.
 
-            $search->{'tank.owner_id'} = $c->user->user_id();
-            $order->{'join'} = 'tank';
+            $search->{'owner_id'} = $c->user->user_id();
 
             $export_file .= q{-all_tanks};
         }
@@ -128,7 +123,7 @@ sub export :Chained('get_tank') PathPart('water_test/tools/export') Args(0) Form
 
         $export_file =~ s{/}{}g;
 
-        my $tests = $c->model('WaterTest')->list($search, $order);
+        my $tests = $c->model('WaterTest')->export($search, $order);
 
         $c->stash( columns      => [ $c->model('WaterTest')->columns() ],
                    cursor       => $tests->cursor(),

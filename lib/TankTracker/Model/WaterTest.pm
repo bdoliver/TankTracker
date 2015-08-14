@@ -149,12 +149,7 @@ sub get {
     return $test;
 }
 
-## We override the Base class' list() method because we need to munge
-## the test results into something more useful. It also saves us from
-## having to have the ugly search criteria for tank_id (which is on the
-## water_test_result record (NOT the water_test record); AND the ugly
-## prefetch crap we need to make sure we get all the col headings & notes.
-sub list {
+sub _list_args {
     my ( $self, $search, $args ) = @_;
 
     # in case we get passed nothing, we will attempt to return
@@ -192,6 +187,19 @@ sub list {
         };
 
     $args->{'order_by'} = $order_by;
+
+    return ( $search. $args );
+}
+
+## We override the Base class' list() method because we need to munge
+## the test results into something more useful. It also saves us from
+## having to have the ugly search criteria for tank_id (which is on the
+## water_test_result record (NOT the water_test record); AND the ugly
+## prefetch crap we need to make sure we get all the col headings & notes.
+sub list {
+    my ( $self, $search, $args ) = @_;
+
+    ( $search, $args ) = $self->_list_args($search, $args);
 
     if ( $args->{'no_deflate'} ) {
         return $self->SUPER::list($search,$args);
@@ -351,6 +359,21 @@ sub load_tests {
     $self->txn_commit();
 
     return "Imported $rec_no test records.";
+}
+
+sub export {
+    my ( $self, $search  ) = @_;
+
+    my $args = {
+        order_by => { '-asc' => [ qw(tank_id test_date) ],
+    };
+
+    ( $search, $args ) = $self->_list_args($search, $args);
+
+    return $self->schema->resultset('TankWaterTestResultView')->search(
+        $search,
+        $args,
+    );
 }
 
 ## ============================================================================

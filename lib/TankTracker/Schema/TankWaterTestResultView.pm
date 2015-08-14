@@ -17,12 +17,24 @@ __PACKAGE__->table("public.tank_water_test_result_view");
 __PACKAGE__->add_columns(
   "tank_id",
   { data_type => "integer", is_nullable => 1 },
+  "tank_name",
+  { data_type => "text", is_nullable => 1 },
+  "owner_id",
+  { data_type => "integer", is_nullable => 1 },
+  "owner_first_name",
+  { data_type => "text", is_nullable => 1 },
+  "owner_last_name",
+  { data_type => "text", is_nullable => 1 },
   "test_id",
   { data_type => "integer", is_nullable => 1 },
   "test_date",
   { data_type => "timestamp", is_nullable => 1 },
   "user_id",
   { data_type => "integer", is_nullable => 1 },
+  "tester_first_name",
+  { data_type => "text", is_nullable => 1 },
+  "tester_last_name",
+  { data_type => "text", is_nullable => 1 },
   "parameter",
   {
     data_type => "enum",
@@ -66,8 +78,8 @@ __PACKAGE__->add_columns(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-12 10:47:39
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:KtavRvIF0OffZ9Uw+98pCg
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-14 15:05:11
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:CSexaDQG42MNvxBEc2FOFQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

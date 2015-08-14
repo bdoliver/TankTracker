@@ -364,39 +364,31 @@ CREATE TABLE water_test_result (
 
 CREATE VIEW tank_water_test_result_view AS (
     SELECT wtr.tank_id,
+           t.tank_name,
+           t.owner_id,
+           tu.first_name AS owner_first_name,
+           tu.last_name  AS owner_last_name,
            wt.test_id,
            wt.test_date,
            wt.user_id,
+           u.first_name  AS tester_first_name,
+           u.last_name   AS tester_last_name,
            wtp.parameter,
-           t.param_order,
-           t.title,
-           t.label,
-           t.rgb_colour,
-           t.active,
-           t.chart,
+           twtp.param_order,
+           twtp.title,
+           twtp.label,
+           twtp.rgb_colour,
+           twtp.active,
+           twtp.chart,
            wtr.test_result
       FROM water_test_result    wtr
       JOIN water_test           wt  USING ( test_id )
       JOIN water_test_parameter wtp USING ( parameter_id )
-      JOIN tank_water_test_parameter t USING ( tank_id, parameter_id )
-  ORDER BY wtr.tank_id, wt.test_date, wt.test_id, t.param_order, wtr.parameter_id
-);
-
-CREATE AGGREGATE array_accum (anyelement) (
-    sfunc    = array_append,
-    stype    = anyarray,
-    initcond = '{}'
-);
-
-CREATE VIEW tank_export_test_result_view AS (
-    SELECT tank_id,
-           user_id,
-           test_date,
-           test_id,
-           array_accum(test_result) AS test_results
-      FROM tank_water_test_result_view
-  GROUP BY 1, 2, 3, 4
-  ORDER BY 1, 2, 3, 4
+      JOIN tank_water_test_parameter twtp USING ( tank_id, parameter_id )
+      JOIN tank                 t   USING ( tank_id )
+      JOIN tracker_user         u   USING ( user_id )
+      JOIN tracker_user         tu  ON ( t.owner_id = tu.user_id )
+  ORDER BY wtr.tank_id, wt.test_date, wt.test_id, twtp.param_order, wtr.parameter_id
 );
 
 CREATE TYPE inventory_type AS ENUM (
