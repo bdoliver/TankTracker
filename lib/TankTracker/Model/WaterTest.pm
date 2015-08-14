@@ -357,6 +357,8 @@ sub load_tests {
 ## The following methods are exclusively used when generating test result data
 ## suitable for graphing by jquery.flot:
 ## -------------------------------------
+## chart_columns() is called by Controller::WaterTest::Chart to determine the
+## checkboxes required for the chart page.
 sub chart_columns {
     my ( $self, $tank_id ) = @_;
 
@@ -378,6 +380,9 @@ sub chart_columns {
     return { map { $_->{'parameter_id'} => $_ } @cols };
 }
 
+## chart_data() is requested via callback from the generateChart() javascript
+## function which is attached to the checkbox change handlers on the chart
+## page (refer TankTrackerChart.js)
 sub chart_data {
     my ( $self, $search, $show_notes ) = @_;
 
@@ -386,8 +391,9 @@ sub chart_data {
         {
             # NB: jquery.flot's time series requires the test_date to
             # be in epoch milliseconds, so add a column to the search
-            # query.  The scalarref is required otherwise DBIx thinks
-            # it is a column name & prepends 'me.' to it!
+            # query to calculate the value.  The scalarref is required
+            # otherwise DBIx thinks it is a column name & prepends 'me.'
+            # to it!
             '+select'  => [ \'extract(epoch from test_date) * 1000' ],
             '+as'      => [ 'timestamp' ],
             'order_by' => { '-asc' => 'test_date' },
