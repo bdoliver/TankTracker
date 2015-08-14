@@ -382,6 +382,23 @@ CREATE VIEW tank_water_test_result_view AS (
   ORDER BY wtr.tank_id, wt.test_date, wt.test_id, t.param_order, wtr.parameter_id
 );
 
+CREATE AGGREGATE array_accum (anyelement) (
+    sfunc    = array_append,
+    stype    = anyarray,
+    initcond = '{}'
+);
+
+CREATE VIEW tank_export_test_result_view AS (
+    SELECT tank_id,
+           user_id,
+           test_date,
+           test_id,
+           array_accum(test_result) AS test_results
+      FROM tank_water_test_result_view
+  GROUP BY 1, 2, 3, 4
+  ORDER BY 1, 2, 3, 4
+);
+
 CREATE TYPE inventory_type AS ENUM (
     'consumable',
     'equipment',
