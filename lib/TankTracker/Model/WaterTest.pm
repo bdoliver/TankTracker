@@ -362,10 +362,10 @@ sub load_tests {
 }
 
 sub export {
-    my ( $self, $search  ) = @_;
+    my ( $self, $search ) = @_;
 
     my $args = {
-        order_by => { '-asc' => [ qw(tank_id test_date) ],
+        order_by => { '-asc' => [ qw(tank_id test_date) ] },
     };
 
     ( $search, $args ) = $self->_list_args($search, $args);
