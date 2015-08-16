@@ -188,14 +188,15 @@ sub _list_args {
 
     $args->{'order_by'} = $order_by;
 
-    return ( $search. $args );
+    return ( $search, $args );
 }
 
 ## We override the Base class' list() method because we need to munge
 ## the test results into something more useful. It also saves us from
 ## having to have the ugly search criteria for tank_id (which is on the
-## water_test_result record (NOT the water_test record); AND the ugly
-## prefetch crap we need to make sure we get all the col headings & notes.
+## water_test_result record NOT the water_test record!); AND the ugly
+## prefetch crap we need (to make sure we get all the col headings & notes)
+## all jammed into the caller's arg list.
 sub list {
     my ( $self, $search, $args ) = @_;
 
@@ -205,7 +206,7 @@ sub list {
         return $self->SUPER::list($search,$args);
     }
 
-    my $has_pager = $args->{'page'};
+    my $has_pager = $args->{'page'} || 0;
 
     my $list = $self->SUPER::list($search,$args);
 
