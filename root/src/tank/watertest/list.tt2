@@ -65,6 +65,7 @@
                 [% ELSE %]
                     &nbsp;
                 [% END %]
+                </td>
             </tr>
             [% END %]
             </tbody>
