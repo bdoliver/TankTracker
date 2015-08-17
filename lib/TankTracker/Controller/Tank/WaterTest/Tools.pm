@@ -123,9 +123,9 @@ sub export :Chained('get_tank') PathPart('water_test/tools/export') Args(0) Form
 
         $export_file =~ s{/}{}g;
 
-        my $tests = $c->model('WaterTest')->export($search);
+        my $tests = $c->model('WaterTest')->export_tests($search);
 
-        $c->stash( columns      => [ $c->model('WaterTest')->columns() ],
+        $c->stash( columns      => $c->model('WaterTest')->export_column_names(),
                    cursor       => $tests->cursor(),
                    current_view => 'CSV',
                    filename     => "$export_file.csv",
@@ -136,8 +136,6 @@ sub export :Chained('get_tank') PathPart('water_test/tools/export') Args(0) Form
 sub _import_form :Private {
     my ($self, $c ) = @_;
 
-    my $tank_id = $c->stash->{'tank'}{'tank_id'};
-
     my $elements = [
         {
             name => 'import_file',
@@ -147,7 +145,12 @@ sub _import_form :Private {
                 'data-preview-file-type' => 'text',
                 'data-wrap-text-length' => 45,
             },
-            constraints => [ 'Required' ],
+            constraints => [
+                {
+                    type    => 'Required',
+                    message => 'No file selected for upload.',
+                },
+            ],
         },
         {
             type => 'Submit',
@@ -179,7 +182,7 @@ sub import :Chained('get_tank') PathPart('water_test/tools/import') Args(0) Form
                 die "Failed to copy '$file' to '$target': $!";
 
             try {
-                my $result = $c->model('WaterTest')->load_tests({
+                my $result = $c->model('WaterTest')->import_tests({
                     tank_id => $c->stash->{'tank'}{'tank_id'},
                     user_id => $c->user->user_id(),
                     fh      => $upload->decoded_fh(),

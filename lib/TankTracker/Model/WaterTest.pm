@@ -267,15 +267,15 @@ sub _get_headings {
     return \@headings;
 }
 
-## NB: load_tests() is expected to be called within an eval{} or
+## NB: import_tests() is expected to be called within an eval{} or
 ##     try/catch block in order to simplify error reporting to the
 ##     caller.
-sub load_tests {
+sub import_tests {
     my ( $self, $args ) = @_;
 
     for my $arg ( qw( tank_id user_id fh ) ) {
         $args->{$arg} or
-        die qq{load_tests() missing '$arg' parameter!};
+        die qq{import_tests() missing '$arg' parameter!};
     }
 
     my $fh      = $args->{'fh'};
@@ -362,14 +362,30 @@ sub load_tests {
     return "Imported $rec_no test records.";
 }
 
-sub export {
+sub export_column_names {
+    return [ qw(
+            tank_id
+            tank_name
+            owner_id
+            owner_first_name
+            owner_last_name
+            test_id
+            test_date
+            user_id
+            tester_first_name
+            tester_last_name
+            parameter
+            test_result
+        ) ];
+}
+
+sub export_tests {
     my ( $self, $search ) = @_;
 
     my $args = {
         order_by => { '-asc' => [ qw(tank_id test_date) ] },
+        columns  => $self->export_column_names(),
     };
-
-    ( $search, $args ) = $self->_list_args($search, $args);
 
     return $self->schema->resultset('TankWaterTestResultView')->search(
         $search,
