@@ -28,8 +28,10 @@ sub chart :Chained('get_tank') PathPart('water_test/chart') Args(0) {
 
     $c->stash->{'action_heading'} = 'Graph Test Results';
 
-    my $chart_cols = $c->model('WaterTest')
-                       ->chart_columns($c->stash->{'tank'}{'tank_id'});
+    my $chart_cols = $c->model('WaterTest')->test_columns({
+        'tank_id' => $c->stash->{'tank'}{'tank_id'},
+        'chart'   => 1
+    });
 
     # this gives us the tank's water test parameter IDs in their
     # desired sequence:
