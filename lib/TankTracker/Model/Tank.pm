@@ -58,7 +58,7 @@ sub update {
                 $tank->update($self->_fix_params($params));
 
                 # update water test parameters for this tank:
-                $self->_water_test_params($wtp);
+                $self->_water_test_params($tank_id, $wtp);
             }
         );
 

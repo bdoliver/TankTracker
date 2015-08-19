@@ -364,7 +364,14 @@ sub _details_form : Private {
     if ( ! $test_params or ! @{ $test_params } ) {
         # must be adding a new tank - fetch some defaults:
         my $type = $c->stash->{'water_type'}.'_water';
-        $test_params = $c->model('WaterTestParameter')->list({ $type => 1 });
+        $test_params = $c->model('WaterTestParameter')->list(
+            {
+                $type => 1
+            },
+            {
+                'order_by' => { '-asc' => [ qw( parameter_id ) ] },
+            },
+        );
 
         # set the active & show_chart flags to default for all params:
         map { $_->{'active'} = $_->{'chart'} = 1 } @{ $test_params };

@@ -46,7 +46,14 @@ sub get_tank :Chained('base') :PathPart('') CaptureArgs(1) {
         }
 
         # fetch the test attributes for this tank:
-        my $params = $c->model('TankWaterTestParameter')->list({ tank_id => $tank_id });
+        my $params = $c->model('TankWaterTestParameter')->list(
+            {
+                'tank_id' => $tank_id,
+            },
+            {
+                'order_by' => { '-asc' => [ qw( param_order parameter_id ) ] },
+            },
+        );
 
         $tank->{'test_params'} = $params || [];
 
