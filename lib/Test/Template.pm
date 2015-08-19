@@ -70,7 +70,7 @@ sub _init {
             TRIM        => 1,
             PRE_CHOMP   => 1,
             POST_CHOMP  => 0,
-            PRE_PROCESS => 'macro.tt2',
+            PRE_PROCESS => 'macro.tt',
             TIMER       => 0,
         },
         $config

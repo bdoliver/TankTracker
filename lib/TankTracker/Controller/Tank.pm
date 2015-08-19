@@ -120,7 +120,7 @@ sub select : Chained('base') :PathPart('') Args(0) FormMethod('_select_form') {
         return;
     }
 
-    $c->stash->{'template'} = 'tank/select.tt2';
+    $c->stash->{'template'} = 'tank/select.tt';
 
     return;
 }
@@ -289,7 +289,7 @@ sub details : Chained('get_tank') Args(0) FormMethod('_details_form') {
 #     }
     $form->default_values($c->stash->{'tank'});
 
-    $c->stash(template => 'tank/details.tt2');
+    $c->stash(template => 'tank/details.tt');
 
     return;
 }

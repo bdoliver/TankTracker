@@ -18,13 +18,14 @@ has 'rs_name' => (
 sub get {
     my ( $self, $user_id ) = @_;
 
-    my $user_obj = $self->resultset->find($user_id, { 'prefetch' => 'preference' });
+#     my $user_obj = $self->resultset->find($user_id, { 'prefetch' => 'preference' });
+    my $user_obj = $self->resultset->find($user_id);
 
-    my $prefs = $self->deflate($user_obj->preference());
+#     my $prefs = $self->deflate($user_obj->preference());
     my $user  = $self->deflate($user_obj);
 
     delete $user->{'password'};
-
+my $prefs;
     $user->{'preferences'} = $prefs;
 
     return $user;
