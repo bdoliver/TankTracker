@@ -20,7 +20,7 @@ sub _tools :Private {
     $c->stash->{'tools_action'}   = $action;
     $c->stash->{'action_heading'} = q{Test Results - }.ucfirst($action);
 
-    $c->stash->{'template'} = qq{tank/watertest/tools/$action.tt2};
+    $c->stash->{'template'} = qq{tank/watertest/tools/$action.tt};
 
     return;
 }

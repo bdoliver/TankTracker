@@ -292,7 +292,7 @@ sub details: Chained('get_inventory') PathPart('details') Args(0) FormMethod('_i
 
     $c->stash->{'col_width'} = 4;
     
-    $c->stash->{'template'}  = 'tank/inventory/details.tt2';
+    $c->stash->{'template'}  = 'tank/inventory/details.tt';
     
     return;
 }

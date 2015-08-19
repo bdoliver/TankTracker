@@ -342,7 +342,7 @@ sub details :Args(0) FormMethod('_details') {
     }
 
     $c->stash->{'action_heading'} = 'Details';
-    $c->stash->{'template'} = 'user/details.tt2';
+    $c->stash->{'template'} = 'user/details.tt';
 
     return;
 }
@@ -378,7 +378,7 @@ sub list :Path('/user/admin/') {
     $c->stash->{'active_tab'}     = 'admin';
     $c->stash->{'add_url'}        = q{/user/add};
 
-    $c->stash->{'template'}       = 'user/list.tt2';
+    $c->stash->{'template'}       = 'user/list.tt';
 
     return;
 }

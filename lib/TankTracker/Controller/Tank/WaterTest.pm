@@ -264,7 +264,7 @@ sub details :Chained('get_test') PathPart('water_test/details') Args(0) FormMeth
 
     $form->default_values($c->stash->{'water_test'});
 
-    $c->stash->{'template'} = 'tank/watertest/details.tt2';
+    $c->stash->{'template'} = 'tank/watertest/details.tt';
 }
 
 sub _water_test_params :Private {
@@ -318,7 +318,7 @@ sub view :Chained('get_test') PathPart('view') Args(0) {
 
     $c->stash->{'action_heading'} = 'View Test Details';
 
-    $c->stash->{'template'} = 'tank/watertest/details.tt2';
+    $c->stash->{'template'} = 'tank/watertest/details.tt';
 }
 
 =pod

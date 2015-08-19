@@ -66,12 +66,12 @@ __PACKAGE__->config(
             __PACKAGE__->path_to('root', 'lib'),
             __PACKAGE__->path_to('root', 'src'),
         ],
-        PRE_PROCESS => 'macro.tt2',
-        WRAPPER     => 'content.tt2',
+        PRE_PROCESS => 'macro.tt',
+        WRAPPER     => 'content.tt',
         PRE_CHOMP   => 1,
         ERROR       => $ENV{'CATALYST_DEBUG'}
                        ? undef
-                       : 'error/template_error.tt2',
+                       : 'error/template_error.tt',
     },
 
     'View::JSON' => {

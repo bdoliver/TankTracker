@@ -34,7 +34,7 @@ Check if there is a user and, if not, forward to login page
 sub auto :Private {
     my ($self, $c) = @_;
 
-    $c->stash->{'template_wrappers'} = [ 'html.tt2' ];
+    $c->stash->{'template_wrappers'} = [ 'html.tt' ];
 
     $c->forward('check_request') || return 0;
 
@@ -71,7 +71,7 @@ sub check_request : Private {
 
     $c->stash->{'user'} = $c->model('User')->get($c->user->user_id());
 
-    push @{ $c->stash->{'template_wrappers'} }, 'menu.tt2';
+    push @{ $c->stash->{'template_wrappers'} }, 'menu.tt';
 
     if ( $c->user->has_role('Admin') ) {
         $c->stash->{'is_admin'} = 1;
@@ -166,7 +166,7 @@ sub login : Local FormMethod('_login_form') Args(0) {
     }
 
     $c->stash->{'page_title'} = 'Login';
-    $c->stash->{'template'}   = 'login.tt2';
+    $c->stash->{'template'}   = 'login.tt';
 
     return;
 }
@@ -206,7 +206,7 @@ Standard 404 error page
 sub default :Path {
     my ( $self, $c ) = @_;
     #$c->response->body( 'Page not found' );
-    $c->stash->{'template'} = 'error.tt2';
+    $c->stash->{'template'} = 'error.tt';
     $c->stash->{'error'}  ||= 'Requested resource is unavailable';
     $c->response->status(404);
 }
