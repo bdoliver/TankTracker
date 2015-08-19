@@ -6,7 +6,7 @@ use warnings;
 use Test::More;
 use Test::Template;
 
-my $tt = Test::Template->new({ INPUT => 'tank/diary/add.tt2', })
+my $tt = Test::Template->new({ INPUT => 'tank/diary/add.tt', })
     or die "$Template::ERROR\n";
 
 ok( $tt->process(), q{processed template ok} );

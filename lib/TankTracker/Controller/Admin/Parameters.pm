@@ -114,7 +114,7 @@ sub params : Chained('base') :PathPart('parameters') Args(0) FormMethod('_parame
         };
     }
 
-    $c->stash->{'template'} = 'admin/parameters.tt2';
+    $c->stash->{'template'} = 'admin/parameters.tt';
 
 }
 

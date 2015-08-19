@@ -6,7 +6,7 @@ use warnings;
 use Test::More;
 use Test::Template;
 
-my $tt = Test::Template->new({ INPUT => 'user/access/list.tt2', })
+my $tt = Test::Template->new({ INPUT => 'user/access/list.tt', })
     or die "$Template::ERROR\n";
 
 my $content = q{};
@@ -43,7 +43,7 @@ subtest 'user by tank' => sub {
     );
 
     like($content => qr{<td class="text-left">foo barbaz</td>},
-        q{using 'by_user.tt2' template}
+        q{using 'by_user.tt' template}
     );
 
     ok((($content =~ qr{<ul\ class="list-unstyled">\s+
@@ -86,7 +86,7 @@ subtest 'tank by user' => sub {
     );
 
     like($content => qr{<td\ class="text-left">TT\ #1\ (brackish)</td>}msx,
-        q{using 'by_tank.tt2' template}
+        q{using 'by_tank.tt' template}
     );
 
     ok((($content =~ qr{<ul\ class="list-unstyled">\s+

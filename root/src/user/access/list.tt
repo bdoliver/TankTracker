@@ -20,9 +20,9 @@
             </div>
             </form>
             [% IF by_tank;
-                INCLUDE user/access/list/by_tank.tt2;
+                INCLUDE user/access/list/by_tank.tt;
                ELSE;
-                INCLUDE user/access/list/by_user.tt2;
+                INCLUDE user/access/list/by_user.tt;
                END;
             %]
 

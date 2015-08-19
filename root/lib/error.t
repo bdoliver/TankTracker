@@ -6,12 +6,10 @@ use warnings;
 use Test::More;
 use Test::Template;
 
-my $tt = Test::Template->new({ INPUT => 'user/access/list/by_tank.tt', })
+my $tt = Test::Template->new({ INPUT => 'error.t', })
     or die "$Template::ERROR\n";
 
 ok( $tt->process(), q{Processed template ok} );
 
-## We don't need any further tests as the template is exercised via
-## the user/access/list.t test.
-
 done_testing();
+
