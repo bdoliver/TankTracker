@@ -83,26 +83,43 @@ sub update {
 
                 my $rs = $self->schema->resultset('WaterTestResult');
 
-                for my $result ( @{ $results } ) {
-                    my $test_rec = $rs->find({
-                        'test_result_id' => $result->{'test_result_id'},
-                    }) or
-                        die "Cannot find test_result_id #$result->{'test_result_id'}\n";
+                my @result_ids = grep { $_->{'test_result_id'} } @{ $results };
 
-                    # sanity check:
-                    $test_rec->tank_id() == $result->{'tank_id'} or
-                        die "test_result_id #$result->{'test_result_id'} does not belong to current tank!\n";
-                    $test_rec->test_id() == $result->{'test_id'} or
-                        die "test_result_id #$result->{'test_result_id'} does not belong to current test!\n";
+                if ( @result_ids == @{ $results } ) {
+                    ## all results have an existing test_result_id
+                    ## so we can update the records:
+                    for my $result ( @{ $results } ) {
+                        my $test_rec = $rs->find({
+                            'test_result_id' => $result->{'test_result_id'},
+                        }) or
+                            die "Cannot find test_result_id #$result->{'test_result_id'}\n";
 
-                    $test_rec->test_result($result->{'test_result'});
+                        # sanity check:
+                        $test_rec->tank_id() == $result->{'tank_id'} or
+                            die "test_result_id #$result->{'test_result_id'} does not belong to current tank!\n";
+                        $test_rec->test_id() == $result->{'test_id'} or
+                            die "test_result_id #$result->{'test_result_id'} does not belong to current test!\n";
 
-                    # only save if something has changed...
-                    $test_rec->update() if $test_rec->is_changed();
+                        $test_rec->test_result($result->{'test_result'});
 
-                    # keep track of which tank these results are for so we
-                    # can do a diary note for the update
-                    $tank_id ||= $result->{'tank_id'};
+                        # only save if something has changed...
+                        $test_rec->update() if $test_rec->is_changed();
+
+                        # keep track of which tank these results are for so we
+                        # can do a diary note for the update
+                        $tank_id ||= $result->{'tank_id'};
+                    }
+                }
+                else {
+                    ## the list of test results don't all have existing
+                    ## test_result_id to match, so delete existing records
+                    ## & insert new (this will likely be the case when
+                    ## using the import facility):
+                    $rs->search({'test_id' => $test_id})->delete();
+                    for my $result ( @{ $results } ) {
+                        $result->{'test_id'} = $test_id;
+                        $rs->create($result);
+                    }
                 }
             }
         );
@@ -132,16 +149,12 @@ sub get {
 
     ## Munge test into something suitable for providing the form default
     ## values:
-#     my $diary = delete $test->{'diary'};
-#
-#     $test->{'notes'} = $diary->{'diary_note'} if $diary;
-
     my $results = delete $test->{'water_test_results'} || [];
 
     for my $result ( @{ $results } ) {
         my $param_id = $result->{'parameter_id'};
 
-        $test->{'tank_id'} ||= $result->{'tank_id'};
+        $test->{'tank_id'}             ||= $result->{'tank_id'};
         $test->{"test_result_$param_id"} = $result->{'test_result_id'};
         $test->{"parameter_$param_id"}   = $result->{'test_result'};
     }
@@ -237,15 +250,16 @@ sub list {
     return $has_pager ? [ $rows, $pager ] : $rows;
 }
 
-sub _get_headings {
+sub _get_import_headings {
     my ( $self, $row ) = @_;
 
-    my @cols = $self->columns();
+    # import mirrors export:
+    my $cols = $self->export_column_names();
 
     my ( @headings, @errors );
 
     for my $hdg ( @{ $row } ) {
-        if ( grep { lc $hdg eq $_ } @cols ) {
+        if ( grep { lc $hdg eq $_ } @{ $cols } ) {
             push @headings, $hdg;
         }
         else {
@@ -255,14 +269,14 @@ sub _get_headings {
 
     die "Invalid column names: ".join(", ", @errors) if @errors;
 
-    # make sure we have at least date + 1 result column:
-    die "No 'test_date' column in upload"
-        if not grep { $_ eq 'test_date' } @headings;
+    # check for mandatory columns:
+    for my $hdg ( qw( test_date parameter test_result ) ) {
+        if ( not grep { $_ eq $hdg } @headings ) {
+            push @errors, $hdg;
+        }
+    }
 
-    die "Need at least one result_* column in upload"
-        if not grep { $_ =~ qr{ \A result_ }msix } @headings;
-
-    ## FIXME: should also check for duplicate columns?
+    die "Missing mandatory columns in import:".join(", ", @errors) if @errors;
 
     return \@headings;
 }
@@ -280,24 +294,32 @@ sub import_tests {
 
     my $fh      = $args->{'fh'};
     my $user_id = $args->{'user_id'};
-    my $current_tank_id = $args->{'tank_id'};
+    my $tank_id = $args->{'tank_id'};
 
     my $csv = Text::CSV_XS->new({ binary => 1, empty_is_undef => 1});
 
     # first line s/be headings:
-    my $headings = $self->_get_headings($csv->getline($fh));
+    my $headings = $self->_get_import_headings($csv->getline($fh));
 
     $csv->column_names($headings);
 
     my $rec_no;
 
-    $self->txn_begin();
+    try {
+        $self->txn_begin();
 
-    eval {
+        my $current_test    = {};
+        my $tank_parameters = {};
+        my $current_tank_id;
+
         ## FIXME: should we set an upper limit on records loaded?
         CSV: while ( my $row = $csv->getline_hr($fh) ) {
 
             $rec_no = $csv->record_number();
+
+            # test records default to currently-selected tank if not
+            # otherwise provided in the import record:
+            $row->{'tank_id'} ||= $tank_id;
 
             try {
                 my $dt = DateTime::Format::Pg->parse_datetime($row->{'test_date'});
@@ -306,58 +328,64 @@ sub import_tests {
                 die "Record #$rec_no: has invalid test_date.";
             };
 
-            if ( my $test_id = delete $row->{'test_id'} ) {
-                my $test = $self->get($test_id);
-
-                $test or
-                    die "Record #$rec_no: test ID $test_id not found in database.";
-
-                my $tank_id = delete $row->{'tank_id'};
-
-                if ( $tank_id ) {
-                    ( $tank_id == $test->{'tank_id'} ) or
-                        die "Record #$rec_no: test with ID $test_id belongs to different tank in database.";
-
-                    my $tank = $self->schema->resultset('Tank')->find($tank_id);
-
-                    ( $user_id == $tank->owner_id() ) or
-                        die "Record #$rec_no: you do not own the tank for test ID $test_id.";
-                }
-
-                $self->update($test_id, $row) or
-                    die "Record #$rec_no: failed to update test ID $test_id.";
-
-                next CSV;
+            if ( $row->{'test_id'} and
+                 $row->{'test_id'} != $current_test->{'test_id'} ) {
+                # updating an existing test record:
+                $self->update($current_test);
+                delete $current_test->{'details'};
+            }
+            elsif ( $row->{'test_date'} ne $current_test->{'test_date'} ) {
+                # adding a new test record:
+                $self->add($current_test);
+                delete $current_test->{'details'};
             }
 
-            ## If the test is not for a specific tank, then assume the currently
-            ## selected tank:
+            if ( ! $tank_parameters or ( $row->{'tank_id'} != $current_tank_id ) ) {
+                # get parameters for current tank:
+                $current_tank_id = $row->{'tank_id'};
+                $tank_parameters = {};
+                my $param = $self->schema->resultset('WaterTestParameterView')
+                                 ->search({'tank_id' => $row->{'tank_id'}});
+                while ( my $p = $param->next() ) {
+                    $tank_parameters->{$p->parameter()} = $p->parameter_id();
+                }
+            }
 
-            my $tank_id = delete $row->{'tank_id'} || $current_tank_id;
+            if ( ! $current_test->{'details'} ) {
+               $current_test->{'details'} = {
+                    'test_id'   => $row->{'test_id'},
+                    'test_date' => $row->{'test_date'},
+                    'user_id'   => $row->{'user_id'} || $user_id,
+                    'notes'     => 'Imported water test',
+                };
+                $current_test->{'results'} = [],
+            }
 
-            my $tank = $self->schema->resultset('Tank')->find($tank_id);
-
-            $tank or
-                die "Record #$rec_no: tank #$tank_id not found in database.";
-
-            ( $user_id == $tank->owner_id() ) or
-                die "Record #$rec_no: you do not own tank #$tank_id.";
-
-            # make sure the row has a valid tank_id
-            $row->{'tank_id'} = $tank_id;
-            $row->{'user_id'} = $user_id;
-
-            $self->add($row) or
-                die  "record #$rec_no: failed to import test results.";
+            push @{ $current_test->{'results'} },
+                {
+                    'tank_id'      => $row->{'tank_id'},
+                    'test_id'      => $row->{'test_id'},
+                    'parameter_id' => $tank_parameters->{$row->{'parameter'}},
+                    'test_result'  => $row->{'test_result'},
+                };
         }
-    };
 
-    if ( my $error = $@ ) {
-        $self->rollback();
-        die $error;
+        # flush remaining record to DB:
+        if ( $current_test->{'test_id'} ) {
+             # updating an existing test record:
+             $self->update($current_test);
+        }
+        else {
+            # adding a new test record:
+            $self->add($current_test);
+        }
+
+        $self->txn_commit();
     }
-
-    $self->txn_commit();
+    catch {
+        $self->rollback();
+        die $_;
+    };
 
     return "Imported $rec_no test records.";
 }
@@ -397,16 +425,13 @@ sub export_tests {
 ## The following methods are exclusively used when generating test result data
 ## suitable for graphing by jquery.flot:
 ## -------------------------------------
-## chart_columns() is called by Controller::WaterTest::Chart to determine the
-## checkboxes required for the chart page.
-sub chart_columns {
-    my ( $self, $tank_id ) = @_;
+## Return the active list of columns for water tests or charting:
+sub test_columns {
+    my ( $self, $search ) = @_;
+
 
     my $cols = $self->schema->resultset('WaterTestParameterView')->search(
-        {
-            tank_id  => $tank_id,
-            chart    => 1, ## only test parameters available for charting
-        },
+        $search,
         {
             order_by => {
                 '-asc' => [ qw( param_order parameter_id ) ],
