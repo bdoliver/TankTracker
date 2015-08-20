@@ -24,7 +24,7 @@ sub base :Chained('/') :PathPart('admin') :CaptureArgs(0) {
 sub _parameter_form :Private {
     my ($self, $c) = @_;
 
-    my $params = $c->model('Parameter')->list(
+    my $params = $c->model('WaterTestParameter')->list(
         {},
         { 'order_by' => { '-asc' => 'parameter_id' }, },
     );
