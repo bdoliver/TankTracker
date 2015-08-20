@@ -1,0 +1,14 @@
+* must select tank first:
+Water tests
+View / edit tank details
+Inventory
+Diary
+
+Add a new saltwater tank
+Add a new freshwater tank
+
+* Admin-type options
+    - user maintain own details
+    - user access to tank(s)
+    - add/delete users.
+    - default test parameters
