@@ -1,46 +1,74 @@
 <div class="row">
     <div class="col-md-12 well">
-<form id="menuTabs" method="POST">
-    <ul class="nav nav-tabs">
-        <li [% IF active_tab == 'tank'   %]class="active"[% END %]><a data-toggle="tab" data-target="#tank">Tank</a></li>
-        <li [% IF active_tab == 'user'   %]class="active"[% END %]><a data-toggle="tab" data-target="#user_[% user.user_id %]_edit">User</a></li>
+
+    <div id="tab-container" class='tab-container'>
+      <ul class="nav nav-tabs">
+        <li>
+            <a href="/tank/select" data-target="#tank">Tank</a>
+        </li>
+        <li>
+            <a href="/user" data-target="#user">User</a>
         [% IF is_admin OR has_users %]
-        <li [% IF active_tab == 'access' %]class="active"[% END %]><a data-toggle="tab" data-target="#user_[% user.user_id %]_access_list">Access</a></li>
+        <li>
+            <a href="" data-target="#access">Access</a>
+        </li>
         [% END %]
         [% IF is_admin %]
-        <li [% IF active_tab == 'admin'  %]class="active"[% END %]><a data-toggle="tab" data-target="#user_admin">Admin</a></li>
-        <li [% IF active_tab == 'params' %]class="active"[% END %]><a data-toggle="tab" data-target="#admin_parameters">Test Params</a></li>
-
+        <li>
+            <a href="/admin" data-target="#admin">Admin</a>
+        </li>
+        <li>
+            <a href="/admin/parameters #tab_cont" data-target="#parameter_tab">Test Params</a>
+        </li>
         [% END %]
-    </ul>
-</form>
-    <div class="tab-content">
-        <div class="tab-pane active">
-        [% content %]
+      </ul>
+
+        <div class="tab-content">
+          <div id="tank" class="tab-pane fade in"><p>Tank stuff</p></div>
+          <div id="user" class="tab-pane fade in">User stuff</div>
+          [% IF is_admin OR has_users %]
+          <div id="access" class="tab-pane fade in">Access stuff</div>
+          [% END %]
+          [% IF is_admin %]
+          <div id="admin" class="tab-pane fade in">Admin Stuff</div>
+          <div id="parameter_tab" class="tab-pane fade in">Parameters</div>
+          [% END %]
         </div>
+
     </div>
-<!--
-    [% # following for the ajax-y version... if i ever get it working... %]
-    <div class="tab-content">
-        <div id="tank" class="tab-pane fade in active"></div>
-        <div id="user_[% user.user_id %]_edit" class="tab-pane fade in"></div>
-        <div id="user_[% user.user_id %]_access_list" class="tab-pane fade in"></div>
-        <div id="user_admin" class="tab-pane fade in"></div>
-    </div>
--->
+
     </div>
 </div>
 
 <script>
 $(function() {
-    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-        // perform tab-switch:
-        $('#menuTabs').attr('action',
-                            '/'+$(e.target).attr('data-target')
-                                           .substring(1)
-                                           .replace(/_/g,'/'));
-        $('#menuTabs').submit();
+    $('#tab-container').easytabs({ cache: false });
 
+/*
+    $('#tab-container')
+    .bind('easytabs:ajax:beforeSend', function(e, clicked, panel){
+      var $this = $(clicked);
+      $this.data('label', $this.html());
+      $this.html('Loading...');
+    })
+    .bind('easytabs:ajax:complete', function(e, clicked, panel, response, status, xhr) {
+      var $this = $(clicked);
+      $this.html($this.data('label'));
+      if (status == "error") {
+        var msg = "Sorry but there was an error: ";
+        $("#error").html(msg + xhr.status + " " + xhr.statusText);
+      }
+      else {
+          $(panel).empty().html(response);
+      }
+    });
+*/
+
+/*
+        window.location.href = '/'+$(e.target).attr('data-target')
+                                              .substring(1)
+                                              .replace(/_/g,'/');
+*/
 /*
         var target = $(e.target).attr('data-target');
         if ( $(target).is(':empty') ) {
@@ -62,7 +90,7 @@ $(function() {
             });
         }
 */
-    });
+//    });
 
     // always show tank tab first...
 //    $('.nav-tabs a:first').tab().trigger('click');
