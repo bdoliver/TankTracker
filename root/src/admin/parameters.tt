@@ -1,4 +1,4 @@
-<div id="tab_cont" class="row">
+<div id="tab_panel_content" class="row">
     <div class="col-md-12">
 
     [% header %]

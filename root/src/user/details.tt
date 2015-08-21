@@ -1,3 +1,4 @@
+<div id="tab_panel_content">
 <form class="form" method="[% form.method %]" action="[% form.action %]" >
     [% form.get_element('tank_id') %]
     <div class="row">
@@ -136,3 +137,4 @@ $(function() {
     });
 });
 </script>
+</div>

@@ -22,11 +22,13 @@ $ua->submit_form_ok(
      );
 $ua->title_is('TankTracker - Tank');
 
-$ua->content_like(qr{<li\ class="active">
-                     <a\ data-toggle="tab"\ data-target="\#tank">Tank</a>
-                     </li>}msx
-    => 'Menu active tab = Tank'
-);
+$ua->get_ok('/admin/parameters');
+warn "\nCONTENT:\n", $ua->content(), "\n\n";
+# $ua->content_like(qr{<li\ class="active">
+#                      <a\ data-toggle="tab"\ data-target="\#tank">Tank</a>
+#                      </li>}msx
+#     => 'Menu active tab = Tank'
+# );
 # ok( request('/login')->is_success, 'Login page' );
 
 done_testing();

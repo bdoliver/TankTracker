@@ -4,27 +4,27 @@
     <div id="tab-container" class='tab-container'>
       <ul class="nav nav-tabs">
         <li>
-            <a href="/tank/select" data-target="#tank">Tank</a>
+            <a href="/tank/select #tab_panel_content" data-target="#tank">Tank</a>
         </li>
         <li>
-            <a href="/user" data-target="#user">User</a>
+            <a href="/user/[% user.user_id %]/edit #tab_panel_content" data-target="#user">User</a>
         [% IF is_admin OR has_users %]
         <li>
-            <a href="" data-target="#access">Access</a>
+            <a href="/user/[% user.user_id %]/access/list #tab_panel_content" data-target="#access">Access</a>
         </li>
         [% END %]
         [% IF is_admin %]
         <li>
-            <a href="/admin" data-target="#admin">Admin</a>
+            <a href="/user/admin #tab_panel_content" data-target="#admin">Admin</a>
         </li>
         <li>
-            <a href="/admin/parameters #tab_cont" data-target="#parameter_tab">Test Params</a>
+            <a href="/admin/parameters #tab_panel_content" data-target="#parameter_tab">Test Params</a>
         </li>
         [% END %]
       </ul>
 
         <div class="tab-content">
-          <div id="tank" class="tab-pane fade in"><p>Tank stuff</p></div>
+          <div id="tank" class="tab-pane fade in"></div>
           <div id="user" class="tab-pane fade in">User stuff</div>
           [% IF is_admin OR has_users %]
           <div id="access" class="tab-pane fade in">Access stuff</div>
@@ -36,7 +36,6 @@
         </div>
 
     </div>
-
     </div>
 </div>
 
@@ -63,37 +62,7 @@ $(function() {
       }
     });
 */
-
-/*
-        window.location.href = '/'+$(e.target).attr('data-target')
-                                              .substring(1)
-                                              .replace(/_/g,'/');
-*/
-/*
-        var target = $(e.target).attr('data-target');
-        if ( $(target).is(':empty') ) {
-
-            alert("URL =>"+'/'+target.substring(1).replace(/_/g,'/')+"<=");
-
-            $.ajax({
-                'type'      : "POST",
-                'data'      : { ajax: 1 },
-                'xhrFields' : { withCredentials: true },
-                'url'       : '/'+target.substring(1).replace(/_/g,'/'),
-                'error'     : function(data){
-                    alert("There was a problem");
-                },
-                'success'   : function(data){
-                    alert("Ajax call ok");
-                    $(target).html(data);
-                }
-            });
-        }
-*/
-//    });
-
-    // always show tank tab first...
-//    $('.nav-tabs a:first').tab().trigger('click');
-
 });
 </script>
+
+[% content %]
