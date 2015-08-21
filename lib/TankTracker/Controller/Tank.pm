@@ -30,7 +30,6 @@ sub auto :Private {
 
     $c->stash->{'page_title'} = 'Tank';
     $c->stash->{'active_tab'} = 'tank';
-    $c->stash->{'template_wrappers'} = [];
 
     return 1;
 }
@@ -141,7 +140,39 @@ sub select : Chained('base') :PathPart('') Args(0) FormMethod('_select_form') {
         return;
     }
 
+    $c->stash->{'tabs'} = [
+        { 'href'   => q{/tank/%d/water_test/list},
+          'target' => q{water-test},
+          'title'  => q{Water Tests},
+        },
+        { 'href'   => q{/tank/%d/water_test/chart},
+          'target' => q{graph-test},
+          'title'  => q{Graph Tests},
+        },
+        { 'href'   => q{/tank/%d/water_test/tools/export},
+          'target' => q{export-test},
+          'title'  => q{Export Tests},
+        },
+        { 'href'   => q{/tank/%d/water_test/tools/import},
+          'target' => q{import-test},
+          'title'  => q{Import Tests},
+        },
+        { 'href'   => q{/tank/%d/inventory/list},
+          'target' => q{inventory},
+          'title'  => q{Inventory},
+        },
+        { 'href'   => q{/tank/%d/diary/list},
+          'target' => q{diary},
+          'title'  => q{Diary},
+        },
+        { 'href'   => q{/tank/%d/view},
+          'target' => q{details},
+          'title'  => q{Tank Details},
+        },
+    ];
+
     $c->stash->{'template'} = 'tank/select.tt';
+    $c->stash->{'template_wrappers'} = [];
 
     return;
 }

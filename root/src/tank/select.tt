@@ -1,5 +1,3 @@
-<form class="form" method="[% form.method %]" action="[% form.action %]" >
-
 <div class="row content">
     <div class="col-md-12">
     [% IF form.get_element('tank_id') %]
@@ -20,26 +18,60 @@
         </div>
     </div>
     [% END %]
-    <div class="row">
-        <div class="form-group col-md-2">
-             <label for="tank_action">Choose action:</label>
+
+    <div id="tank-tabs" class="row">
+        <div class="col-md-12">
+
+        <div id="tank-tab-container" class='tab-container'>
+            <ul class="nav nav-tabs">
+            [% FOR tab IN tabs %]
+                <li>
+                    <a href="[% tab.href %]" data-target="#[% tab.target %]">[% tab.title %]</a>
+                </li>
+            [% END %]
+            </ul>
+
+            <div class="tab-content">
+            [% FOR tab IN tabs %]
+                <div id="[% tab.target %]"  class="tab-pane fade in"></div>
+            [% END %]
+            </div>
         </div>
-        <div class="col-md-4">
-            [% form.get_element('tank_action') %]
+
         </div>
     </div>
-
-    [% form_errors %]
 
     </div>
 </div>
-<div class="row">
-    <div class="col-md-8 col-md-offset-2">
-        <div class="btn-group center-block">
-            [% submit_btn %]
-            [% logout_btn %]
-        </div>
-    </div>
-</div>
+<script>
+$(function() {
+[% IF ! tank.tank_id %]
+    $('#tank-tabs').hide();
+[% END %]
 
-</form>
+    $('select[name="tank_id"]').change(function() {
+        var tank_id = $(this).val();
+        if ( ! tank_id ) { return false; }
+
+        $('#tank-tabs').show();
+    });
+
+    if ( $('#tank-tabs').is(':visible') ) {
+        $('#tank-tab-container').easytabs({ cache: false });
+
+        $('#tank-tab-container')
+            .bind('easytabs:ajax:beforeSend', function(e, clicked, panel){
+                var tank_id = $('select[name="tank_id"]').val();
+                if ( tank_id ) {
+                    var href = $(clicked).attr('href').replace('%d',tank_id);
+                    $(clicked).attr('href', href);
+
+                    alert("href: "+$(clicked).attr('href'));
+                }
+                else {
+                    return false;
+                }
+        });
+    }
+});
+</script>

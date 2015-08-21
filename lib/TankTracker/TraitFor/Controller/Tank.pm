@@ -57,6 +57,9 @@ sub get_tank :Chained('base') :PathPart('') CaptureArgs(1) {
 
         $tank->{'test_params'} = $params || [];
 
+        # wrap all tank-specific pages with the tank-select menu
+        $c->stash->{'template_wrappers'} = [ 'tank/select.tt' ];
+
         $c->stash->{'tank'} = $tank;
     }
     else {
