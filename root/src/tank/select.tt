@@ -1,4 +1,3 @@
-<div id="tab_panel_content">
 <form class="form" method="[% form.method %]" action="[% form.action %]" >
 
 <div class="row content">
@@ -44,4 +43,3 @@
 </div>
 
 </form>
-</div>

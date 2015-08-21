@@ -13,6 +13,7 @@ sub auto :Private {
 
     $c->stash->{'page_title'} = 'Tank Access';
     $c->stash->{'active_tab'} = 'access';
+    $c->stash->{'template_wrappers'} = [];
 
     return 1;
 }

@@ -4,7 +4,7 @@
     <div id="tab-container" class='tab-container'>
       <ul class="nav nav-tabs">
         <li>
-            <a href="/tank/select #tab_panel_content" data-target="#tank">Tank</a>
+            <a href="/tank" data-target="#tank">Tank</a>
         </li>
         <li>
             <a href="/user/[% user.user_id %]/edit #tab_panel_content" data-target="#user">User</a>
@@ -64,5 +64,3 @@ $(function() {
 */
 });
 </script>
-
-[% content %]
