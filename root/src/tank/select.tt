@@ -45,33 +45,23 @@
 </div>
 <script>
 $(function() {
-[% IF ! tank.tank_id %]
-    $('#tank-tabs').hide();
-[% END %]
 
-    $('select[name="tank_id"]').change(function() {
-        var tank_id = $(this).val();
-        if ( ! tank_id ) { return false; }
+    //if ( $('#tank-tabs').is(':visible') ) {
+        $('#tank-tab-container').easytabs({ cache: false, collapsedByDefault: true });
 
-        $('#tank-tabs').show();
-    });
-
-    if ( $('#tank-tabs').is(':visible') ) {
-        $('#tank-tab-container').easytabs({ cache: false });
 
         $('#tank-tab-container')
             .bind('easytabs:ajax:beforeSend', function(e, clicked, panel){
                 var tank_id = $('select[name="tank_id"]').val();
-                if ( tank_id ) {
-                    var href = $(clicked).attr('href').replace('%d',tank_id);
-                    $(clicked).attr('href', href);
 
-                    alert("href: "+$(clicked).attr('href'));
+                if ( tank_id ) {
+alert("tank_id ==>"+tank_id+"<== clicked:"+clicked);
+                    $(clicked).parent().data('easytabs').ajax.replace('%d',tank_id);
                 }
                 else {
                     return false;
                 }
         });
-    }
+    //}
 });
 </script>
