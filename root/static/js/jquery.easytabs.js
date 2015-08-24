@@ -236,12 +236,7 @@
           // If ajax panel and not already cached
           if( ajaxUrl && (!settings.cache || !$clicked.parent().data('easytabs').cached) ) {
             $container.trigger('easytabs:ajax:beforeSend', [$clicked, $targetPanel]);
-/*FIXME
- * Can we re-read ajaxUrl here?
- *
- */
-    ajaxUrl = $clicked.parent().data('easytabs').ajax;
-alert("calling URL: "+ajaxUrl);
+
             $targetPanel.load(ajaxUrl, function(response, status, xhr){
               $clicked.parent().data('easytabs').cached = true;
               $container.trigger('easytabs:ajax:complete', [$clicked, $targetPanel, response, status, xhr]);

@@ -73,46 +73,27 @@ sub _select_form :Private {
                     message => 'You must select a tank.',
                 },
             ],
-        },
-        {
-            name    => 'tank_action',
-            type    => 'Radiogroup',
-            default => $c->session->{'tank_action'},
-            options => [
-                [ 'water_test/list' => 'Water tests' ],
-                [ 'view'            => 'View / edit tank details' ],
-                [ 'add/salt'        => 'Add a new saltwater tank' ],
-                [ 'add/fresh'       => 'Add a new freshwater tank' ],
-                [ 'inventory/list'  => 'Inventory'   ],
-                [ 'diary/list'      => 'Diary'       ],
-            ],
-            constraints => [
-                'AutoSet',
-                {
-                    type    => 'Required',
-                    message => 'You must select an action.',
-                },
-            ],
-        },
-    }
-    else {
-        push @elements,
-        {
-            name    => 'tank_action',
-            type    => 'Radiogroup',
-            default => $c->session->{'tank_action'},
-            options => [
-                [ 'add/salt'        => 'Add a new saltwater tank' ],
-                [ 'add/fresh'       => 'Add a new freshwater tank' ],
-            ],
-            constraints => [
-                'AutoSet',
-                {
-                    type    => 'Required',
-                    message => 'You must select an action.',
-                },
-            ],
-        },
+        };
+#         {
+#             name    => 'tank_action',
+#             type    => 'Radiogroup',
+#             default => $c->session->{'tank_action'},
+#             options => [
+#                 [ 'water_test/list' => 'Water tests' ],
+#                 [ 'view'            => 'View / edit tank details' ],
+#                 [ 'add/salt'        => 'Add a new saltwater tank' ],
+#                 [ 'add/fresh'       => 'Add a new freshwater tank' ],
+#                 [ 'inventory/list'  => 'Inventory'   ],
+#                 [ 'diary/list'      => 'Diary'       ],
+#             ],
+#             constraints => [
+#                 'AutoSet',
+#                 {
+#                     type    => 'Required',
+#                     message => 'You must select an action.',
+#                 },
+#             ],
+#         },
     }
 
     return { 'elements' => \@elements };
@@ -124,55 +105,48 @@ sub select : Chained('base') :PathPart('') Args(0) FormMethod('_select_form') {
     my $form = $c->stash->{'form'};
 
     if ( $form->submitted_and_valid() ) {
-        my $action  = $c->request->params->{'tank_action'};
+
         my $tank_id = $c->request->params->{'tank_id'};
 
-        # remember the currently-selected tank & action:
-        $c->session->{tank_id}     = $tank_id;
-        $c->session->{tank_action} = $action if $action !~ qr{^add};
+        $c->session->{tank_id} = $tank_id;
+        $c->stash->{'tabs'} = [
+            { 'href'   => qq{/tank/$tank_id/water_test/list},
+              'target' => q{water-test},
+              'title'  => q{Water Tests},
+            },
+            { 'href'   => qq{/tank/$tank_id/water_test/chart},
+              'target' => q{graph-test},
+              'title'  => q{Graph Tests},
+            },
+            { 'href'   => qq{/tank/$tank_id/water_test/tools/export},
+              'target' => q{export-test},
+              'title'  => q{Export Tests},
+            },
+            { 'href'   => qq{/tank/$tank_id/water_test/tools/import},
+              'target' => q{import-test},
+              'title'  => q{Import Tests},
+            },
+            { 'href'   => qq{/tank/$tank_id/inventory/list},
+              'target' => q{inventory},
+              'title'  => q{Inventory},
+            },
+            { 'href'   => qq{/tank/$tank_id/diary/list},
+              'target' => q{diary},
+              'title'  => q{Diary},
+            },
+            { 'href'   => qq{/tank/$tank_id/view},
+              'target' => q{details},
+              'title'  => q{Tank Details},
+            },
+        ];
 
-        my $path  = q{/tank/};
-           $path .= "$tank_id/" if $action !~ qr{^add};
-           $path .= $action;
 
-        $c->response->redirect($c->uri_for($path));
-        $c->detach();
-        return;
+#         $c->response->redirect($c->uri_for(qq{/tank}));
+#         $c->detach();
+#         return;
     }
 
-    $c->stash->{'tabs'} = [
-        { 'href'   => q{/tank/%d/water_test/list},
-          'target' => q{water-test},
-          'title'  => q{Water Tests},
-        },
-        { 'href'   => q{/tank/%d/water_test/chart},
-          'target' => q{graph-test},
-          'title'  => q{Graph Tests},
-        },
-        { 'href'   => q{/tank/%d/water_test/tools/export},
-          'target' => q{export-test},
-          'title'  => q{Export Tests},
-        },
-        { 'href'   => q{/tank/%d/water_test/tools/import},
-          'target' => q{import-test},
-          'title'  => q{Import Tests},
-        },
-        { 'href'   => q{/tank/%d/inventory/list},
-          'target' => q{inventory},
-          'title'  => q{Inventory},
-        },
-        { 'href'   => q{/tank/%d/diary/list},
-          'target' => q{diary},
-          'title'  => q{Diary},
-        },
-        { 'href'   => q{/tank/%d/view},
-          'target' => q{details},
-          'title'  => q{Tank Details},
-        },
-    ];
-
     $c->stash->{'template'} = 'tank/select.tt';
-    $c->stash->{'template_wrappers'} = [];
 
     return;
 }

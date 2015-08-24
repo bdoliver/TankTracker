@@ -1,8 +1,6 @@
 <div class="row">
     <div class="col-md-12">
 
-    [% header %]
-
     <div class="row content">
         <div class="col-md-12">
         [% IF NOT tests.size %]
@@ -78,16 +76,10 @@
     </div>
 
     <div class="row">
-        <div class="col-md-8 col-md-offset-3 btn-group">
+        <div class="col-md-8 col-md-offset-1 btn-group">
             [% IF tank.active %]
             <a [% href(add_url) %] class="btn btn-md btn-info">Add Test</a>
             [% END %]
-            <a [% href(chart_url) %] class="btn btn-md btn-info">Graph Results</a>
-            <a [% href(export_url) %] class="btn btn-md btn-info">Export Results</a>
-            [% IF tank.active %]
-            <a [% href(import_url) %] class="btn btn-md btn-info">Import Results</a>
-            [% END %]
-            [% back_btn %]
             [% logout_btn %]
         </div>
     </div>

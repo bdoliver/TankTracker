@@ -1,6 +1,6 @@
 <div class="row content">
     <div class="col-md-12">
-    [% IF form.get_element('tank_id') %]
+<form id="tank-select" class="form" method="[% form.method %]" action="[% form.action %]">
     <div class="row tanksel">
         <div class="form-group col-md-2">
             <label for="tank_id">Select tank:</label>
@@ -9,16 +9,9 @@
             [% form.get_element('tank_id') %]
         </div>
     </div>
-    [% ELSE %]
-    <div class="row">
-        <div class="col-md-12">
-            <p class="text-danger bg-danger">
-                There are no tanks found in the database for you.
-            </p>
-        </div>
-    </div>
-    [% END %]
+</form>
 
+[% IF tabs %]
     <div id="tank-tabs" class="row">
         <div class="col-md-12">
 
@@ -43,25 +36,20 @@
 
     </div>
 </div>
+[% END %]
+
 <script>
 $(function() {
-
-    //if ( $('#tank-tabs').is(':visible') ) {
-        $('#tank-tab-container').easytabs({ cache: false, collapsedByDefault: true });
-
-
-        $('#tank-tab-container')
-            .bind('easytabs:ajax:beforeSend', function(e, clicked, panel){
-                var tank_id = $('select[name="tank_id"]').val();
-
-                if ( tank_id ) {
-alert("tank_id ==>"+tank_id+"<== clicked:"+clicked);
-                    $(clicked).parent().data('easytabs').ajax.replace('%d',tank_id);
-                }
-                else {
-                    return false;
-                }
-        });
-    //}
+    $('select[name="tank_id"]').change(function() {
+        if ( $(this).val() ) {
+            $('#tank-select').submit();
+        }
+        else {
+            return false;
+        }
+    });
+    [% IF tabs %]
+    $('#tank-tab-container').easytabs({ cache: false });
+    [% END %]
 });
 </script>

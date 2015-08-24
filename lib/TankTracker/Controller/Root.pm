@@ -71,7 +71,7 @@ sub check_request : Private {
 
     $c->stash->{'user'} = $c->model('User')->get($c->user->user_id());
 
-    push @{ $c->stash->{'template_wrappers'} }, 'menu.tt';
+#    push @{ $c->stash->{'template_wrappers'} }, 'menu.tt';
 
     if ( $c->user->has_role('Admin') ) {
         $c->stash->{'is_admin'} = 1;
@@ -153,7 +153,7 @@ sub login : Local FormMethod('_login_form') Args(0) {
                     },
               }) ) {
                 $c->model('User')->record_last_login($c->user->user_id());
-                $c->response->redirect($c->uri_for('/menu'));
+                $c->response->redirect($c->uri_for('/tank'));
                 $c->detach();
                 return;
             } else {
@@ -193,12 +193,6 @@ sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
 
     $c->response->redirect($c->uri_for('login'));
-
-    return;
-}
-
-sub menu :Path :Args(0) {
-    my ( $self, $c ) = @_;
 
     return;
 }
