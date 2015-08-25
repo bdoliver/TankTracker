@@ -77,8 +77,10 @@
 
     <div class="row">
         <div class="col-md-8 col-md-offset-1 btn-group">
+        <!-- FIXME: not good enough to check tank.active!!
+                    - does user have permission to add a test? -->
             [% IF tank.active %]
-            <a [% href(add_url) %] class="btn btn-md btn-info">Add Test</a>
+            <button type="button" data-toggle="modal" data-target="#modal-details" class="btn btn-md btn-info">Add Test</button>
             [% END %]
             [% logout_btn %]
         </div>
@@ -86,3 +88,19 @@
 
     </div>
 </div>
+[% IF tank.active %]
+<script>
+$(function() {
+    $('#modal-details').on('show.bs.modal', function() {
+        $('#modal-details-content').load("[% add_url %]");
+        $('#modal-details-heading').text("[% action_heading %]");
+        $('#modal-details-footer').empty().append(
+            '<button type="button" class="btn btn-default" data-dismiss="modal">Save</button>'
+        ).append(
+            '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>'
+        );
+
+    });
+});
+</script>
+[% END %]

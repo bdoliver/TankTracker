@@ -169,7 +169,7 @@ sub _test_form :Private {
 sub add :Chained('get_tank') PathPart('water_test/add') Args(0) {
     my ($self, $c) = @_;
 
-    $c->stash->{'action_heading'} = 'Add Test';
+    $c->stash->{'action_heading'} = 'Add Water Test';
     $c->stash->{'add_test'}       = 1;
     $c->forward('details');
 
@@ -222,7 +222,7 @@ sub get_test :Chained('get_tank') PathPart('water_test') CaptureArgs(1) {
 sub edit :Chained('get_test') PathPart('edit') Args(0) {
     my ( $self, $c ) = @_;
 
-    $c->stash->{'action_heading'} = 'Edit Test';
+    $c->stash->{'action_heading'} = 'Edit Water Test';
     $c->stash->{'edit_test'}      = 1;
     $c->forward('details');
 
