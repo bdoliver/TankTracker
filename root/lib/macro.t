@@ -14,47 +14,19 @@ my $tt = Test::Template->new({ INPUT => \$template, })
 ok( $tt->process(), q{Processed template ok} );
 
 subtest 'header' => sub {
-    $template = q{[% header %]};
-
-    my $content = $tt->process({ tank => { tank_name => 'Fooby-tank' } });
-    like($content => qr{<h4>Fooby-tank\s*</h4>}msx,
-        q{tank name only}
-    );
-
-    $content = $tt->process({ action_heading => 'gracNify' });
-    like($content => qr{<h4>\s+-\s+gracNify</h4>}msx,
-        q{action heading only}
-    );
-
-    $content = $tt->process({
-        tank           => { tank_name => 'Bobble-tank' },
-        action_heading => 'splotz!'
-    });
-    like($content => qr{<h4>Bobble-tank - splotz!</h4>},
-        q{tank name + action heading}
-    );
-
-    $content = $tt->process({
-        page_title     => 'My page title',
-        action_heading => 'some action',
-    });
-    like($content => qr{<h4>\QMy page title - some action\E</h4>}msx,
-        q{action heading + page title (no tank)}
-    );
-
     $template = q{[% header('<span>good html</span>') %]};
 
+    my $content;
+
     ok($content = $tt->process(),
-        q{processed xtra html}
+        q{processed 'hdg' html}
     );
-    like($content => qr{\Q<div class="col col-md-4 text-right">\E\s*
+    like($content => qr{\Q<div class="col col-md-12 text-right">\E\s*
                         \Q<span>good html</span>\E\s*
                         </div>}msx,
-        q{xtra html rendered}
+        q{'hdg' html rendered}
     );
 };
-done_testing();
-exit;
 
 subtest 'href' => sub {
     # this is hardly worth it... just doing for the sake of completeness
@@ -175,10 +147,10 @@ subtest 'form_errors' => sub {
         unlike($content => qr{<div class="row form_errors">},
             q{form errors}
         );
-        unlike($content => qr{<div class="col text-success bg-success">},
+        unlike($content => qr{<div class="alert alert-success fade in"">},
             q{message}
         );
-        unlike($content => qr{<div class="col text-danger bg-danger">},
+        unlike($content => qr{<div class="alert alert-danger fade in">},
             q{error}
         );
     };
@@ -198,10 +170,10 @@ subtest 'form_errors' => sub {
         like($content => qr{<div class="row form_errors">},
             q{form errors}
         );
-        like($content => qr{<div class="col text-success bg-success">},
+        like($content => qr{<div class="alert alert-success fade in">},
             q{message}
         );
-        like($content => qr{<div class="col text-danger bg-danger">},
+        like($content => qr{<div class="alert alert-danger fade in">},
             q{error}
         );
     };

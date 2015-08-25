@@ -1,39 +1,57 @@
 <div class="row content">
     <div class="col-md-12">
-<form id="tank-select" class="form" method="[% form.method %]" action="[% form.action %]">
-    <div class="row tanksel">
-        <div class="form-group col-md-2">
-            <label for="tank_id">Select tank:</label>
-        </div>
-        <div class="col-md-4">
-            [% form.get_element('tank_id') %]
-        </div>
-    </div>
-</form>
 
-[% IF tabs %]
-    <div id="tank-tabs" class="row">
-        <div class="col-md-12">
-
-        <div id="tank-tab-container" class='tab-container'>
-            <ul class="nav nav-tabs">
-            [% FOR tab IN tabs %]
-                <li>
-                    <a href="[% tab.href %]" data-target="#[% tab.target %]">[% tab.title %]</a>
-                </li>
-            [% END %]
-            </ul>
-
-            <div class="tab-content">
-            [% FOR tab IN tabs %]
-                <div id="[% tab.target %]"  class="tab-pane fade in"></div>
-            [% END %]
+    <form id="tank-select" class="form" method="[% form.method %]" action="[% form.action %]">
+        <div class="row tanksel">
+            <div class="form-group col-md-2">
+                <label for="tank_id">Select tank:</label>
+            </div>
+            <div class="col-md-4">
+                [% form.get_element('tank_id') %]
             </div>
         </div>
+    </form>
 
+[% IF tabs %]
+        <div id="tank-tabs" class="row">
+            <div class="col-md-12">
+
+                <div id="tank-tab-container" class='tab-container'>
+                    <ul class="nav nav-tabs">
+                [% FOR tab IN tabs %]
+                    <li>
+                        <a href="[% tab.href %]" data-target="#[% tab.target %]">[% tab.title %]</a>
+                    </li>
+                [% END %]
+                    </ul>
+
+                    <div class="tab-content">
+                [% FOR tab IN tabs %]
+                    <div id="[% tab.target %]"  class="tab-pane fade in"></div>
+                [% END %]
+                </div>
+             </div>
         </div>
-    </div>
+[% END %]
 
+    </div>
+</div>
+
+[% IF tabs %]
+<!-- Modal -->
+<div id="modal-details" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">[% details_hdg %]</h4>
+            </div>
+            <div class="modal-body">
+                <div id="modal-details-content" class="row content"></div>
+            </div>
+        </div>
     </div>
 </div>
 [% END %]
@@ -49,7 +67,10 @@ $(function() {
         }
     });
     [% IF tabs %]
-    $('#tank-tab-container').easytabs({ cache: false });
+    $('#tank-tab-container').easytabs({
+        cache: true,
+        animationSpeed: 'fast'
+    });
     [% END %]
 });
 </script>

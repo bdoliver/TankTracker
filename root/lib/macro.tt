@@ -1,20 +1,8 @@
-[% MACRO header(xtra) BLOCK %]
+[% MACRO header(hdg) BLOCK %]
     <div class="row header">
-        <div class="col col-md-8">
-        [% IF tank OR action_heading OR page_title %]
-        <h4>[% IF page_title AND not tank.name %]
-                [% page_title %]
-            [% ELSE %]
-                [% IF tank.tank_name %][% tank.tank_name %][% END %]
-            [% END %]
-            [% IF action_heading %] - [% action_heading %][% END %]</h4>
-        [% END %]
+        <div class="col col-md-12 text-right">
+            [% hdg %]
         </div>
-        [% IF xtra %]
-        <div class="col col-md-4 text-right">
-            [% xtra %]
-        </div>
-        [% END %]
     </div>
 [% END %]
 
@@ -56,32 +44,6 @@ href="[% path %]"
   [% END %]
 [% END%]
 
-[% MACRO form_errors_ORIG BLOCK %]
-    [% IF form.get_errors.size %]
-        <div class="row form_errors">
-            <div class="col col-md-6 text-danger bg-danger form_errors">
-            [% # FOR error IN form.get_errors %]
-            [% # only render the first form error... %]
-            [% error = form.get_errors.shift %]
-                [% error.message | html_line_break | html_para %]
-            [% # END %]
-            </div>
-        </div>
-    [% ELSE %]
-        [% IF message %]
-        <div class="row form_errors">
-            <div class="col col-md-6 text-success bg-success">[% message %]</div>
-        </div>
-        [% END %]
-        [% IF error %]
-        <div class="row form_errors">
-            <div class="col text-danger bg-danger">[% error %]</div>
-        </div>
-        [% END %]
-    [% END %]
-[% END %]
-
-
 [% MACRO form_errors BLOCK %]
     [% IF form.get_errors.size %]
         <div class="row form_errors">
@@ -91,17 +53,16 @@ href="[% path %]"
             [% END %]
             </div>
         </div>
-    [% ELSE %]
-        [% IF message %]
+    [% END %]
+    [% IF message %]
         <div class="row form_errors">
             <div class="alert alert-success fade in">[% message %]</div>
         </div>
-        [% END %]
-        [% IF error %]
+    [% END %]
+    [% IF error %]
         <div class="row form_errors">
             <div class="alert alert-danger fade in">[% error %]</div>
         </div>
-        [% END %]
     [% END %]
 [% END %]
 

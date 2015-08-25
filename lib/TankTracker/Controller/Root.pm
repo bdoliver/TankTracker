@@ -71,8 +71,6 @@ sub check_request : Private {
 
     $c->stash->{'user'} = $c->model('User')->get($c->user->user_id());
 
-#    push @{ $c->stash->{'template_wrappers'} }, 'menu.tt';
-
     if ( $c->user->has_role('Admin') ) {
         $c->stash->{'is_admin'} = 1;
     }

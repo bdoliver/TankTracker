@@ -91,7 +91,7 @@ td.tdc label {
  * collapse into nothing on initial display
  */
 div#testChartDiv {
-    border: 1px solid black;
+    border: 1px solid #DDDDDD;
     height: 450px;
     margin: 15px 0px;
 }

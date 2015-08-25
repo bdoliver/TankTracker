@@ -1,5 +1,8 @@
 <div class="row">
     <div class="col-md-12">
+    [% IF NOT inventory.size %]
+         <p>There are no inventory records in the database for the selected tank.</p>
+    [% ELSE %]
 
     [% header(
         '<span class="glyphicon glyphicon-refresh" data-toggle="tooltip" title="Click to reset search."></span>
@@ -78,9 +81,6 @@
                 </div>
             </div>
             </form>
-            [% IF NOT inventory.size %]
-            <p>There are no inventory records in the database for the selected tank.</p>
-            [% ELSE %]
             <div class="row">
                 <div class="col-md-12">
 
@@ -113,14 +113,12 @@
 
                 </div>
             </div>
-            [% END %]
         </div>
     </div>
-
+    [% END %]
     <div class="row">
         <div class="col-md-8 col-md-offset-3 btn-group">
             <a [% href(add_url) %] class="btn btn-md btn-info">Add Inventory Item</a>
-            [% back_btn %]
             [% logout_btn %]
         </div>
     </div>
