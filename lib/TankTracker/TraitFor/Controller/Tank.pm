@@ -4,6 +4,8 @@ use MooseX::MethodAttributes::Role;
 use DateTime::Format::Pg;
 use namespace::autoclean;
 
+with q{TankTracker::TraitFor::Controller::User::Access};
+
 sub base :Chained('/') :PathPart('tank') :CaptureArgs(0) {
     my ( $self, $c ) = @_;
 
@@ -37,8 +39,8 @@ sub get_tank :Chained('base') :PathPart('') CaptureArgs(1) {
     }
 
     if ( my $tank = $c->model('Tank')->get($tank_id) ) {
-        if ( $c->user->user_id() != $tank->{'owner_id'} ) {
-            my $error = qq{Tank requested '$tank_id': does not belong to current user!};
+        if ( not $c->forward('user_can_access_tank', [ $tank_id ] ) ) {
+            my $error = q{You do not have access to the selected tank!};
             $c->log->fatal("get_error() $error");
             $c->error($error);
             $c->detach();

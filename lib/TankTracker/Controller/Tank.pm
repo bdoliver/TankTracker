@@ -109,43 +109,44 @@ sub select : Chained('base') :PathPart('') Args(0) FormMethod('_select_form') {
         my $tank_id = $c->request->params->{'tank_id'};
 
         $c->session->{tank_id} = $tank_id;
-        $c->stash->{'tabs'} = [
-            { 'href'   => qq{/tank/$tank_id/water_test/list},
-              'target' => q{water-test},
-              'title'  => q{Water Tests},
-            },
-            { 'href'   => qq{/tank/$tank_id/water_test/chart},
-              'target' => q{graph-test},
-              'title'  => q{Graph Tests},
-            },
-            { 'href'   => qq{/tank/$tank_id/water_test/tools/export},
-              'target' => q{export-test},
-              'title'  => q{Export Tests},
-            },
-            { 'href'   => qq{/tank/$tank_id/water_test/tools/import},
-              'target' => q{import-test},
-              'title'  => q{Import Tests},
-            },
-            { 'href'   => qq{/tank/$tank_id/inventory/list},
-              'target' => q{inventory},
-              'title'  => q{Inventory},
-            },
-            { 'href'   => qq{/tank/$tank_id/diary/list},
-              'target' => q{diary},
-              'title'  => q{Diary},
-            },
-            { 'href'   => qq{/tank/$tank_id/view},
-              'target' => q{details},
-              'title'  => q{Tank Details},
-            },
-        ];
 
-
-#         $c->response->redirect($c->uri_for(qq{/tank}));
-#         $c->detach();
-#         return;
+        if ( $c->forward('user_can_access_tank') ) {
+            $c->stash->{'tabs'} = [
+                { 'href'   => qq{/tank/$tank_id/water_test/list},
+                  'target' => q{water-test},
+                  'title'  => q{Water Tests},
+                },
+                { 'href'   => qq{/tank/$tank_id/water_test/chart},
+                  'target' => q{graph-test},
+                  'title'  => q{Graph Tests},
+                },
+                { 'href'   => qq{/tank/$tank_id/water_test/tools/export},
+                  'target' => q{export-test},
+                  'title'  => q{Export Tests},
+                },
+                { 'href'   => qq{/tank/$tank_id/water_test/tools/import},
+                  'target' => q{import-test},
+                  'title'  => q{Import Tests},
+                },
+                { 'href'   => qq{/tank/$tank_id/inventory/list},
+                  'target' => q{inventory},
+                  'title'  => q{Inventory},
+                },
+                { 'href'   => qq{/tank/$tank_id/diary/list},
+                  'target' => q{diary},
+                  'title'  => q{Diary},
+                },
+                { 'href'   => qq{/tank/$tank_id/view},
+                  'target' => q{details},
+                  'title'  => q{Tank Details},
+                },
+            ];
+        }
+        else {
+            $c->stash->{'error'} =
+                q{You do not have access to the selected tank.'};
+        }
     }
-
     $c->stash->{'template'} = 'tank/select.tt';
 
     return;
