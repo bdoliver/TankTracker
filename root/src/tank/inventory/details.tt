@@ -1,4 +1,4 @@
-<form class="form" method="[% form.method %]" action="[% form.action %]" >
+<form id="inventory_form" class="form" method="[% form.method %]" action="[% form.action %]" >
     [% form.get_element('tank_id') %]
 
 <div class="row">

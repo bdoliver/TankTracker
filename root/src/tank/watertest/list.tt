@@ -95,11 +95,12 @@ $(function() {
         $('#modal-details-content').load("[% add_url %]");
         $('#modal-details-heading').text("[% action_heading %]");
         $('#modal-details-footer').empty().append(
-            '<button type="button" class="btn btn-default" data-dismiss="modal">Save</button>'
+            '<button id="save_btn" type="button" class="btn btn-primary" data-dismiss="modal">Save</button>'
         ).append(
-            '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>'
+            '<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>'
         );
 
+        $('#save_btn').click(function() { $('#watertest_form').submit() } );
     });
 });
 </script>

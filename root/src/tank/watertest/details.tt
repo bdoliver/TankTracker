@@ -1,4 +1,4 @@
-<form class="form" method="[% form.method %]" action="[% form.action %]" >
+<form id="watertest_form" class="form" method="[% form.method %]" action="[% form.action %]" >
     [% form.get_element('tank_id') %]
 [% IF edit_test %]
     [% form.get_element('test_id') %]
