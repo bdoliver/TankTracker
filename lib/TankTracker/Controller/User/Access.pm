@@ -11,8 +11,7 @@ with q{TankTracker::TraitFor::Controller::User};
 sub auto :Private {
     my ($self, $c) = @_;
 
-    $c->stash->{'page_title'} = 'Tank Access';
-    $c->stash->{'active_tab'} = 'access';
+    $c->stash->{'active_tab'}     = 'access';
 
     return 1;
 }
