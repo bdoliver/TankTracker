@@ -1,7 +1,6 @@
 package TankTracker::TraitFor::Controller::Tank;
 
 use MooseX::MethodAttributes::Role;
-use DateTime::Format::Pg;
 use namespace::autoclean;
 
 sub base :Chained('/') :PathPart('tank') :CaptureArgs(0) {
