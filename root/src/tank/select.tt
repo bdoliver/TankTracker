@@ -1,7 +1,6 @@
 <form class="form" method="[% form.method %]" action="[% form.action %]" >
-[% header %]
 
-<div class="row content">
+<div class="row content tanksel">
     <div class="col-md-12">
     [% IF form.get_element('tank_id') %]
     <div class="row tanksel">

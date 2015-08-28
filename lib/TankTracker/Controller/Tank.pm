@@ -28,7 +28,6 @@ Catalyst Controller.
 sub auto :Private {
     my ($self, $c) = @_;
 
-    $c->stash->{'page_title'} = 'Tank';
     $c->stash->{'active_tab'} = 'tank';
 
     return 1;
@@ -148,12 +147,12 @@ sub select : Chained('base') :PathPart('') Args(0) FormMethod('_select_form') {
 sub add : Chained('base') :PathPart('add') Args(1) {
     my ( $self, $c, $water_type ) = @_;
 
-    $c->stash->{'tank_action'}    = 'add';
-    $c->stash->{'action_heading'} = sprintf(
-                                        'Add %s Water Tank',
-                                        ucfirst($water_type)
-                                    );
-    $c->stash->{'water_type'}     = $water_type;
+    $c->stash->{'tank_action'} = 'add';
+    $c->stash->{'page_title'}  = sprintf(
+                                    'Add %s Water Tank',
+                                    ucfirst($water_type)
+                                 );
+    $c->stash->{'water_type'}  = $water_type;
 
     $c->forward('details');
 
@@ -164,7 +163,7 @@ sub edit : Chained('get_tank') :PathPart('edit') Args(0) {
     my ( $self, $c ) = @_;
 
     $c->stash->{'tank_action'}    = 'edit';
-    $c->stash->{'action_heading'} = 'Edit';
+    $c->stash->{'action_heading'} = 'Edit Details';
 
     $c->forward('details');
 

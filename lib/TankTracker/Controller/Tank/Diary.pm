@@ -25,8 +25,6 @@ Catalyst Controller.
 sub auto :Private {
     my ($self, $c) = @_;
 
-    $c->stash->{'page_title'} = 'Diary';
-
     return 1;
 }
 

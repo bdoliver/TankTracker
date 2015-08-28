@@ -17,13 +17,16 @@ h5 {
   margin: 0px 0px 10px;
   padding-top: 10px;
 }
+.row.content.tanksel {
+  margin-top: 15px;
+}
+.col-md-4.text-right {
+  margin-top: 10px;
+}
 
 .form_errors {
   padding-top: 10px;
   margin: 10px 5px 0px 5px;   
-}
-.tanksel {
-  margin-top: 15px;
 }
 
 th.sortable,
@@ -103,3 +106,4 @@ div#testChartDiv {
 div.colpick {
     z-index: 3000;
 }
+

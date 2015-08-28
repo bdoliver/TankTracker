@@ -30,8 +30,6 @@ Catalyst Controller.
 sub auto :Private {
     my ($self, $c) = @_;
 
-    $c->stash->{'page_title'} = 'Water Tests';
-
     return 1;
 }
 
