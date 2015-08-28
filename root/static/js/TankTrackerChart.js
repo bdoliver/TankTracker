@@ -94,7 +94,7 @@ function generateChart(tank_id) {
         };
     }
 
-    $.ajax({ url      : '/tank/'+tank_id+'/water_test/chart_data',
+    $.ajax({ url      : '/tank/'+tank_id+'/water_test/chart/data',
              xhrFields: { withCredentials: true }, // seems to be necessary for catalyst to get the cookie
              data     : request_data,
              dataType : 'json',

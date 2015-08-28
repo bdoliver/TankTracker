@@ -44,7 +44,7 @@ sub chart :Chained('get_tank') PathPart('water_test/chart') Args(0) {
     return;
 }
 
-sub chart_data :Chained('get_tank') PathPart('water_test/chart_data') Args(0) {
+sub chart_data :Chained('get_tank') PathPart('water_test/chart/data') Args(0) {
     my ($self, $c) = @_;
 
     my $params = $c->request->body_data();
