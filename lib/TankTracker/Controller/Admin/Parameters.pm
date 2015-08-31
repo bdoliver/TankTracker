@@ -98,12 +98,11 @@ sub params : Chained('base') :PathPart('parameters') Args(0) FormMethod('_parame
 
         try {
             $c->model('WaterTestParameter')->update(\@params);
-            $c->stash->{'message'} = q{Saved parameters ok};
+            $c->flash->{'message'} = q{Saved parameters ok};
 
-            ## FIXME: see if default_values() will work to populate the form?
             # Because of the way in which the form is constructed,
             # we need to do an external redirect back to ourself
-            # in order to re-display the saved valus:
+            # in order to re-display the newly-saved values:
             $c->response->redirect($c->uri_for(qq{/admin/parameters}));
             $c->detach();
             return;
@@ -112,6 +111,10 @@ sub params : Chained('base') :PathPart('parameters') Args(0) FormMethod('_parame
             my $err = qq{Error saving parameters: $_};
             $c->stash->{'error'} = $err;
         };
+    }
+
+    if ( my $msg = $c->flash->{'message'} ) {
+        $c->stash->{'message'} = $msg;
     }
 
     $c->stash->{'template'} = 'admin/parameters.tt';
