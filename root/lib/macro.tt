@@ -91,17 +91,16 @@ href="[% path %]"
             [% END %]
             </div>
         </div>
-    [% ELSE %]
-        [% IF message %]
+    [% END %]
+    [% IF message %]
         <div class="row form_errors">
             <div class="alert alert-success fade in">[% message %]</div>
         </div>
-        [% END %]
-        [% IF error %]
+    [% END %]
+    [% IF error %]
         <div class="row form_errors">
             <div class="alert alert-danger fade in">[% error %]</div>
         </div>
-        [% END %]
     [% END %]
 [% END %]
 
