@@ -1,5 +1,5 @@
 use utf8;
-package TankTracker::Schema::TankWaterTestResultView;
+package TankTracker::Schema::WaterTestCsv;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
@@ -13,7 +13,7 @@ use MooseX::MarkAsMethods autoclean => 1;
 extends 'DBIx::Class::Core';
 __PACKAGE__->load_components("InflateColumn::DateTime");
 __PACKAGE__->table_class("DBIx::Class::ResultSource::View");
-__PACKAGE__->table("public.tank_water_test_result_view");
+__PACKAGE__->table("public.water_test_csv");
 __PACKAGE__->add_columns(
   "tank_id",
   { data_type => "integer", is_nullable => 1 },
@@ -41,51 +41,43 @@ __PACKAGE__->add_columns(
   { data_type => "text", is_nullable => 1 },
   "tester_last_name",
   { data_type => "text", is_nullable => 1 },
-  "parameter",
-  {
-    data_type => "enum",
-    extra => {
-      custom_type_name => "parameter_type",
-      list => [
-        "salinity",
-        "ph",
-        "ammonia",
-        "nitrite",
-        "nitrate",
-        "calcium",
-        "phosphate",
-        "magnesium",
-        "kh",
-        "gh",
-        "copper",
-        "iodine",
-        "strontium",
-        "temperature",
-        "water_change",
-        "tds",
-      ],
-    },
-    is_nullable => 1,
-  },
-  "param_order",
-  { data_type => "integer", is_nullable => 1 },
-  "title",
-  { data_type => "text", is_nullable => 1 },
-  "label",
-  { data_type => "text", is_nullable => 1 },
-  "rgb_colour",
-  { data_type => "char", is_nullable => 1, size => 7 },
-  "active",
-  { data_type => "boolean", is_nullable => 1 },
-  "chart",
-  { data_type => "boolean", is_nullable => 1 },
-  "test_result",
+  "salinity",
+  { data_type => "numeric", is_nullable => 1 },
+  "ph",
+  { data_type => "numeric", is_nullable => 1 },
+  "ammonia",
+  { data_type => "numeric", is_nullable => 1 },
+  "nitrite",
+  { data_type => "numeric", is_nullable => 1 },
+  "nitrate",
+  { data_type => "numeric", is_nullable => 1 },
+  "calcium",
+  { data_type => "numeric", is_nullable => 1 },
+  "phosphate",
+  { data_type => "numeric", is_nullable => 1 },
+  "magnesium",
+  { data_type => "numeric", is_nullable => 1 },
+  "kh",
+  { data_type => "numeric", is_nullable => 1 },
+  "gh",
+  { data_type => "numeric", is_nullable => 1 },
+  "copper",
+  { data_type => "numeric", is_nullable => 1 },
+  "iodine",
+  { data_type => "numeric", is_nullable => 1 },
+  "strontium",
+  { data_type => "numeric", is_nullable => 1 },
+  "temperature",
+  { data_type => "numeric", is_nullable => 1 },
+  "water_change",
+  { data_type => "numeric", is_nullable => 1 },
+  "tds",
   { data_type => "numeric", is_nullable => 1 },
 );
 
 
 # Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-31 11:26:48
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:n49o2WFEwb/9QW+wYWLJ/w
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:5xLObhbRzlpogR1AWkiXIw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

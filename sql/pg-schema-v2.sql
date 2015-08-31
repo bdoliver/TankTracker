@@ -365,6 +365,7 @@ CREATE TABLE water_test_result (
 CREATE VIEW tank_water_test_result_view AS (
     SELECT wtr.tank_id,
            t.tank_name,
+           t.water_type,
            t.owner_id,
            tu.first_name AS owner_first_name,
            tu.last_name  AS owner_last_name,
@@ -446,5 +447,101 @@ CREATE VIEW user_tanks AS (
            user_id
     FROM tank_user_access JOIN tank USING ( tank_id )
 );
+
+CREATE TYPE water_test_csv_record AS (
+    tank_id           INTEGER,
+    tank_name         TEXT,
+    water_type        water_type,
+    owner_id          INTEGER,
+    owner_first_name  TEXT,
+    owner_last_name   TEXT,
+    test_id           INTEGER,
+    test_date         TIMESTAMP(0) WITHOUT TIME ZONE,
+    user_id           INTEGER,
+    tester_first_name TEXT,
+    tester_last_name  TEXT,
+    salinity          NUMERIC,
+    ph                NUMERIC,
+    ammonia           NUMERIC,
+    nitrite           NUMERIC,
+    nitrate           NUMERIC,
+    calcium           NUMERIC,
+    phosphate         NUMERIC,
+    magnesium         NUMERIC,
+    kh                NUMERIC,
+    gh                NUMERIC,
+    copper            NUMERIC,
+    iodine            NUMERIC,
+    strontium         NUMERIC,
+    temperature       NUMERIC,
+    water_change      NUMERIC,
+    tds               NUMERIC
+);
+
+CREATE OR REPLACE FUNCTION export_water_test()
+RETURNS SETOF water_test_csv_record AS
+$$
+DECLARE
+    test_rec tank_water_test_result_view%ROWTYPE;
+    rec water_test_csv_record;
+    test_id INT;
+
+BEGIN
+    FOR test_rec IN SELECT * FROM tank_water_test_result_view ORDER BY tank_id, test_date
+    LOOP
+        IF test_id IS NULL THEN
+            test_id = test_rec.test_id;
+        END IF;
+
+        IF test_id != test_rec.test_id THEN
+            RETURN NEXT rec;
+            -- clear current rec:
+            rec = null;
+            test_id = test_rec.test_id;
+        END IF;
+
+        IF test_rec.test_id = test_id THEN
+            IF rec.tank_id IS NULL THEN
+                rec.tank_id           = test_rec.tank_id;
+                rec.tank_name         = test_rec.tank_name;
+                rec.water_type        = test_rec.water_type;
+                rec.owner_id          = test_rec.owner_id;
+                rec.owner_first_name  = test_rec.owner_first_name;
+                rec.owner_last_name   = test_rec.owner_last_name;
+                rec.test_id           = test_rec.test_id;
+                rec.test_date         = test_rec.test_date;
+                rec.user_id           = test_rec.user_id;
+                rec.tester_first_name = test_rec.tester_first_name;
+                rec.tester_last_name  = test_rec.tester_last_name;
+            END IF;
+
+            CASE test_rec.parameter
+                WHEN 'salinity'     THEN rec.salinity     = test_rec.test_result;
+                WHEN 'ph'           THEN rec.ph           = test_rec.test_result;
+                WHEN 'ammonia'      THEN rec.ammonia      = test_rec.test_result;
+                WHEN 'nitrite'      THEN rec.nitrite      = test_rec.test_result;
+                WHEN 'nitrate'      THEN rec.nitrate      = test_rec.test_result;
+                WHEN 'calcium'      THEN rec.calcium      = test_rec.test_result;
+                WHEN 'phosphate'    THEN rec.phosphate    = test_rec.test_result;
+                WHEN 'magnesium'    THEN rec.magnesium    = test_rec.test_result;
+                WHEN 'kh'           THEN rec.kh           = test_rec.test_result;
+                WHEN 'gh'           THEN rec.gh           = test_rec.test_result;
+                WHEN 'copper'       THEN rec.copper       = test_rec.test_result;
+                WHEN 'iodine'       THEN rec.iodine       = test_rec.test_result;
+                WHEN 'strontium'    THEN rec.strontium    = test_rec.test_result;
+                WHEN 'temperature'  THEN rec.temperature  = test_rec.test_result;
+                WHEN 'water_change' THEN rec.water_change = test_rec.test_result;
+                WHEN 'tds'          THEN rec.tds          = test_rec.test_result;
+            END CASE;
+        END IF;
+    END LOOP;
+
+    -- flush out remaining record...
+    RETURN NEXT rec;
+    RETURN;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE VIEW water_test_csv AS SELECT * FROM export_water_test();
 
 COMMIT;
