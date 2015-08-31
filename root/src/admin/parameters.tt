@@ -65,17 +65,19 @@
     </div>
 </div>
 <script>
-[% # turn all rgb_colour inputs into a colour picker & colourise
-   # the input field background... %]
-$('input[name="rgb_colour"]').each(function(idx,obj) {
-    $(obj).colpick({
-        colorScheme:'light',
-        layout: 'hex',
-        color: $(obj).val(),
-        onSubmit:function(hsb,hex,rgb,el) {
-            $(el).css('background-color', '#'+hex).val(('#'+hex).toUpperCase());
-            $(el).colpickHide();
-        }
-    }).css('background-color', $(obj).val());
+$(function() {
+    [% # turn all rgb_colour inputs into a colour picker & colourise
+       # the input field background... %]
+    $('input[name="rgb_colour"]').each(function(idx,obj) {
+        $(obj).colpick({
+            colorScheme: 'light',
+            layout: 'hex',
+            color: $(obj).val(),
+            onSubmit:function(hsb,hex,rgb,el) {
+                $(el).css('background-color', '#'+hex).val(('#'+hex).toUpperCase());
+                $(el).colpickHide();
+            }
+        }).css('background-color', $(obj).val());
+    });
 });
 </script>
