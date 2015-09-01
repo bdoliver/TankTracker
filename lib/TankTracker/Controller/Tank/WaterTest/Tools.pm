@@ -56,10 +56,6 @@ sub _export_form :Private {
             type  => 'Text',
             default => DateTime->now()->strftime('%Y-%m-%d'),
         },
-        {
-            type => 'Submit',
-            name => 'submit',
-        },
     ];
 
     return { 'elements' => $elements };
@@ -125,7 +121,7 @@ sub export :Chained('get_tank') PathPart('water_test/tools/export') Args(0) Form
 
         my $tests = $c->model('WaterTest')->export_tests($search);
 
-        $c->stash( columns      => $c->model('WaterTest')->export_column_names(),
+        $c->stash( columns      => [ $tests->result_source->columns() ],
                    cursor       => $tests->cursor(),
                    current_view => 'CSV',
                    filename     => "$export_file.csv",

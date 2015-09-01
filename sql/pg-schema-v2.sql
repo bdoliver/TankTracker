@@ -542,6 +542,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE VIEW water_test_csv AS SELECT * FROM export_water_test();
+CREATE VIEW water_test_csv_view AS SELECT * FROM export_water_test();
 
 COMMIT;

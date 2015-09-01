@@ -412,10 +412,9 @@ sub export_tests {
 
     my $args = {
         order_by => { '-asc' => [ qw(tank_id test_date) ] },
-        columns  => $self->export_column_names(),
     };
 
-    return $self->schema->resultset('TankWaterTestResultView')->search(
+    return $self->schema->resultset('WaterTestCsvView')->search(
         $search,
         $args,
     );
