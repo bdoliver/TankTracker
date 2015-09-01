@@ -165,63 +165,13 @@ sub _details :Private {
         $password_fields[1]{'constraints'}[1]{'when'} = $when;
     }
 
+    my $preferences = $c->stash->{'user'}{'preferences'};
     push @$elements,
         @password_fields,
-#         {
-#             name  => 'dimension_units',
-#             type  => 'Select',
-#             empty_first       => 1,
-#             empty_first_label => '- Units -',
-#             options => [
-#                 [ 'mm'     => 'mm'     ],
-#                 [ 'cm'     => 'cm'     ],
-#                 [ 'm'      => 'm'      ],
-#                 [ 'inches' => 'inches' ],
-#                 [ 'feet'   => 'feet'   ],
-#             ],
-#             constraints => [
-#                 {
-#                     type    => 'Required',
-#                     message => 'You must select the units for the dimensions of your tank(s)',
-#                 },
-#             ],
-#         },
-#         {
-#             name  => 'capacity_units',
-#             type  => 'Select',
-#             empty_first       => 1,
-#             empty_first_label => '- Units -',
-#             options => [
-#                 [ 'litres'     => 'Litres'     ],
-#                 [ 'gallons'    => 'Gallons'    ],
-#                 [ 'us gallons' => 'US Gallons' ],
-#             ],
-#             constraints => [
-#                 {
-#                     type    => 'Required',
-#                     message => 'You must select the units for the capacity of your tank(s)',
-#                 },
-#             ],
-#         },
-#         {
-#             name  => 'temperature_scale',
-#             type  => 'Select',
-#             empty_first       => 1,
-#             empty_first_label => '- Units -',
-#             options => [
-#                 [ 'C' => 'Celsius'    ],
-#                 [ 'F' => 'Fahrenheit' ],
-#             ],
-#             constraints => [
-#                 {
-#                     type    => 'Required',
-#                     message => 'You must select the temperature scale for your tank(s) water tests',
-#                 },
-#             ],
-#         },
         {
             name => 'recs_per_page',
             type => 'Text',
+            default => $preferences->{'recs_per_page'},
             constraints => [
                 {
                     type    => 'Number',
@@ -234,7 +184,53 @@ sub _details :Private {
                     message => 'Records per page must be between 5 and 50',
                 },
             ],
-        };
+        },
+        {
+            name    => 'tank_order_col',
+            type    => 'Select',
+            default => $preferences->{'tank_order_col'},
+            options => [
+                [ 'tank_id'    => 'Tank ID'             ],
+                [ 'tank_name'  => 'Name'                ],
+                [ 'created_on' => 'Date Created'        ],
+                [ 'updated_on' => 'Most Recent Updated' ],
+
+            ],
+        },
+        {
+            name    => 'tank_order_seq',
+            type    => 'Radiogroup',
+            default => $preferences->{'tank_order_seq'},
+            options => [
+                [ 'asc'  => 'Ascending'  ],
+                [ 'desc' => 'Descending' ],
+            ],
+            constraints => [
+                'AutoSet',
+            ],
+        },
+        {
+            name    => 'water_test_order_col',
+            type    => 'Select',
+            default => $preferences->{'water_test_order_col'},
+            options => [
+                [ 'test_id'    => 'Test ID'             ],
+                [ 'test_date'  => 'Test Date'           ],
+            ],
+        },
+        {
+            name    => 'water_test_order_seq',
+            type    => 'Radiogroup',
+            default => $preferences->{'water_test_order_seq'},
+            options => [
+                [ 'asc'  => 'Ascending'  ],
+                [ 'desc' => 'Descending' ],
+            ],
+            constraints => [
+                'AutoSet',
+            ],
+        },
+    ;
 
     return { elements => $elements };
 }
@@ -297,7 +293,11 @@ sub details :Args(0) FormMethod('_details') {
         my $prefs = {};
 
         # Currently there's only one user pref...
-        for my $pref ( qw(recs_per_page) ) {
+        for my $pref ( qw(recs_per_page
+                          tank_order_col
+                          tank_order_seq
+                          water_test_order_col
+                          water_test_order_seq) ) {
             $prefs->{$pref} = delete $params->{$pref};
         }
 

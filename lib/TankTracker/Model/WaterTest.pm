@@ -253,8 +253,7 @@ sub list {
 sub _get_import_headings {
     my ( $self, $row ) = @_;
 
-    # import mirrors export:
-    my $cols = $self->export_column_names();
+    my $cols = [ $self->schema->resultset('WaterTestCsvView')->result_source->columns() ];
 
     my ( @headings, @errors );
 
@@ -268,15 +267,6 @@ sub _get_import_headings {
     }
 
     die "Invalid column names: ".join(", ", @errors) if @errors;
-
-    # check for mandatory columns:
-    for my $hdg ( qw( test_date parameter test_result ) ) {
-        if ( not grep { $_ eq $hdg } @headings ) {
-            push @errors, $hdg;
-        }
-    }
-
-    die "Missing mandatory columns in import:".join(", ", @errors) if @errors;
 
     return \@headings;
 }
@@ -309,7 +299,7 @@ sub import_tests {
         $self->txn_begin();
 
         my $current_test    = {};
-        my $tank_parameters = {};
+        my $tank_parameters;
         my $current_tank_id;
 
         ## FIXME: should we set an upper limit on records loaded?
@@ -322,6 +312,7 @@ sub import_tests {
             $row->{'tank_id'} ||= $tank_id;
 
             try {
+                # this only checks date validity... ergo the lexical scoping:
                 my $dt = DateTime::Format::Pg->parse_datetime($row->{'test_date'});
             }
             catch {
@@ -408,9 +399,9 @@ sub export_column_names {
 }
 
 sub export_tests {
-    my ( $self, $search ) = @_;
+    my ( $self, $search, $args ) = @_;
 
-    my $args = {
+    $args ||= {
         order_by => { '-asc' => [ qw(tank_id test_date) ] },
     };
 

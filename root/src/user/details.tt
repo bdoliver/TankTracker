@@ -85,11 +85,29 @@
                 </div>
                 <div class="col-md-6">
                     <div class="row">
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label for="recs_per_page">Recs per page</label>
                         </div>
-                        <div class="col-md-3 form-group number">
+                        <div class="col-md-4 form-group number">
                             [% form.get_element('recs_per_page') %]
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label for="tank_order_col">Sort tanks by:</label>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            [% form.get_element('tank_order_col') %]
+                            [% form.get_element('tank_order_seq') %]
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label for="tank_order_col">Sort tests by:</label>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            [% form.get_element('water_test_order_col') %]
+                            [% form.get_element('water_test_order_seq') %]
                         </div>
                     </div>
                 </div>
