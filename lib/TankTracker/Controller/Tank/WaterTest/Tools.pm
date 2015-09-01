@@ -119,7 +119,20 @@ sub export :Chained('get_tank') PathPart('water_test/tools/export') Args(0) Form
 
         $export_file =~ s{/}{}g;
 
-        my $tests = $c->model('WaterTest')->export_tests($search);
+        my $preference     = $c->user->user_preference();
+        my $tank_order_col = $preference->tank_order_col();
+        my $tank_order_seq = $preference->tank_order_seq();
+        my $test_order_col = $preference->water_test_order_col();
+        my $test_order_seq = $preference->water_test_order_seq();
+
+        my $args = {
+            'order_by' => [
+                { "-$tank_order_seq" => $tank_order_col },
+                { "-$test_order_seq" => $test_order_col },
+            ],
+        };
+
+        my $tests = $c->model('WaterTest')->export_tests($search,$args);
 
         $c->stash( columns      => [ $tests->result_source->columns() ],
                    cursor       => $tests->cursor(),

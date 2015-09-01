@@ -36,12 +36,15 @@ sub auto :Private {
 sub _select_form :Private {
     my ( $self, $c ) = @_;
 
+    my $order_col = $c->user->user_preference->tank_order_col();
+    my $order_seq = $c->user->user_preference->tank_order_seq();
+
     my @tanks = @{ $c->model('UserTank')->list(
         {
             user_id => $c->user->user_id(),
         },
         {
-            order_by => { -asc => 'tank_name' },
+            order_by => { "-$order_seq" => $order_col },
         },
     ) };
 

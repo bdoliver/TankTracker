@@ -38,12 +38,15 @@ sub list :Chained('get_tank') PathPart('water_test/list') {
 
     my $tank_id = $c->stash->{'tank'}{'tank_id'};
 
+    my $order_col = $c->user->user_preference->water_test_order_col();
+    my $order_seq = $c->user->user_preference->water_test_order_seq();
+
     my ( $tests, $pager ) = @{ $c->model('WaterTest')->list(
         {
              'tank_id' => $tank_id,
         },
         {
-            order_by => { '-desc' => 'test_date' },
+            order_by => { "-$order_seq" => "me.$order_col" },
             page     => $page || 1,
             rows     => $c->stash->{'user'}{'preferences'}{'recs_per_page'} || 10,
         },

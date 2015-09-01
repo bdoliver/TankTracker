@@ -143,6 +143,7 @@ sub login : Local FormMethod('_login_form') Args(0) {
                             },
                             {
                                 'prefetch' => [
+                                    'user_preference',
                                     {
                                         'tracker_user_roles' => 'role'
                                     },
