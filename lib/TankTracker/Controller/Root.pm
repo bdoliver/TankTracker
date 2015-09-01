@@ -38,14 +38,14 @@ sub auto :Private {
 
     $c->forward('check_request') || return 0;
 
-    # User found, so everything ok - continue procesing
+    # User found, so everything ok - continue processing
     return 1;
 }
 
 sub check_request : Private {
     my ( $self, $c ) = @_;
 
-     # block form submission with a GET request (a potential XSS attack)
+    # block form submission with a GET request (a potential XSS attack)
     if ( $c->request->method() eq 'GET'          &&
          scalar %{ $c->request->query_params() }
     ) {
@@ -58,14 +58,14 @@ sub check_request : Private {
         return 1;
     }
 
-     # unauthenticated request - force login...
+    # unauthenticated request - force login...
     if ( ! $c->user_exists() ) {
         $c->response->redirect($c->uri_for('login'));
         return 0;
     }
 
     $c->response->headers->header(
-        'Cache-control' => 'no-cache, must-revalidate, private, no-store'
+        'Cache-control' => 'must-revalidate, private, no-store, max-age=0, no-cache'
     );
     $c->response->headers->header('Pragma' => 'no-cache');
 
