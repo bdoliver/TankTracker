@@ -422,6 +422,18 @@ CREATE TABLE inventory (
     updated_on        TIMESTAMP(0) DEFAULT now()
 );
 
+CREATE TYPE tank_order_type AS ENUM (
+    'tank_id',
+    'tank_name',
+    'created_on',
+    'updated_on'
+);
+
+CREATE TYPE water_test_order_type AS ENUM (
+    'test_id',
+    'test_date'
+);
+
 CREATE TABLE user_preferences (
     user_id         INTEGER
                     NOT NULL
@@ -433,7 +445,27 @@ CREATE TABLE user_preferences (
                     DEFAULT 10
                     CHECK (recs_per_page > 0),
 
-    updated_on      TIMESTAMP(0) DEFAULT now(),
+    tank_order_col  tank_order_type
+                    NOT NULL
+                    DEFAULT 'tank_id',
+    tank_order_seq  TEXT
+                    NOT NULL
+                    DEFAULT 'asc'
+                    CHECK ( lower(tank_order_seq) = 'asc'
+                                OR
+                            lower(tank_order_seq) = 'desc' ),
+
+    water_test_order_col water_test_order_type
+                    NOT NULL
+                    DEFAULT 'test_id',
+    water_test_order_seq TEXT
+                    NOT NULL
+                    DEFAULT 'desc'
+                    CHECK ( lower(tank_order_seq) = 'asc'
+                                OR
+                            lower(tank_order_seq) = 'desc' ),
+
+    updated_on       TIMESTAMP(0) DEFAULT now(),
     PRIMARY KEY ( user_id )
 );
 

@@ -18,6 +18,30 @@ __PACKAGE__->add_columns(
   { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "recs_per_page",
   { data_type => "integer", default_value => 10, is_nullable => 0 },
+  "tank_order_col",
+  {
+    data_type => "enum",
+    default_value => "tank_id",
+    extra => {
+      custom_type_name => "tank_order_type",
+      list => ["tank_id", "tank_name", "created_on", "updated_on"],
+    },
+    is_nullable => 0,
+  },
+  "tank_order_seq",
+  { data_type => "text", default_value => "asc", is_nullable => 0 },
+  "water_test_order_col",
+  {
+    data_type => "enum",
+    default_value => "test_id",
+    extra => {
+      custom_type_name => "water_test_order_type",
+      list => ["test_id", "test_date"],
+    },
+    is_nullable => 0,
+  },
+  "water_test_order_seq",
+  { data_type => "text", default_value => "desc", is_nullable => 0 },
   "updated_on",
   {
     data_type     => "timestamp",
@@ -35,8 +59,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-11 11:58:05
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:jClNUACSHBwtVJfeQ3JfuA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-09-01 15:01:10
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:KvN/uOdoA43EwZbdZlaGyw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
