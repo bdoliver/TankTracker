@@ -96,7 +96,7 @@
                         <div class="col-md-2">
                             <label for="tank_order_col">Sort tanks by:</label>
                         </div>
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-4 form-group order_seq">
                             [% form.get_element('tank_order_col') %]
                             [% form.get_element('tank_order_seq') %]
                         </div>
@@ -105,11 +105,19 @@
                         <div class="col-md-2">
                             <label for="tank_order_col">Sort tests by:</label>
                         </div>
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-4 form-group order_seq">
                             [% form.get_element('water_test_order_col') %]
                             [% form.get_element('water_test_order_seq') %]
                         </div>
                     </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <p class="bg-warning">
+                        NB: After changing your preferences, you will need to logout
+                            &amp; login again for the changes to take effect.
+                    </p>
                 </div>
             </div>
             <div class="row">

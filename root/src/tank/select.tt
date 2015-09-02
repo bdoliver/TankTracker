@@ -24,7 +24,7 @@
         <div class="form-group col-md-2">
              <label for="tank_action">Choose action:</label>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4 tank_action">
             [% form.get_element('tank_action') %]
         </div>
     </div>

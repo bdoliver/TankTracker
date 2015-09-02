@@ -50,11 +50,16 @@ th.sortable,
   margin-bottom: 15px;
 }
 
-fieldset.form-group {
+div.tank_action fieldset.form-group {
     margin-left: 50px;
     margin-bottom: 0px;
 }
 
+div.order_seq fieldset.form-group {
+  position: absolute;
+  top: -13px;
+  left: 16em;
+}
 
 span.radio span {
   display: block;
