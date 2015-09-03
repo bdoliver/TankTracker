@@ -1,4 +1,40 @@
 <form class="form" method="[% form.method %]" action="[% form.action %]" >
+[% IF ! water_type %]
+    <div class="row">
+        <div class="col-md-12">
+
+        [% header %]
+
+            <div class="row content">
+                <div class="col-md-8">
+                    <div class="row form-group">
+                        <div class="col-md-4">
+                            <label for="sel_water_type">Select water type:</label>
+                        </div>
+                        <div class="col-md-4">
+                            [% form.get_element('sel_water_type') %]
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="row form-group">
+                        <div class="btn-group col-md-4"></div>
+                        <div class="btn-group col-md-4">
+                            [% submit_btn %]
+                            [% back_btn %]
+                            [% logout_btn %]
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+[% RETURN %]
+[% END %]
+
     [% form.get_element('tank_id')    %]
     [% form.get_element('water_type') %]
     <div class="row">
