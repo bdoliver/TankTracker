@@ -68,10 +68,11 @@ sub _select_form :Private {
             constraints       => [
                 {
                     type    => 'Required',
-                    when    => { field => 'tank_action',
-                                 values => [ 'add/fresh', 'add/salt' ],
-                                 not   => 1,
-                               },
+                    when    => {
+                        field  => 'tank_action',
+                        values => [ 'add' ],
+                        not    => 1,
+                    },
                     message => 'You must select a tank.',
                 },
             ],
@@ -83,8 +84,7 @@ sub _select_form :Private {
             options => [
                 [ 'water_test/list' => 'Water tests' ],
                 [ 'view'            => 'View / edit tank details' ],
-                [ 'add/salt'        => 'Add a new saltwater tank' ],
-                [ 'add/fresh'       => 'Add a new freshwater tank' ],
+                [ 'add'             => 'Add a new tank' ],
                 [ 'inventory/list'  => 'Inventory'   ],
                 [ 'diary/list'      => 'Diary'       ],
             ],
@@ -104,8 +104,7 @@ sub _select_form :Private {
             type    => 'Radiogroup',
             default => $c->session->{'tank_action'},
             options => [
-                [ 'add/salt'        => 'Add a new saltwater tank' ],
-                [ 'add/fresh'       => 'Add a new freshwater tank' ],
+                [ 'add' => 'Add a new tank' ],
             ],
             constraints => [
                 'AutoSet',
@@ -131,10 +130,10 @@ sub select : Chained('base') :PathPart('') Args(0) FormMethod('_select_form') {
 
         # remember the currently-selected tank & action:
         $c->session->{tank_id}     = $tank_id;
-        $c->session->{tank_action} = $action if $action !~ qr{^add};
+        $c->session->{tank_action} = $action;
 
         my $path  = q{/tank/};
-           $path .= "$tank_id/" if $action !~ qr{^add};
+           $path .= "$tank_id/" if $action ne q{add};
            $path .= $action;
 
         $c->response->redirect($c->uri_for($path));
@@ -147,17 +146,64 @@ sub select : Chained('base') :PathPart('') Args(0) FormMethod('_select_form') {
     return;
 }
 
-sub add : Chained('base') :PathPart('add') Args(1) {
+sub _water_type_form :Private {
+    my ( $self, $c ) = @_;
+
+    return { 'elements' =>
+        [
+            {
+                name => 'water_type',
+                type => 'Select',
+                empty_first => 1,
+                empty_first_label => '- Select -',
+                options => [
+                    [ 'fresh' => 'Fresh water' ],
+                    [ 'salt'  => 'Salt water'  ],
+                ],
+                constraints => [
+                    {
+                        type    => 'Required',
+                        message => 'You must select a water type',
+                    },
+                ],
+            },
+        ],
+    };
+}
+
+sub add : Chained('base') :PathPart('add') FormMethod('_water_type_form') {
     my ( $self, $c, $water_type ) = @_;
 
     $c->stash->{'tank_action'} = 'add';
     $c->stash->{'page_title'}  = sprintf(
-                                    'Add %s Water Tank',
-                                    ucfirst($water_type)
+                                    'Add %s Tank',
+                                    $water_type
+                                        ? ucfirst("$water_type Water")
+                                        : 'New'
                                  );
-    $c->stash->{'water_type'}  = $water_type;
 
-    $c->forward('details');
+    if ( $water_type ) {
+        $c->stash->{'water_type'} = $water_type;
+        $c->forward('details');
+        $c->detach();
+        return;
+    }
+
+    my $form = $c->stash->{'form'};
+
+    if ( $form->submitted_and_valid() ) {
+
+        my $params = $form->params();
+
+        if ( my $water_type = $params->{'water_type'} ) {
+            $c->stash->{'water_type'} = $water_type;
+            $c->response->redirect($c->uri_for(qq{/tank/add/$water_type}));
+            $c->detach();
+            return;
+        }
+    }
+
+    $c->stash->{'template'} = 'tank/water_type.tt';
 
     return;
 }
@@ -167,7 +213,7 @@ sub edit : Chained('get_tank') :PathPart('edit') Args(0) {
 
     $c->stash->{'tank_action'}    = 'edit';
     $c->stash->{'action_heading'} = 'Edit Details';
-
+    $c->stash->{'water_type'}     = $c->stash->{'tank'}{'water_type'};
     $c->forward('details');
 
     return;
@@ -178,7 +224,7 @@ sub view : Chained('get_tank') Args(0) {
 
     $c->stash->{'tank_action'}    = 'view';
     $c->stash->{'action_heading'} = 'Details';
-
+    $c->stash->{'water_type'}     = $c->stash->{'tank'}{'water_type'};
     $c->forward('details');
 }
 
@@ -430,7 +476,7 @@ sub _details_form : Private {
                 {
                     type    => 'Regex',
                     regex   => '^#[\da-fA-F]{6}$',
-                    message => qq{RGB colour for parameter id #id must be of the form '#ffffff'},
+                    message => qq{RGB colour for parameter id #$id must be of the form '#ffffff'},
                 },
             ],
         },
@@ -454,6 +500,7 @@ sub details : Chained('get_tank') Args(0) FormMethod('_details_form') {
     my $form = $c->stash->{'form'};
 
     if ( $form->submitted_and_valid() ) {
+
         my $params = $form->params();
 
         $params->{'owner_id'} = $c->user->user_id();
@@ -489,10 +536,11 @@ sub details : Chained('get_tank') Args(0) FormMethod('_details_form') {
 
             $c->stash->{'message'} = $msg;
 
-            # Edit complete - send user back to 'view' mode...
-            my $path = qq{/tank/$tank->{'tank_id'}/view};
+            delete $c->session->{'tank_action'}; # re-set action selection
 
-            $c->response->redirect($c->uri_for($path));
+            # Edit complete - send user back to 'tank select' page
+            $c->response->redirect($c->uri_for('/tank'));
+
             $c->detach();
             return;
         }
@@ -502,16 +550,18 @@ sub details : Chained('get_tank') Args(0) FormMethod('_details_form') {
         };
     }
 
-    my %defaults = %{ $c->stash->{'tank'} };
+    if ( $c->stash->{'tank'} ) {
+        my %defaults = %{ $c->stash->{'tank'} };
 
-    for my $param ( @{ delete $defaults{'test_params'} } ) {
-       my $id = $param->{'parameter_id'};
-       for my $key ( keys %{ $param } ) {
-           $defaults{'wtp_'.$id.'_'.$key} = $param->{$key};
-       }
+        for my $param ( @{ delete $defaults{'test_params'} } ) {
+           my $id = $param->{'parameter_id'};
+           for my $key ( keys %{ $param } ) {
+               $defaults{'wtp_'.$id.'_'.$key} = $param->{$key};
+           }
+        }
+
+        $form->default_values(\%defaults);
     }
-
-    $form->default_values(\%defaults);
 
     $c->stash->{'template'} = 'tank/details.tt';
 
