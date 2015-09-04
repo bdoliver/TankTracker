@@ -109,6 +109,22 @@ CREATE TABLE tank (
 );
 CREATE UNIQUE INDEX tank_name_idx ON tank (lower(tank_name));
 
+CREATE TABLE tank_photos (
+    photo_id     SERIAL
+                 NOT NULL
+                 PRIMARY KEY,
+
+    tank_id      INTEGER
+                 NOT NULL
+                 REFERENCES tank ( tank_id ),
+
+    file_path    TEXT
+                 NOT NULL,
+
+    caption      TEXT
+);
+CREATE INDEX tank_photo_idx ON tank_photos ( tank_id, photo_id );
+
 CREATE TABLE tank_user_access (
     tank_id   INTEGER
               NOT NULL
