@@ -13,44 +13,6 @@ has 'rs_name' => (
     default => 'Tank',
 );
 
-sub get {
-    my ( $self, $id ) = @_;
-
-    my $args = {
-        'no_deflate' => 1,
-        'prefetch'   => [
-            'tank_water_test_parameters',
-            'tank_photos',
-        ],
-    };
-
-    my $obj = $self->SUPER::get($id, $args);
-
-    ## Calling deflate() on $obj doesn't walk the prefetched records,
-    ## so we'll deflate those explicitly. We also put them into a consistent
-    ## order while doing so.
-    my @test_params = map { $self->deflate($_) }
-                      sort { ( int($a->param_order()  || 0) <=> int($a->param_order()  || 0) )
-                                                         or
-                             ( int($a->parameter_id() || 0) <=> int($a->parameter_id() || 0) )
-                           }
-                      $obj->tank_water_test_parameters()->all();
-
-    my @tank_photos = map { $self->deflate($_) }
-                      sort { ( ($a->caption()   || '') cmp ($a->caption()   || '') )
-                                                       or
-                             ( ($a->file_path() || '') cmp ($a->file_path() || '') )
-                           }
-                      $obj->tank_photos()->all();
-
-    my $tank        = $self->deflate($obj);
-
-    $tank->{test_params} = \@test_params;
-    $tank->{photos}      = \@tank_photos;
-
-    return $tank;
-}
-
 ## Ensures we don't pass empty strings to the database for
 ## certain optional tank attributes:
 sub _fix_params {
