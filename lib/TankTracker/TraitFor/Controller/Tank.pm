@@ -44,19 +44,21 @@ sub get_tank :Chained('base') :PathPart('') CaptureArgs(1) {
             return;
         }
 
-        # fetch the test attributes for this tank:
-        my $params = $c->model('TankWaterTestParameter')->list(
-            {
-                'tank_id' => $tank_id,
-            },
-            {
-                'order_by' => { '-asc' => [ qw( param_order parameter_id ) ] },
-            },
-        );
-
-        $tank->{'test_params'} = $params || [];
+#         # fetch the test attributes for this tank:
+#         my $params = $c->model('TankWaterTestParameter')->list(
+#             {
+#                 'tank_id' => $tank_id,
+#             },
+#             {
+#                 'order_by' => { '-asc' => [ qw( param_order parameter_id ) ] },
+#             },
+#         );
+#
+#         $tank->{'test_params'} = $params || [];
 
         $c->stash->{'tank'} = $tank;
+# use Data::Dumper;
+# warn "\n\nTANK:\n", Dumper($tank);
     }
     else {
         my $error = qq{Tank requested '$tank_id': not found in database!};
