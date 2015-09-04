@@ -57,7 +57,7 @@ sub get {
         $no_deflate = delete $args->{'no_deflate'};
     }
 
-    my $object = $self->resultset->find($id, $args);
+    my $object = $self->resultset->find($id, $args || {});
 
     return $no_deflate ? $object : $self->deflate($object);
 }
