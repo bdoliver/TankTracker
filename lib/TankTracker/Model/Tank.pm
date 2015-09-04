@@ -30,16 +30,16 @@ sub get {
     ## so we'll deflate those explicitly. We also put them into a consistent
     ## order while doing so.
     my @test_params = map { $self->deflate($_) }
-                      sort { ( int($a->param_order()  || 0) <=> int($a->param_order()  || 0) )
+                      sort { ( int($a->param_order()  || 0) <=> int($b->param_order()  || 0) )
                                                          or
-                             ( int($a->parameter_id() || 0) <=> int($a->parameter_id() || 0) )
+                             ( int($a->parameter_id() || 0) <=> int($b->parameter_id() || 0) )
                            }
                       $obj->tank_water_test_parameters()->all();
 
     my @tank_photos = map { $self->deflate($_) }
-                      sort { ( ($a->caption()   || '') cmp ($a->caption()   || '') )
+                      sort { ( ($a->caption()   || '') cmp ($b->caption()   || '') )
                                                        or
-                             ( ($a->file_path() || '') cmp ($a->file_path() || '') )
+                             ( ($a->file_path() || '') cmp ($b->file_path() || '') )
                            }
                       $obj->tank_photos()->all();
 
