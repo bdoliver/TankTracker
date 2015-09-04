@@ -141,6 +141,10 @@ sub select : Chained('base') :PathPart('') Args(0) FormMethod('_select_form') {
         return;
     }
 
+    if ( my $msg = $c->flash->{'message'} ) {
+        $c->stash->{'message'} = $msg;
+    }
+
     $c->stash->{'template'} = 'tank/select.tt';
 
     return;
@@ -527,14 +531,14 @@ sub details : Chained('get_tank') Args(0) FormMethod('_details_form') {
                 delete $params->{'owner_id'};
 
                 $tank = $c->model('Tank')->update($tank_id, $params, $wtp_fields);
-                $msg  = q{Updated tank details.};
+                $msg  = q{Updated details: }.$tank->{'tank_name'};
             }
             else {
                 $tank = $c->model('Tank')->add($params, $wtp_fields);
-                $msg = q{Created new tank.};
+                $msg = q{Created new tank: }.$tank->{'tank_name'};
             }
 
-            $c->stash->{'message'} = $msg;
+            $c->flash->{'message'} = $msg;
 
             delete $c->session->{'tank_action'}; # re-set action selection
 
