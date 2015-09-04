@@ -49,9 +49,15 @@ sub columns {
 }
 
 sub get {
-    my ( $self, $id, $no_deflate ) = @_;
+    my ( $self, $id, $args ) = @_;
 
-    my $object = $self->resultset->find($id);
+    my $no_deflate;
+
+    if ( $args and ref($args) eq 'HASH' ) {
+        $no_deflate = delete $args->{'no_deflate'};
+    }
+
+    my $object = $self->resultset->find($id, $args || {});
 
     return $no_deflate ? $object : $self->deflate($object);
 }

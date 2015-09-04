@@ -538,6 +538,9 @@ sub details : Chained('get_tank') Args(0) FormMethod('_details_form') {
                 $msg = q{Created new tank: }.$tank->{'tank_name'};
             }
 
+            # Make sure we have the photo dir for this tank:
+            $c->forward('photo_dir', [ $tank_id ]);
+
             $c->flash->{'message'} = $msg;
 
             delete $c->session->{'tank_action'}; # re-set action selection

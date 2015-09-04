@@ -60,6 +60,8 @@ __PACKAGE__->config(
     default_view => 'HTML',
     uploadtmp => '/tmp/tt_uploads',
 
+    photo_root => '/static/images/photos',
+
     'View::HTML' => {
         # set the location for TT files
         INCLUDE_PATH => [
