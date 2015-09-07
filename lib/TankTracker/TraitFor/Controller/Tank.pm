@@ -3,6 +3,8 @@ package TankTracker::TraitFor::Controller::Tank;
 use MooseX::MethodAttributes::Role;
 use namespace::autoclean;
 
+use File::Path qw(make_path);
+
 sub base :Chained('/') :PathPart('tank') :CaptureArgs(0) {
     my ( $self, $c ) = @_;
 
@@ -56,6 +58,11 @@ sub get_tank :Chained('base') :PathPart('') CaptureArgs(1) {
 #
 #         $tank->{'test_params'} = $params || [];
 
+        # Make sure we have the photo dir for this tank:
+        $tank->{'photo_dir'} = $c->forward('photo_dir', [ $tank_id ]);
+
+        warn "\n\nPHOTO ROOT: ",$c->uri_for($tank->{'photo_dir'}), "\n\n";
+
         $c->stash->{'tank'} = $tank;
 # use Data::Dumper;
 # warn "\n\nTANK:\n", Dumper($tank);
@@ -69,6 +76,33 @@ sub get_tank :Chained('base') :PathPart('') CaptureArgs(1) {
     }
 
     return 1;
+}
+
+sub photo_dir :Private {
+    my ( $self, $c, $tank_id ) = @_;
+
+    # Make sure we have the photo dir for this tank:
+    my $tank_photo_dir = $c->path_to('./root')
+                         .$c->config->{'photo_root'}
+                         ."/$tank_id";
+
+    if ( ! -d $tank_photo_dir ) {
+        try {
+            make_path(
+                $tank_photo_dir,
+                {
+                    'verbose' => 0,
+                    'mode'    => 0755,
+                }
+            );
+        }
+        catch {
+            warn "\n\n Error creating photo path ($tank_photo_dir): $_\n\n";
+            $tank_photo_dir = undef;
+        };
+    }
+
+    return $tank_photo_dir;
 }
 
 1;
