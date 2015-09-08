@@ -207,7 +207,7 @@
   <!-- Indicators -->
   <ol class="carousel-indicators">
     [% FOR photo IN tank.photos %]
-    <li data-target="#myCarousel" data-slide-to="[% photo.slide_to %]" [% IF loop.first %]class="active"[% END %]></li>
+    <li data-target="#myCarousel" data-slide-to="[% photo.slide_to %]" alt="" [% IF loop.first %]class="active"[% END %]></li>
     [% END %]
   </ol>
 
