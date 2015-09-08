@@ -46,26 +46,18 @@ sub get_tank :Chained('base') :PathPart('') CaptureArgs(1) {
             return;
         }
 
-#         # fetch the test attributes for this tank:
-#         my $params = $c->model('TankWaterTestParameter')->list(
-#             {
-#                 'tank_id' => $tank_id,
-#             },
-#             {
-#                 'order_by' => { '-asc' => [ qw( param_order parameter_id ) ] },
-#             },
-#         );
-#
-#         $tank->{'test_params'} = $params || [];
-
         # Make sure we have the photo dir for this tank:
-        $tank->{'photo_dir'} = $c->forward('photo_dir', [ $tank_id ]);
+        my $photo_dir = $c->forward('photo_dir', [ $tank_id ]);
 
-        warn "\n\nPHOTO ROOT: ",$c->uri_for($tank->{'photo_dir'}), "\n\n";
+        if ( $photo_dir and @{ $tank->{'photos'} } ) {
+            my $uri = $c->uri_for($c->config->{'photo_root'}."/$tank_id");
+
+            # prefix each photo with the uri path to it:
+            map { $_->{'file_path'} = $uri."/".$_->{'file_path'} }
+                @{ $tank->{'photos'} };
+        }
 
         $c->stash->{'tank'} = $tank;
-# use Data::Dumper;
-# warn "\n\nTANK:\n", Dumper($tank);
     }
     else {
         my $error = qq{Tank requested '$tank_id': not found in database!};
