@@ -52,9 +52,11 @@ sub get_tank :Chained('base') :PathPart('') CaptureArgs(1) {
         if ( $photo_dir and @{ $tank->{'photos'} } ) {
             my $uri = $c->uri_for($c->config->{'photo_root'}."/$tank_id");
 
+            my $idx = 0;
             # prefix each photo with the uri path to it:
-            map { $_->{'file_path'} = $uri."/".$_->{'file_path'} }
-                @{ $tank->{'photos'} };
+            map { $_->{'file_path'} = $uri."/".$_->{'file_path'};
+                  $_->{'slide_to'}  = $idx++;
+            } @{ $tank->{'photos'} };
         }
 
         $c->stash->{'tank'} = $tank;
