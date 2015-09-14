@@ -423,10 +423,6 @@ CREATE TABLE inventory (
 
     inventory_type    inventory_type NOT NULL,
 
-    tank_id           INTEGER
-                      NOT NULL
-                      REFERENCES tank ( tank_id ),
-
     user_id           INTEGER
                       NOT NULL
                       REFERENCES tracker_user ( user_id ),
@@ -436,6 +432,21 @@ CREATE TABLE inventory (
     purchase_price    MONEY NOT NULL,
     created_on        TIMESTAMP(0) NOT NULL DEFAULT now(),
     updated_on        TIMESTAMP(0) DEFAULT now()
+);
+
+CREATE TABLE tank_inventory (
+    tank_id           INTEGER
+                      NOT NULL
+                      REFERENCES tank ( tank_id ),
+
+    inventory_id      INTEGER
+                      NOT NULL
+                      REFERENCES inventory ( inventory_id ),
+
+    created_on        TIMESTAMP(0) NOT NULL DEFAULT now(),
+    updated_on        TIMESTAMP(0) DEFAULT now(),
+
+    PRIMARY KEY ( tank_id, inventory_id )
 );
 
 CREATE TYPE tank_order_type AS ENUM (
