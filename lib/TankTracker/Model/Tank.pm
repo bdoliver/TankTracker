@@ -39,7 +39,7 @@ sub get {
     my @tank_photos = map { $self->deflate($_) }
                       sort { ( ($a->caption()   || '') cmp ($b->caption()   || '') )
                                                        or
-                             ( ($a->file_path() || '') cmp ($b->file_path() || '') )
+                             ( ($a->file_name() || '') cmp ($b->file_name() || '') )
                            }
                       $obj->tank_photos()->all();
 
