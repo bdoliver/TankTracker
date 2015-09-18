@@ -84,6 +84,7 @@ sub _select_form :Private {
             options => [
                 [ 'water_test/list' => 'Water tests' ],
                 [ 'view'            => 'View / edit tank details' ],
+                [ 'upload_photo'    => 'Upload tank photo' ],
                 [ 'add'             => 'Add a new tank' ],
                 [ 'inventory/list'  => 'Inventory'   ],
                 [ 'diary/list'      => 'Diary'       ],
@@ -595,6 +596,72 @@ sub _prepare_water_test_params :Private {
     }
 
     return [ map { $params{$_} } sort { $a <=> $b } keys %params ];
+}
+
+sub _upload_photo_form :Private {
+    my ($self, $c ) = @_;
+
+    my $elements = [
+        {
+            name => 'upload_photo',
+            type => 'File',
+            attributes => {
+                'id' => 'upload_photo',
+                'data-preview-file-type' => 'image',
+                'data-wrap-text-length' => 45,
+            },
+            constraints => [
+                {
+                    type    => 'Required',
+                    message => 'No file selected for upload.',
+                },
+            ],
+        },
+        {
+            name => 'caption',
+            type => 'Text',
+        },
+    ];
+
+    return { 'elements' => $elements };
+}
+
+sub upload_photo :Chained('get_tank') PathPart('upload_photo') Args(0) FormMethod('_upload_photo_form') {
+    my ($self, $c ) = @_;
+
+    my $form = $c->stash->{'form'};
+
+    if ( $form->submitted_and_valid() ) {
+
+##FIXME: check out w.r.t limiting/aborting upload based on file size...
+## http://stackoverflow.com/questions/3090574/how-to-cancel-a-file-upload-based-on-file-size-in-catalyst
+        if ( my $upload = $c->request->upload('upload_photo') ) {
+            my $tank_id   = $c->stash->{'tank'}{'tank_id'};
+            my $photo_dir = $c->forward('', [ $tank_id ]);
+            my $file      = $upload->basename();
+            my $target    = qq{$photo_dir/$file};
+
+            try {
+                -d $photo_dir or
+                    die "Upload dir '$photo_dir' does not exist";
+
+                $upload->copy_to($target) or
+                    die "Failed to copy '$file' to '$target': $!";
+
+                # create a tank_photo record:
+                $c->model('TankPhoto')->add(
+                    tank_id   => $tank_id,
+                    file_name => $file,
+                    caption   => $form->params()->{'caption'},
+                );
+
+                $c->flash->{'message'} = qq{Uploaded $file ok};
+            }
+            catch {
+                $c->stash->{'error'} = $_;
+            };
+        }
+    }
 }
 
 =encoding utf8

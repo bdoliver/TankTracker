@@ -1,0 +1,7 @@
+
+Tank-selected:
+	water tests -> list / chart / export / import
+	details / photos
+	inventory [tank-specific s/be optional]
+	diary
+

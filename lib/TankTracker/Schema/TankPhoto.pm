@@ -12,18 +12,18 @@ use MooseX::NonMoose;
 use MooseX::MarkAsMethods autoclean => 1;
 extends 'DBIx::Class::Core';
 __PACKAGE__->load_components("InflateColumn::DateTime");
-__PACKAGE__->table("public.tank_photos");
+__PACKAGE__->table("public.tank_photo");
 __PACKAGE__->add_columns(
   "photo_id",
   {
     data_type         => "integer",
     is_auto_increment => 1,
     is_nullable       => 0,
-    sequence          => "tank_photos_photo_id_seq",
+    sequence          => "tank_photo_photo_id_seq",
   },
   "tank_id",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
-  "file_path",
+  "file_name",
   { data_type => "text", is_nullable => 0 },
   "caption",
   { data_type => "text", is_nullable => 1 },
@@ -37,8 +37,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-09-04 14:12:03
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:sMr/9a1njYUZM1nMAm0Syw
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-09-15 10:07:13
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:N4tUmQ89yX6I4ynp72bUAQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
