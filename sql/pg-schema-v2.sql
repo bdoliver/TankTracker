@@ -118,10 +118,16 @@ CREATE TABLE tank_photo (
                  NOT NULL
                  REFERENCES tank ( tank_id ),
 
+    user_id      INTEGER
+                 NOT NULL
+                 REFERENCES tracker_user ( user_id ),
+
     file_name    TEXT
                  NOT NULL,
 
-    caption      TEXT
+    caption      TEXT,
+
+    FOREIGN KEY ( tank_id, user_id ) REFERENCES tank_user_access ( tank_id, user_id )
 );
 CREATE INDEX tank_photo_idx ON tank_photo ( tank_id, photo_id );
 

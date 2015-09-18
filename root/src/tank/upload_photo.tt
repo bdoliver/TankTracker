@@ -1,4 +1,4 @@
-<form class="form" method="[% form.method %]" action="[% form.action %]" >
+<form class="form" method="[% form.method %]" action="[% form.action %]" enctype="multipart/form-data">
     [% form.get_element('tank_id')    %]
     <div class="row">
         <div class="col-md-12">
@@ -19,6 +19,10 @@
                 <div class="form-group col-md-6">
                     <label for="upload_photo">Select file to upload:</label>
                     [% form.get_element('upload_photo') %]
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="caption">Caption:</label>
+                    [% form.get_element('caption') %]
                 </div>
             </div>
         </div>

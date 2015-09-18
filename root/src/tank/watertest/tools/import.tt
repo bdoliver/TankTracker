@@ -1,4 +1,4 @@
-<form class="form" method="[% form.method %]" action="[% form.action %]" >
+<form class="form" method="[% form.method %]" action="[% form.action %]" enctype="multipart/form-data">
 <div class="row">
     <div class="col-md-8 col-md-offset-2 well">
 

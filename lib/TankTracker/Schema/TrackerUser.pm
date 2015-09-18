@@ -72,6 +72,12 @@ __PACKAGE__->belongs_to(
   { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
 __PACKAGE__->has_many(
+  "tank_photos",
+  "TankTracker::Schema::TankPhoto",
+  { "foreign.user_id" => "self.user_id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+__PACKAGE__->has_many(
   "tank_user_accesses",
   "TankTracker::Schema::TankUserAccess",
   { "foreign.user_id" => "self.user_id" },
@@ -110,8 +116,8 @@ __PACKAGE__->has_many(
 __PACKAGE__->many_to_many("roles", "tracker_user_roles", "role");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-11 11:58:05
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:7nad55c27uywZUPgsW2pDA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-09-18 15:31:23
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:iCGogzLNq+B0fPoOAepCPA
 
 use Crypt::Eksblowfish::Bcrypt qw(bcrypt_hash en_base64);
 sub hash_pw {

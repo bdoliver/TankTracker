@@ -23,6 +23,8 @@ __PACKAGE__->add_columns(
   },
   "tank_id",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
+  "user_id",
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "file_name",
   { data_type => "text", is_nullable => 0 },
   "caption",
@@ -35,10 +37,22 @@ __PACKAGE__->belongs_to(
   { tank_id => "tank_id" },
   { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
+__PACKAGE__->belongs_to(
+  "tank_user_access",
+  "TankTracker::Schema::TankUserAccess",
+  { tank_id => "tank_id", user_id => "user_id" },
+  { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
+);
+__PACKAGE__->belongs_to(
+  "tracker_user",
+  "TankTracker::Schema::TrackerUser",
+  { user_id => "user_id" },
+  { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
+);
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-09-15 10:07:13
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:N4tUmQ89yX6I4ynp72bUAQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-09-18 15:31:23
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:yGUXzgMgGWzgG48tIv/WSw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

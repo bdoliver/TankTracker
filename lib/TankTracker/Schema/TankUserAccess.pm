@@ -28,6 +28,15 @@ __PACKAGE__->belongs_to(
   { tank_id => "tank_id" },
   { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
+__PACKAGE__->has_many(
+  "tank_photos",
+  "TankTracker::Schema::TankPhoto",
+  {
+    "foreign.tank_id" => "self.tank_id",
+    "foreign.user_id" => "self.user_id",
+  },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
 __PACKAGE__->belongs_to(
   "tracker_user",
   "TankTracker::Schema::TrackerUser",
@@ -36,8 +45,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-07-29 11:59:28
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:E9q4Gib3K54qRHhYqTgMOw
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-09-18 15:31:23
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ehrkoOA4TCR6qx5hQBIjnw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

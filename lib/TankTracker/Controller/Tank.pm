@@ -637,9 +637,10 @@ sub upload_photo :Chained('get_tank') PathPart('upload_photo') Args(0) FormMetho
 ## http://stackoverflow.com/questions/3090574/how-to-cancel-a-file-upload-based-on-file-size-in-catalyst
         if ( my $upload = $c->request->upload('upload_photo') ) {
             my $tank_id   = $c->stash->{'tank'}{'tank_id'};
-            my $photo_dir = $c->forward('', [ $tank_id ]);
+            my $photo_dir = $c->forward('photo_dir', [ $tank_id ]);
             my $file      = $upload->basename();
             my $target    = qq{$photo_dir/$file};
+            my $caption   = $form->params()->{'caption'};
 
             try {
                 -d $photo_dir or
@@ -649,17 +650,20 @@ sub upload_photo :Chained('get_tank') PathPart('upload_photo') Args(0) FormMetho
                     die "Failed to copy '$file' to '$target': $!";
 
                 # create a tank_photo record:
-                $c->model('TankPhoto')->add(
+                $c->model('TankPhoto')->add({
                     tank_id   => $tank_id,
+                    user_id   => $c->user->user_id(),
                     file_name => $file,
-                    caption   => $form->params()->{'caption'},
-                );
+                    caption   => $caption,
+                });
 
-                $c->flash->{'message'} = qq{Uploaded $file ok};
+                $c->stash->{'upload_result'} = qq{Uploaded $file ok};
             }
             catch {
-                $c->stash->{'error'} = $_;
+                $c->stash->{'upload_error'} = $_;
             };
+        }
+        else {
         }
     }
 }
