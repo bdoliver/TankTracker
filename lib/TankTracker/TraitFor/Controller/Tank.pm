@@ -55,7 +55,7 @@ sub get_tank :Chained('base') :PathPart('') CaptureArgs(1) {
 
             my $idx = 0;
             # prefix each photo with the uri path to it:
-            map { $_->{'file_path'} = $uri."/".$_->{'file_path'};
+            map { $_->{'file_name'} = $uri."/".$_->{'file_name'};
                   $_->{'slide_to'}  = $idx++;
             } @{ $tank->{'photos'} };
         }

@@ -1,0 +1,44 @@
+<form class="form" method="[% form.method %]" action="[% form.action %]" enctype="multipart/form-data">
+    [% form.get_element('tank_id')    %]
+    <div class="row">
+        <div class="col-md-12">
+
+        [% header %]
+
+    <div class="row content">
+        <div class="col-md-12">
+
+        [% IF upload_result %]
+        <p class="text-success bg-success">[% upload_result %]</p>
+        [% END %]
+        [% IF upload_error %]
+        <p class="text-danger bg-danger">[% upload_error %]</p>
+        [% END %]
+
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="upload_photo">Select file to upload:</label>
+                    [% form.get_element('upload_photo') %]
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="caption">Caption:</label>
+                    [% form.get_element('caption') %]
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 pull-right btn-group">
+            [% back_btn('/tank/') %]
+            [% logout_btn %]
+        </div>
+    </div>
+
+        </div>
+    </div>
+</form>
+<script>
+$(document).ready(function(){
+    $('#upload_photo').fileinput();
+});
+</script>
