@@ -215,9 +215,12 @@
   <div class="carousel-inner" role="listbox">
     [% FOR photo IN tank.photos %]
     <div class="item[% IF loop.first %] active[% END %]">
-      <img src="[% photo.file_path %]" <!-- alt="Chania  -->">
+      <img src="[% photo.file_name %]"
       [% IF photo.caption %]
+      alt="[% photo.caption %]" />
       <div class="carousel-caption">[% photo.caption %]</div>
+      [% ELSE %]
+      alt="" />
       [% END %]
     </div>
    [% END %]
