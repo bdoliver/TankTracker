@@ -657,14 +657,21 @@ sub upload_photo :Chained('get_tank') PathPart('upload_photo') Args(0) FormMetho
                     caption   => $caption,
                 });
 
-                $c->stash->{'upload_result'} = qq{Uploaded $file ok};
+                # A little brutal, but ensures the caption field gets
+                # cleared after a successful upload...
+                $c->flash->{'upload_result'} = qq{Uploaded $file ok};
+                $c->response->redirect($c->uri_for(qq{/tank/$tank_id/upload_photo}));
+                $c->detach();
+                return;
             }
             catch {
                 $c->stash->{'upload_error'} = $_;
             };
         }
-        else {
-        }
+    }
+
+    if ( $c->flash->{'upload_result'} ) {
+        $c->stash->{'upload_result'} = $c->flash->{'upload_result'};
     }
 }
 
