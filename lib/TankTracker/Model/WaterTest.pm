@@ -381,23 +381,6 @@ sub import_tests {
     return "Imported $rec_no test records.";
 }
 
-sub export_column_names {
-    return [ qw(
-            tank_id
-            tank_name
-            owner_id
-            owner_first_name
-            owner_last_name
-            test_id
-            test_date
-            user_id
-            tester_first_name
-            tester_last_name
-            parameter
-            test_result
-        ) ];
-}
-
 sub export_tests {
     my ( $self, $search, $args ) = @_;
 
