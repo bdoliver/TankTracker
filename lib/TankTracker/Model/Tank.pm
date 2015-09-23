@@ -22,6 +22,9 @@ sub get {
             'tank_water_test_parameters',
             'tank_photos',
         ],
+        'join'       => 'last_water_test',
+        '+select'    => [ 'last_water_test.last_test_date' ],
+        '+as'        => [ 'last_test_date' ],
     };
 
     my $obj = $self->SUPER::get($id, $args);
@@ -43,7 +46,7 @@ sub get {
                            }
                       $obj->tank_photos()->all();
 
-    my $tank        = $self->deflate($obj);
+    my $tank = $self->deflate($obj);
 
     $tank->{test_params} = \@test_params;
     $tank->{photos}      = \@tank_photos;

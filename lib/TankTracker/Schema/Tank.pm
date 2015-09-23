@@ -140,6 +140,14 @@ __PACKAGE__->has_many(
 # Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-09-23 15:01:14
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ZM1Sb1L8nI00vB1SbYKbKA
 
+# Tank may have water tests, create a relationship to the 'last test' view:
+__PACKAGE__->might_have(
+  "last_water_test",
+  "TankTracker::Schema::LastWaterTest",
+  { "foreign.tank_id" => "self.tank_id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
 __PACKAGE__->meta->make_immutable;

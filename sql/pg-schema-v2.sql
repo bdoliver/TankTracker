@@ -395,6 +395,13 @@ CREATE TABLE water_test_result (
      REFERENCES tank_water_test_parameter ( tank_id, parameter_id )
 );
 
+CREATE VIEW last_water_test AS (
+    SELECT tank_id,
+           max(test_date) AS last_test_date
+      FROM water_test_result
+      JOIN water_test using ( test_id ) group by 1
+);
+
 CREATE VIEW tank_water_test_result_view AS (
     SELECT wtr.tank_id,
            t.tank_name,
