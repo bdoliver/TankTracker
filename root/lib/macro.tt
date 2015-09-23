@@ -16,6 +16,25 @@
         </div>
         [% END %]
     </div>
+
+    [% test_reminder %]
+
+[% END %]
+
+[% MACRO test_reminder BLOCK %]
+    [% IF tank.test_reminder %]
+    <div class="row">
+        <div class="alert alert-danger fade in">
+            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            <strong>Water test reminder:</strong>
+        [% IF tank.last_test_date %]
+            Last water test date: [% tank.last_test_date %]
+        [% ELSE %]
+            This tank does not have any water tests recorded.
+        [% END %]
+        </div>
+    </div>
+    [% END %]
 [% END %]
 
 [% MACRO href(path) BLOCK %]
