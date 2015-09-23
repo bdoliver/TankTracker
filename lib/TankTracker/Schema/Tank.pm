@@ -65,6 +65,22 @@ __PACKAGE__->add_columns(
     extra => { custom_type_name => "temperature_scale", list => ["C", "F"] },
     is_nullable => 0,
   },
+  "test_reminder",
+  { data_type => "boolean", default_value => \"true", is_nullable => 0 },
+  "last_reminder",
+  { data_type => "date", is_nullable => 1 },
+  "reminder_freq",
+  {
+    data_type => "enum",
+    default_value => "daily",
+    extra => {
+      custom_type_name => "frequency",
+      list => ["daily", "weekly", "monthly"],
+    },
+    is_nullable => 1,
+  },
+  "reminder_time",
+  { data_type => "time", default_value => "09:00:00", is_nullable => 1 },
   "active",
   { data_type => "boolean", default_value => \"true", is_nullable => 1 },
   "created_on",
@@ -121,8 +137,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-09-14 13:21:27
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Sik8TzV/bmq1QViomy+/JA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-09-23 15:01:14
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ZM1Sb1L8nI00vB1SbYKbKA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

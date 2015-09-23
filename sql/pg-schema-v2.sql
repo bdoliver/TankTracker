@@ -80,6 +80,12 @@ CREATE TYPE temperature_scale AS ENUM (
     'F'
 );
 
+CREATE TYPE frequency AS ENUM (
+    'daily',
+    'weekly',
+    'monthly'
+);
+
 CREATE TABLE tank (
     tank_id         SERIAL
                     NOT NULL
@@ -103,11 +109,30 @@ CREATE TABLE tank (
 
     temperature_scale temperature_scale NOT NULL,
 
+    test_reminder   BOOLEAN DEFAULT TRUE NOT NULL,
+    last_reminder   DATE,
+    reminder_freq   frequency DEFAULT 'daily',
+    reminder_time   TIME DEFAULT '09:00'::TIME,
+
     active          BOOLEAN DEFAULT TRUE,
     created_on      TIMESTAMP(0) NOT NULL DEFAULT now(),
     updated_on      TIMESTAMP(0) DEFAULT now()
 );
 CREATE UNIQUE INDEX tank_name_idx ON tank (lower(tank_name));
+
+CREATE TABLE tank_user_access (
+    tank_id   INTEGER
+              NOT NULL
+              REFERENCES tank ( tank_id  ),
+
+    user_id   INTEGER
+              NOT NULL
+              REFERENCES tracker_user ( user_id  ),
+
+    admin     BOOLEAN DEFAULT FALSE,
+
+    PRIMARY KEY ( tank_id, user_id )
+);
 
 CREATE TABLE tank_photo (
     photo_id     SERIAL
@@ -130,20 +155,6 @@ CREATE TABLE tank_photo (
     FOREIGN KEY ( tank_id, user_id ) REFERENCES tank_user_access ( tank_id, user_id )
 );
 CREATE INDEX tank_photo_idx ON tank_photo ( tank_id, photo_id );
-
-CREATE TABLE tank_user_access (
-    tank_id   INTEGER
-              NOT NULL
-              REFERENCES tank ( tank_id  ),
-
-    user_id   INTEGER
-              NOT NULL
-              REFERENCES tracker_user ( user_id  ),
-
-    admin     BOOLEAN DEFAULT FALSE,
-
-    PRIMARY KEY ( tank_id, user_id )
-);
 
 CREATE TYPE parameter_type AS ENUM (
     'salinity',
