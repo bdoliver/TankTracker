@@ -82,17 +82,23 @@ sub photo_dir :Private {
                          ."/$tank_id";
 
     if ( ! -d $tank_photo_dir ) {
-        try {
-            make_path(
-                $tank_photo_dir,
-                {
-                    'verbose' => 0,
-                    'mode'    => 0755,
-                }
-            );
-        }
-        catch {
-            warn "\n\n Error creating photo path ($tank_photo_dir): $_\n\n";
+        my $err = undef;
+        make_path(
+            $tank_photo_dir,
+            {
+                'verbose' => 0,
+                'mode'    => 0755,
+                'error'   => \$err,
+            }
+        );
+
+        # make_path() sets $err as an array ref, but we will check
+        #             anyway, just to be sure!
+
+        if ( $err and ref($err) eq 'ARRAY' and @$err ) {
+            warn "\nError creating photo path ($tank_photo_dir): "
+                 .join("\n", @$err)
+                 ."\n\n";
             $tank_photo_dir = undef;
         };
     }

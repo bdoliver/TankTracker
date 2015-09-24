@@ -636,13 +636,18 @@ sub upload_photo :Chained('get_tank') PathPart('upload_photo') Args(0) FormMetho
 ##FIXME: check out w.r.t limiting/aborting upload based on file size...
 ## http://stackoverflow.com/questions/3090574/how-to-cancel-a-file-upload-based-on-file-size-in-catalyst
         if ( my $upload = $c->request->upload('upload_photo') ) {
-            my $tank_id   = $c->stash->{'tank'}{'tank_id'};
-            my $photo_dir = $c->forward('photo_dir', [ $tank_id ]);
-            my $file      = $upload->basename();
-            my $target    = qq{$photo_dir/$file};
-            my $caption   = $form->params()->{'caption'};
-
             try {
+                my $tank_id   = $c->stash->{'tank'}{'tank_id'};
+                my $photo_dir = $c->forward('photo_dir', [ $tank_id ]);
+
+                # Sanity check!
+                ( $photo_dir and -d $photo_dir ) or
+                    die 'Cannot upload photos - tank photo dir does not exist';
+
+                my $file      = $upload->basename();
+                my $target    = qq{$photo_dir/$file};
+                my $caption   = $form->params()->{'caption'};
+
                 -d $photo_dir or
                     die "Upload dir '$photo_dir' does not exist";
 
