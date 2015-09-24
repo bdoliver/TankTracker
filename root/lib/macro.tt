@@ -1,5 +1,5 @@
 [% MACRO header(xtra) BLOCK %]
-    <div class="row header">
+    <div class="row">
         <div class="col col-md-8">
         [% IF tank OR action_heading OR page_title %]
         <h4>[% IF page_title AND not tank.name %]
@@ -24,14 +24,17 @@
 [% MACRO test_reminder BLOCK %]
     [% IF tank.test_reminder %]
     <div class="row">
+        <div class="col col-md-12">
         <div class="alert alert-danger fade in">
             <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
             <strong>Water test reminder:</strong>
         [% IF tank.last_test_date %]
-            Last water test date: [% tank.last_test_date %]
+            last test date was [% tank.last_test_date |replace('\s+.+$', '') %]
+            ([% tank.days_overdue %] days ago)
         [% ELSE %]
             This tank does not have any water tests recorded.
         [% END %]
+        </div>
         </div>
     </div>
     [% END %]

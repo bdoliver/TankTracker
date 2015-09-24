@@ -23,8 +23,14 @@ sub get {
             'tank_photos',
         ],
         'join'       => 'last_water_test',
-        '+select'    => [ 'last_water_test.last_test_date' ],
-        '+as'        => [ 'last_test_date' ],
+        '+select'    => [
+            'last_water_test.last_test_date',
+            'last_water_test.days_overdue'
+        ],
+        '+as'        => [
+            'last_test_date',
+            'days_overdue'
+        ],
     };
 
     my $obj = $self->SUPER::get($id, $args);

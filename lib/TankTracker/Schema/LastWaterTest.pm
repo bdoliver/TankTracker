@@ -19,11 +19,13 @@ __PACKAGE__->add_columns(
   { data_type => "integer", is_nullable => 1 },
   "last_test_date",
   { data_type => "timestamp", is_nullable => 1 },
+  "days_overdue",
+  { data_type => "double precision", is_nullable => 1 },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-09-23 15:20:57
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:+Ac9JXWy8h4Do+s62m01zA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-09-24 09:55:02
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:atsiu8UQas2vaLWsjOVh+g
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
