@@ -398,9 +398,9 @@ CREATE TABLE water_test_result (
 CREATE VIEW last_water_test AS (
     SELECT tank_id,
            max(test_date) AS last_test_date,
-           extract( days from ( now() - max(test_date) ) ) AS days_overdue
+           extract( days FROM ( now() - max(test_date) ) ) AS days_overdue
       FROM water_test_result
-      JOIN water_test using ( test_id ) group by 1
+      JOIN water_test using ( test_id ) GROUP BY tank_id
 );
 
 CREATE VIEW tank_water_test_result_view AS (
