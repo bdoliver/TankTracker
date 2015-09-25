@@ -2,6 +2,7 @@ package TankTracker::Controller::Tank;
 use Moose;
 use namespace::autoclean;
 
+use File::MimeInfo::Magic;
 use Try::Tiny;
 
 BEGIN { extends q{Catalyst::Controller::HTML::FormFu} }
@@ -641,18 +642,26 @@ sub upload_photo :Chained('get_tank') PathPart('upload_photo') Args(0) FormMetho
                 my $photo_dir = $c->forward('photo_dir', [ $tank_id ]);
 
                 # Sanity check!
-                ( $photo_dir and -d $photo_dir ) or
-                    die 'Cannot upload photos - tank photo dir does not exist';
+                if ( ! $photo_dir or ! -d $photo_dir ) {
+                    $c->log->error("Refuse upload: photo dir ($photo_dir) not found!");
+                    die 'Cannot upload photos - tank photo directory does not exist';
+                }
+
+                my $mimetype = mimetype($upload->fh());
+
+                if ( $mimetype !~ qr{^image/} ) {
+                    $c->log->warn("Refuse upload: $file mimetype=$mimetype");
+                    die q{Cannot upload selected file - it doesn't look like an photo!};
+                }
 
                 my $file      = $upload->basename();
                 my $target    = qq{$photo_dir/$file};
                 my $caption   = $form->params()->{'caption'};
 
-                -d $photo_dir or
-                    die "Upload dir '$photo_dir' does not exist";
-
-                $upload->copy_to($target) or
-                    die "Failed to copy '$file' to '$target': $!";
+                if ( ! $upload->copy_to($target) {
+                    $c->log->error("Failed to copy '$file' to '$target': $!");
+                    die q{Upload failed - cannot copy file to tank photo directory};
+                }
 
                 # create a tank_photo record:
                 $c->model('TankPhoto')->add({
