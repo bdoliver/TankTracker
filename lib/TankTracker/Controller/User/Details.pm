@@ -17,7 +17,7 @@ sub auto :Private {
     return 1;
 }
 
-sub _details :Private {
+sub _details_form :Private {
     my ( $self, $c ) = @_;
 
     my $add_user = $c->stash->{'action_heading'} eq 'Add' ? 1 : 0;
@@ -87,6 +87,35 @@ sub _details :Private {
             ],
             validators => [ 'TankTracker::EmailExists' ],
         };
+
+    my $role = $c->user->role();
+    if ( $role eq 'admin' or $role eq 'owner' ) {
+        my @roles;
+
+        if ( $role eq 'admin' ) {
+            push @roles,
+                [ 'admin' => 'Admin' ],
+                [ 'owner' => 'Owner' ];
+        }
+
+        push @roles,
+            [ 'user'  => 'User'  ],
+            [ 'guest' => 'Guest' ];
+
+        push @$elements,
+            {
+                name    => 'role',
+                type    => 'Select',
+                options => \@roles,
+                default => $c->stash->{'user'}{'role'} || 'guest',
+                constraints => [
+                    {
+                        type    => 'Required',
+                        message => 'You must select a role.',
+                    },
+                ],
+            };
+    }
 
     if ( not $add_user ) {
         push @$elements,
@@ -279,7 +308,7 @@ sub view : Chained('get_user') Args(0) {
     $c->forward('details');
 }
 
-sub details :Args(0) FormMethod('_details') {
+sub details :Args(0) FormMethod('_details_form') {
     my ( $self, $c ) = @_;
 
     my $form = $c->stash->{'form'};
