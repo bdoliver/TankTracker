@@ -13,14 +13,22 @@ use Getopt::Long qw(:config no_ignore_case bundling);
 use Pod::Usage;
 use Try::Tiny;
 
-use TankTracker::Schema::TrackerUser;
+use TankTracker::Schema::User;
 
 our ( $add, $edit, $user, $pass, $email, $first_name, $last_name,
-      $parent_id, $active, $help );
+      $parent_id, $role, $active, $help );
+
+my $Roles = {
+    admin => 1,
+    user  => 1,
+    owner => 1,
+    guest => 1,
+};
 
 Getopt::Long::GetOptions(
     'user=s'       => \$user,
     'pass=s'       => \$pass,
+    'role=s'       => \$role,
     'email=s'      => \$email,
     'first_name=s' => \$first_name,
     'last_name=s'  => \$last_name,
@@ -57,6 +65,21 @@ if ( $add ) {
             -exitval => 2,
             -verbose => 1,
         );
+
+    $role or
+        pod2usage(
+            -message => "--role XXXX mandatory for new a/c\n",
+            -exitval => 2,
+            -verbose => 1,
+        );
+
+    exists $Roles->{$role} or
+        pod2usage(
+            -message => "invalid role '$role'\n",
+            -exitval => 2,
+            -verbose => 1,
+        );
+
     $parent_id or
         pod2usage(
             -message => "--parent_id XXXX mandatory for new a/c\n",
@@ -75,11 +98,11 @@ else {
 
 my $schema = schema;
 
-my $rs = $schema->resultset('TrackerUser');
+my $rs = $schema->resultset('User');
 
 if ( $add ) {
     ## create user:
-    my $hash = TankTracker::Schema::TrackerUser->hash_pw($pass);
+    my $hash = TankTracker::Schema::User->hash_pw($pass);
     Encode::from_to($hash, "iso-8859-1", "utf8");
 
     try {
@@ -93,6 +116,7 @@ if ( $add ) {
                     last_name  => $last_name,
                     parent_id  => $parent_id,
                     active     => $active,
+                    role       => $role,
                 });
 
                 $user->update() or
@@ -130,6 +154,7 @@ else {
         $user->password($user->hash_pw($pass)) if $pass;
         $user->active($active)                 if defined $active;
         $user->parent_id($parent_id)           if $parent_id;
+        $user->role($role)                     if $role;
 
         $user->update() or die "Failed to update user\n";
 
@@ -180,6 +205,11 @@ Specifies user id (C<XXX>) to add / edit / delete (mandatory).
 =item --pass XXX
 
 Password for user (mandatory when adding, otherwise sets new user password).
+
+=item --role XXX
+
+Role for user (mandator when adding).  Must be one of: C<admin>, C<owner>,
+C<user>, C<guest>.
 
 =item --email XXX
 

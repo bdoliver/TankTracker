@@ -53,14 +53,14 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("user_id");
 __PACKAGE__->belongs_to(
   "tracker_user",
-  "TankTracker::Schema::TrackerUser",
+  "TankTracker::Schema::User",
   { user_id => "user_id" },
   { is_deferrable => 0, on_delete => "CASCADE", on_update => "NO ACTION" },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-09-01 15:01:10
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:KvN/uOdoA43EwZbdZlaGyw
+# Created by DBIx::Class::Schema::Loader v0.07043 @ 2015-09-25 14:49:01
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:xQVGB/jPPETKXnTbZXgObw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

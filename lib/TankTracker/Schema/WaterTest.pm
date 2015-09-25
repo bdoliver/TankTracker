@@ -39,7 +39,7 @@ __PACKAGE__->has_many(
 );
 __PACKAGE__->belongs_to(
   "tracker_user",
-  "TankTracker::Schema::TrackerUser",
+  "TankTracker::Schema::User",
   { user_id => "user_id" },
   { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
@@ -51,8 +51,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-13 10:47:52
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:YNxGX1PLgbZuILMsVTRQzw
+# Created by DBIx::Class::Schema::Loader v0.07043 @ 2015-09-25 14:49:01
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:0pobiwok2u9AtdgqDlpQIA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
