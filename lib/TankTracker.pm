@@ -82,9 +82,9 @@ __PACKAGE__->config(
     },
 
     'Plugin::Authentication' => {
-        'default_realm' => 'tracker_users',
+        'default_realm' => 'tt_users',
         'realms'        => {
-            'tracker_users' => {
+            'tt_users' => {
                 'credential' => {
                     'class'          => 'Password',
                     'password_field' => 'password',
