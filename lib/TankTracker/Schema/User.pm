@@ -1,5 +1,5 @@
 use utf8;
-package TankTracker::Schema::TrackerUser;
+package TankTracker::Schema::User;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
@@ -12,19 +12,28 @@ use MooseX::NonMoose;
 use MooseX::MarkAsMethods autoclean => 1;
 extends 'DBIx::Class::Core';
 __PACKAGE__->load_components("InflateColumn::DateTime");
-__PACKAGE__->table("public.tracker_user");
+__PACKAGE__->table("public.user");
 __PACKAGE__->add_columns(
   "user_id",
   {
     data_type         => "integer",
     is_auto_increment => 1,
     is_nullable       => 0,
-    sequence          => "tracker_user_user_id_seq",
+    sequence          => "user_user_id_seq",
   },
   "username",
   { data_type => "text", is_nullable => 0 },
   "password",
   { data_type => "text", is_nullable => 0 },
+  "role",
+  {
+    data_type => "enum",
+    extra => {
+      custom_type_name => "user_role",
+      list => ["admin", "guest", "owner", "user"],
+    },
+    is_nullable => 0,
+  },
   "first_name",
   { data_type => "text", is_nullable => 1 },
   "last_name",
@@ -35,6 +44,8 @@ __PACKAGE__->add_columns(
   { data_type => "boolean", default_value => \"true", is_nullable => 1 },
   "parent_id",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
+  "login_attempts",
+  { data_type => "integer", default_value => 0, is_nullable => 1 },
   "last_login",
   { data_type => "timestamp", is_nullable => 1 },
   "created_on",
@@ -67,7 +78,7 @@ __PACKAGE__->has_many(
 );
 __PACKAGE__->belongs_to(
   "parent",
-  "TankTracker::Schema::TrackerUser",
+  "TankTracker::Schema::User",
   { user_id => "parent_id" },
   { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
@@ -89,22 +100,16 @@ __PACKAGE__->has_many(
   { "foreign.owner_id" => "self.user_id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
-__PACKAGE__->has_many(
-  "tracker_user_roles",
-  "TankTracker::Schema::TrackerUserRole",
-  { "foreign.user_id" => "self.user_id" },
-  { cascade_copy => 0, cascade_delete => 0 },
-);
-__PACKAGE__->has_many(
-  "tracker_users",
-  "TankTracker::Schema::TrackerUser",
-  { "foreign.parent_id" => "self.user_id" },
-  { cascade_copy => 0, cascade_delete => 0 },
-);
 __PACKAGE__->might_have(
   "user_preference",
   "TankTracker::Schema::UserPreference",
   { "foreign.user_id" => "self.user_id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+__PACKAGE__->has_many(
+  "users",
+  "TankTracker::Schema::User",
+  { "foreign.parent_id" => "self.user_id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 __PACKAGE__->has_many(
@@ -113,11 +118,10 @@ __PACKAGE__->has_many(
   { "foreign.user_id" => "self.user_id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
-__PACKAGE__->many_to_many("roles", "tracker_user_roles", "role");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-09-18 15:31:23
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:iCGogzLNq+B0fPoOAepCPA
+# Created by DBIx::Class::Schema::Loader v0.07043 @ 2015-09-25 14:49:01
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Dk+GjCNs43JP+kNl1x6jPg
 
 use Crypt::Eksblowfish::Bcrypt qw(bcrypt_hash en_base64);
 sub hash_pw {
@@ -146,15 +150,6 @@ sub check_password {
 }
 
 use List::Util qw(any);
-sub has_role {
-    my ( $self, $role ) = @_;
-
-    $role or return 0;
-
-    return any {
-        $_->role->name() eq $role
-    } $self->tracker_user_roles->all();
-}
 
 sub can_access_tank {
     my ( $self, $tank_id ) = @_;

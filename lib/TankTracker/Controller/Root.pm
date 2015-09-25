@@ -73,9 +73,7 @@ sub check_request : Private {
 
     push @{ $c->stash->{'template_wrappers'} }, 'menu.tt';
 
-    if ( $c->user->has_role('Admin') ) {
-        $c->stash->{'is_admin'} = 1;
-    }
+    $c->stash->{'is_admin'} = ( $c->user->role() eq 'admin' );
 
     return 1;
 }
@@ -144,9 +142,6 @@ sub login : Local FormMethod('_login_form') Args(0) {
                             {
                                 'prefetch' => [
                                     'user_preference',
-                                    {
-                                        'tracker_user_roles' => 'role'
-                                    },
                                     'tank_user_accesses',
                                 ],
                             },

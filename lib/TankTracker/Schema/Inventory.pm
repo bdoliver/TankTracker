@@ -38,6 +38,10 @@ __PACKAGE__->add_columns(
   { data_type => "date", is_nullable => 0 },
   "purchase_price",
   { data_type => "money", is_nullable => 0 },
+  "external_ref",
+  { data_type => "text", is_nullable => 1 },
+  "photo_filename",
+  { data_type => "text", is_nullable => 1 },
   "created_on",
   {
     data_type     => "timestamp",
@@ -62,14 +66,14 @@ __PACKAGE__->has_many(
 );
 __PACKAGE__->belongs_to(
   "tracker_user",
-  "TankTracker::Schema::TrackerUser",
+  "TankTracker::Schema::User",
   { user_id => "user_id" },
   { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-09-14 13:21:27
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:DC2bEDngypTA6k8hzSTMVw
+# Created by DBIx::Class::Schema::Loader v0.07043 @ 2015-09-25 14:49:01
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:q1Er/Bj/AikaiKfVBcjuvg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

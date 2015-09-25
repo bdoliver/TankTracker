@@ -64,14 +64,14 @@ __PACKAGE__->belongs_to(
 );
 __PACKAGE__->belongs_to(
   "tracker_user",
-  "TankTracker::Schema::TrackerUser",
+  "TankTracker::Schema::User",
   { user_id => "user_id" },
   { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-08-13 10:47:52
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:dALBYG6zvRJDp1AcajFG8A
+# Created by DBIx::Class::Schema::Loader v0.07043 @ 2015-09-25 14:49:01
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:sx9OTcBGWgyU8I2bVwQVZg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

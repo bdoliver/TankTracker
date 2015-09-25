@@ -84,6 +84,16 @@
 
                 </div>
                 <div class="col-md-6">
+                [% IF form.get_element('role') %]
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label for="role">User Role</label>
+                        </div>
+                        <div class="col-md-4 form-group number">
+                            [% form.get_element('role') %]
+                        </div>
+                    </div>
+                [% END %]
                     <div class="row">
                         <div class="col-md-2">
                             <label for="recs_per_page">Recs per page</label>

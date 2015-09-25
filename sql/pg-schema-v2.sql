@@ -1,50 +1,34 @@
 \set ON_ERROR_STOP 1
 BEGIN TRANSACTION;
 
-CREATE TABLE tracker_role (
-    role_id     SERIAL
-                NOT NULL
-                PRIMARY KEY,
-
-    name        TEXT NOT NULL
+CREATE TYPE user_role AS ENUM (
+    'admin',
+    'guest',
+    'owner',
+    'user'
 );
 
-INSERT INTO tracker_role VALUES ( default, 'Admin' );
-INSERT INTO tracker_role VALUES ( default, 'Guest' );
-INSERT INTO tracker_role VALUES ( default, 'Owner' );
-INSERT INTO tracker_role VALUES ( default, 'User'  );
+CREATE TABLE "user" (
+    user_id        SERIAL
+                   NOT NULL
+                   PRIMARY KEY,
 
-CREATE TABLE tracker_user (
-    user_id       SERIAL
-                  NOT NULL
-                  PRIMARY KEY,
+    username       TEXT NOT NULL,
+    password       TEXT NOT NULL,
+    role           user_role NOT NULL,
+    first_name     TEXT,
+    last_name      TEXT,
+    email          TEXT NOT NULL,
+    active         BOOLEAN DEFAULT TRUE,
+    parent_id      INTEGER NOT NULL
+                   REFERENCES "user" (user_id),
 
-    username      TEXT NOT NULL,
-    password      TEXT NOT NULL,
-    first_name    TEXT,
-    last_name     TEXT,
-    email         TEXT NOT NULL,
-    active        BOOLEAN DEFAULT TRUE,
-    parent_id     INTEGER NOT NULL
-                  REFERENCES tracker_user (user_id),
-
-    last_login    TIMESTAMP(0),
-    created_on    TIMESTAMP(0) NOT NULL DEFAULT now(),
-    updated_on    TIMESTAMP(0) DEFAULT now()
+    login_attempts INTEGER DEFAULT 0,
+    last_login     TIMESTAMP(0),
+    created_on     TIMESTAMP(0) NOT NULL DEFAULT now(),
+    updated_on     TIMESTAMP(0) DEFAULT now()
 );
-CREATE UNIQUE INDEX email_address_idx ON tracker_user ( lower(email) );
-
-CREATE TABLE tracker_user_role (
-    user_id     INT
-                NOT NULL
-                REFERENCES tracker_user ( user_id ),
-
-    role_id     INT
-                NOT NULL
-                REFERENCES tracker_role ( role_id ),
-
-    PRIMARY KEY ( user_id, role_id )
-);
+CREATE UNIQUE INDEX email_address_idx ON "user" ( lower(email) );
 
 CREATE TABLE sessions (
     session_id   VARCHAR(72)
@@ -93,7 +77,7 @@ CREATE TABLE tank (
 
     owner_id        INTEGER
                     NOT NULL
-                    REFERENCES tracker_user ( user_id ),
+                    REFERENCES "user" ( user_id ),
 
     water_type      water_type NOT NULL,
     tank_name       TEXT NOT NULL,
@@ -127,7 +111,7 @@ CREATE TABLE tank_user_access (
 
     user_id   INTEGER
               NOT NULL
-              REFERENCES tracker_user ( user_id  ),
+              REFERENCES "user" ( user_id  ),
 
     admin     BOOLEAN DEFAULT FALSE,
 
@@ -145,7 +129,7 @@ CREATE TABLE tank_photo (
 
     user_id      INTEGER
                  NOT NULL
-                 REFERENCES tracker_user ( user_id ),
+                 REFERENCES "user" ( user_id ),
 
     file_name    TEXT
                  NOT NULL,
@@ -331,11 +315,11 @@ CREATE TABLE diary (
 
     tank_id     INTEGER
                 NOT NULL
-                REFERENCES tank         ( tank_id ),
+                REFERENCES tank   ( tank_id ),
 
     user_id     INTEGER
                 NOT NULL
-                REFERENCES tracker_user ( user_id ),
+                REFERENCES "user" ( user_id ),
 
     diary_date  TIMESTAMP(0) NOT NULL DEFAULT now(),
     diary_note  TEXT,
@@ -370,7 +354,7 @@ CREATE TABLE water_test (
 
     user_id           INTEGER
                       NOT NULL
-                      REFERENCES tracker_user ( user_id ),
+                      REFERENCES "user" ( user_id ),
 
     test_date         TIMESTAMP(0) NOT NULL DEFAULT current_date
 );
@@ -428,8 +412,8 @@ CREATE VIEW tank_water_test_result_view AS (
       JOIN water_test_parameter wtp USING ( parameter_id )
       JOIN tank_water_test_parameter twtp USING ( tank_id, parameter_id )
       JOIN tank                 t   USING ( tank_id )
-      JOIN tracker_user         u   USING ( user_id )
-      JOIN tracker_user         tu  ON ( t.owner_id = tu.user_id )
+      JOIN "user"               u   USING ( user_id )
+      JOIN "user"               tu  ON ( t.owner_id = tu.user_id )
   ORDER BY wtr.tank_id, wt.test_date, wt.test_id, twtp.param_order, wtr.parameter_id
 );
 
@@ -450,11 +434,13 @@ CREATE TABLE inventory (
 
     user_id           INTEGER
                       NOT NULL
-                      REFERENCES tracker_user ( user_id ),
+                      REFERENCES "user" ( user_id ),
 
     description       TEXT NOT NULL,
     purchase_date     DATE NOT NULL,
     purchase_price    MONEY NOT NULL,
+    external_ref      TEXT,
+    photo_filename    TEXT,
     created_on        TIMESTAMP(0) NOT NULL DEFAULT now(),
     updated_on        TIMESTAMP(0) DEFAULT now()
 );
@@ -489,7 +475,7 @@ CREATE TYPE water_test_order_type AS ENUM (
 CREATE TABLE user_preferences (
     user_id         INTEGER
                     NOT NULL
-                    REFERENCES tracker_user ( user_id )
+                    REFERENCES "user" ( user_id )
                     ON DELETE CASCADE,
 
     recs_per_page   INTEGER

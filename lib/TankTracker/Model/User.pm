@@ -12,7 +12,7 @@ extends 'TankTracker::Model::Base';
 
 has 'rs_name' => (
     is      => 'ro',
-    default => 'TrackerUser',
+    default => 'User',
 );
 
 sub get {
