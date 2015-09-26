@@ -65,7 +65,9 @@ sub _select_form :Private {
             ],
             empty_first       => 1,
             empty_first_label => '- Select Tank -',
-            default           => $c->session->{'tank_id'},
+            default           => @tanks == 1
+                                 ? $tanks[0]->{'tank_id'}
+                                 : $c->session->{'tank_id'},
             constraints       => [
                 {
                     type    => 'Required',
@@ -125,6 +127,20 @@ sub select : Chained('base') :PathPart('') Args(0) FormMethod('_select_form') {
     my ( $self, $c ) = @_;
 
     my $form = $c->stash->{'form'};
+
+    if ( not $form->get_field({ name => 'tank_id', type => 'Select' }) ) {
+        # user has no tanks - if they are an owner, then redirect them to 
+        # add one; otherwise we can't do anything for them...
+        if ( $c->user->role() eq 'owner' or $c->user->role() eq 'admin' ) {
+            $c->response->redirect($c->uri_for('/tank/add'));
+            $c->detach();
+            return;
+        }
+        else {
+            $c->stash->{'error'} =
+                q{There are no tanks available to you, and you have no permission to create one.};
+        }
+    }
 
     if ( $form->submitted_and_valid() ) {
         my $action  = $c->request->params->{'tank_action'};
