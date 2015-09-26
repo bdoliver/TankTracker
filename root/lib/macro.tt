@@ -87,6 +87,10 @@ href="[% path %]"
             [% END %]
             </div>
         </div>
+    [% ELSIF error %]
+        <div class="row form_errors">
+            <div class="alert alert-danger fade in">[% error %]</div>
+        </div>
     [% END %]
     [% IF message %]
         <div class="row form_errors">
@@ -94,11 +98,6 @@ href="[% path %]"
                 <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
                 [% message %]
             </div>
-        </div>
-    [% END %]
-    [% IF error %]
-        <div class="row form_errors">
-            <div class="alert alert-danger fade in">[% error %]</div>
         </div>
     [% END %]
 [% END %]
