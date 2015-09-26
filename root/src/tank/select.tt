@@ -11,15 +11,6 @@
             [% form.get_element('tank_id') %]
         </div>
     </div>
-    [% ELSE %]
-    <div class="row">
-        <div class="col-md-12">
-            <p class="text-danger bg-danger">
-                There are no tanks found in the database for you.
-            </p>
-        </div>
-    </div>
-    [% END %]
     <div class="row">
         <div class="form-group col-md-2">
              <label for="tank_action">Choose action:</label>
@@ -28,6 +19,7 @@
             [% form.get_element('tank_action') %]
         </div>
     </div>
+    [% END %]
 
     [% form_errors %]
 
@@ -36,7 +28,9 @@
 <div class="row">
     <div class="col-md-8 col-md-offset-2">
         <div class="btn-group center-block">
+        [% IF form.get_element('tank_id') %]
             [% submit_btn %]
+        [% END %]
             [% logout_btn %]
         </div>
     </div>
