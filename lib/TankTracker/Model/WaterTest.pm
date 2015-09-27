@@ -135,17 +135,15 @@ sub update {
         die $_;
     };
 
-    return 1;
+    return $self->get($test_id);
 }
 
 sub get {
     my ( $self, $test_id ) = @_;
 
-    my ( $rec, undef ) = @{ $self->list({'me.test_id' => $test_id}) };
+    my ( $test, undef ) = @{ $self->list({'me.test_id' => $test_id}) };
 
-    return undef if ( ! $rec or ! @$rec );
-
-    my $test = $rec->[0];
+    $test or return undef;
 
     ## Munge test into something suitable for providing the form default
     ## values:
