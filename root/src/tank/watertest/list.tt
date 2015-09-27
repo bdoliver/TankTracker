@@ -3,11 +3,9 @@
 
     [% header %]
 
+        [% IF tests.size %]
     <div class="row content">
         <div class="col-md-12">
-        [% IF NOT tests.size %]
-            <p>There are no tests in the database for the selected tank.</p>
-        [% ELSE %]
             <table class="table table-striped table-hover">
             <thead>
             <tr>
@@ -73,9 +71,9 @@
 
             [% paging %]
 
-        [% END %]
         </div>
     </div>
+        [% END %]
 
     <div class="row">
         <div class="col-md-8 col-md-offset-3 btn-group">
