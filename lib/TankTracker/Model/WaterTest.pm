@@ -176,6 +176,9 @@ sub _list_args {
         }
     }
 
+    # only select _active_ tank water test params:
+    $search->{'tank_water_test_parameter.active'} = 1;
+
     $args->{'prefetch'} ||= [
         { 'water_test_results' => 'tank_water_test_parameter' },
         'diaries',
