@@ -612,6 +612,12 @@ sub _prepare_water_test_params :Private {
         $params{$id}{$param} = $fields->{$field};
     }
 
+    for my $id ( keys %params ) {
+        if ( ! exists $params{$id}{'active'} ) {
+            $params{$id}{'active'} = 0;
+        }
+    }
+
     return [ map { $params{$_} } sort { $a <=> $b } keys %params ];
 }
 
