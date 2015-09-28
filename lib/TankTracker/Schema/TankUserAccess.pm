@@ -18,8 +18,15 @@ __PACKAGE__->add_columns(
   { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "user_id",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
-  "admin",
-  { data_type => "boolean", default_value => \"false", is_nullable => 1 },
+  "role",
+  {
+    data_type => "enum",
+    extra => {
+      custom_type_name => "user_role",
+      list => ["admin", "guest", "owner", "user"],
+    },
+    is_nullable => 0,
+  },
 );
 __PACKAGE__->set_primary_key("tank_id", "user_id");
 __PACKAGE__->belongs_to(
@@ -45,8 +52,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07043 @ 2015-09-25 14:49:01
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:aMIOCmWQmzClwo0uZFK/Ow
+# Created by DBIx::Class::Schema::Loader v0.07043 @ 2015-09-28 12:01:41
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:gcv9Xa/FAvH7e8JGnho2xg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

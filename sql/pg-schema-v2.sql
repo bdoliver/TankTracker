@@ -113,7 +113,8 @@ CREATE TABLE tank_user_access (
               NOT NULL
               REFERENCES "user" ( user_id  ),
 
-    admin     BOOLEAN DEFAULT FALSE,
+    role      user_role NOT
+              NULL,
 
     PRIMARY KEY ( tank_id, user_id )
 );
@@ -512,7 +513,7 @@ CREATE VIEW user_tanks AS (
            tank_name,
            water_type,
            active,
-           admin,
+           role,
            owner_id,
            user_id
     FROM tank_user_access JOIN tank USING ( tank_id )

@@ -27,8 +27,15 @@ __PACKAGE__->add_columns(
   },
   "active",
   { data_type => "boolean", is_nullable => 1 },
-  "admin",
-  { data_type => "boolean", is_nullable => 1 },
+  "role",
+  {
+    data_type => "enum",
+    extra => {
+      custom_type_name => "user_role",
+      list => ["admin", "guest", "owner", "user"],
+    },
+    is_nullable => 1,
+  },
   "owner_id",
   { data_type => "integer", is_nullable => 1 },
   "user_id",
@@ -36,8 +43,8 @@ __PACKAGE__->add_columns(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-07-28 09:49:19
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:glXhwQqncvBhEkuM97iehg
+# Created by DBIx::Class::Schema::Loader v0.07043 @ 2015-09-28 12:01:41
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:CwxWyY1Ju3hE8tt4fNq3LQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
