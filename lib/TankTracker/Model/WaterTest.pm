@@ -246,6 +246,13 @@ sub list {
                 %{ $params },
             };
         }
+
+        # Filter uninteresting notes.  Would much rather do this in the
+        # search but can't get it to work (needs a LEFT OUTER JOIN I think)
+        $row->{'diaries'} = [ grep {
+                $_->{'diary_note'} !~ qr{^(?:Record|Updat)ed water test results$}
+            } @{ $row->{'diaries'} }
+        ];
     }
 
     return $has_pager ? [ $rows, $pager ] : $rows;
