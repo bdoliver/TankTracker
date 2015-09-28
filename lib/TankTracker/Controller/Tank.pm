@@ -51,6 +51,20 @@ sub _select_form :Private {
 
     my @elements = ();
 
+    my $tank_actions = [
+        [ 'water_test/list' => 'Water tests' ],
+        [ 'view'            => 'View / edit tank details' ],
+        [ 'upload_photo'    => 'Upload tank photo' ],
+    ];
+
+    if ( $c->user->can_add_tank() ) {
+        push @$tank_actions, [ 'add' => 'Add a new tank' ];
+    }
+
+    push @$tank_actions,
+        [ 'inventory/list' => 'Inventory'   ],
+        [ 'diary/list'     => 'Diary'       ];
+
     if ( @tanks ) {
         push @elements,
         {
@@ -84,14 +98,7 @@ sub _select_form :Private {
             name    => 'tank_action',
             type    => 'Radiogroup',
             default => $c->session->{'tank_action'},
-            options => [
-                [ 'water_test/list' => 'Water tests' ],
-                [ 'view'            => 'View / edit tank details' ],
-                [ 'upload_photo'    => 'Upload tank photo' ],
-                [ 'add'             => 'Add a new tank' ],
-                [ 'inventory/list'  => 'Inventory'   ],
-                [ 'diary/list'      => 'Diary'       ],
-            ],
+            options => $tank_actions,
             constraints => [
                 'AutoSet',
                 {
@@ -131,7 +138,7 @@ sub select : Chained('base') :PathPart('') Args(0) FormMethod('_select_form') {
     if ( not $form->get_field({ name => 'tank_id', type => 'Select' }) ) {
         # user has no tanks - if they are an owner, then redirect them to 
         # add one; otherwise we can't do anything for them...
-        if ( $c->user->role() eq 'owner' or $c->user->role() eq 'admin' ) {
+        if ( $c->user->can_add_tank() ) {
             $c->response->redirect($c->uri_for('/tank/add'));
             $c->detach();
             return;
