@@ -94,6 +94,7 @@
             <div class="row">
                 <div class="btn-group col-md-8">
                 [% IF tank_action == 'view' %]
+                    [% IF can_edit OR can_add %]
                     <a [% href('/tank/' _ tank.tank_id _ '/edit') %] class="btn btn-md btn-info">Edit</a>
                     <script>
                     $(function() {
@@ -102,6 +103,7 @@
                         $('textarea').addClass('disabled').prop('disabled', true);
                     });
                     </script>
+                    [% END %]
                 [% ELSE %]
                     [% submit_btn('Save') %]
                 [% END %]

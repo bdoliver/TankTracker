@@ -529,8 +529,20 @@ sub details : Chained('get_tank') Args(0) FormMethod('_details_form') {
     my $form = $c->stash->{'form'};
 
     if ( $form->submitted_and_valid() ) {
-
         my $params = $form->params();
+
+        ## Sanity checks:
+        if ( ( $c->stash->{'tank_action'} eq 'add' and
+                not $c->user->can_add_tank() )
+            or
+             ( $c->stash->{'tank_action'} eq 'edit' and
+                not $c->user->can_edit_tank($params->{'tank_id'}) ) ) {
+
+            $c->flash->{'error'} = q{You do not have permission for the selected operation};
+            $c->response->redirect($c->uri_for('/default'));
+            $c->detach();
+            return;
+        }
 
         $params->{'owner_id'} = $c->user->user_id();
         delete $params->{'submit'};
@@ -595,6 +607,8 @@ sub details : Chained('get_tank') Args(0) FormMethod('_details_form') {
         $form->default_values(\%defaults);
     }
 
+    $c->stash->{'can_add'}  = $c->user->can_add_tank();
+    $c->stash->{'can_edit'} = $c->user->can_edit_tank($c->stash->{'tank'}{'tank_id'});
     $c->stash->{'template'} = 'tank/details.tt';
 
     return;

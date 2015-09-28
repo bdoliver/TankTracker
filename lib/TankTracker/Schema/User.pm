@@ -151,6 +151,36 @@ sub check_password {
 
 use List::Util qw(any);
 
+sub can_add_tank {
+    my ( $self ) = @_;
+
+    my $role = $self->role();
+
+    return ($role eq 'admin' or $role eq 'owner') ? 1 : 0;
+}
+
+sub can_edit_tank {
+    my ( $self, $tank_id ) = @_;
+
+    $tank_id or return 0;
+
+    # admin user can edit everything:
+    return 1 if $self->role() eq 'admin';
+
+    my $access = $self->result_source
+                      ->schema->resultset('TankUserAccess')
+                      ->find({
+        'user_id' => $self->user_id(),
+        'tank_id' => $tank_id,
+    });
+
+    return 0 if not $access;
+
+    my $access_role = $access->role();
+
+    return $access_role eq 'owner' ? 1 : 0;
+}
+
 sub can_access_tank {
     my ( $self, $tank_id ) = @_;
 
