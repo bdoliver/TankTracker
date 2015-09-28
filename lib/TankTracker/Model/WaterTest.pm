@@ -49,6 +49,7 @@ sub add {
         $self->add_diary({
             'tank_id'    => $results->[0]{'tank_id'},
             'user_id'    => $test->user_id(),
+            'diary_date' => $details->{'test_date'},
             'diary_note' => $notes || q{Recorded water test results},
             'test_id'    => $test->test_id(),
         });
@@ -127,6 +128,7 @@ sub update {
         $self->add_diary({
             'tank_id'    => $tank_id,
             'user_id'    => $details->{'user_id'},
+            'diary_date' => $details->{'test_date'},
             'diary_note' => $notes || 'Updated water test results',
             'test_id'    => $test_id,
         });
