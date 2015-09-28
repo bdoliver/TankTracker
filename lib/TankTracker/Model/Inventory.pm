@@ -29,6 +29,7 @@ sub add {
     $self->add_diary({
         'tank_id'    => $item->tank_id(),
         'user_id'    => $item->user_id(),
+        'diary_date' => $item->purchase_date(),
         'diary_note' => q{Added inventory item #}.$item->inventory_id(),
     });
 
@@ -45,6 +46,7 @@ sub update {
     $self->add_diary({
         'tank_id'    => $item->tank_id(),
         'user_id'    => $item->user_id(),
+        'diary_date' => $item->purchase_date(),
         'diary_note' => qq{Updated inventory item #$inventory_id},
     });
 
