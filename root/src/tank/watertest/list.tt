@@ -48,13 +48,13 @@
                 [% IF test.diaries.size %]
                     <a href="#"
                        data-title="Notes for test #[% test.test_id %]"
+                       data-trigger="hover"
                        data-toggle="popover"
                        data-placement="left"
                        data-html="true"
                        data-content="
-                       [% FOR d IN test.diaries %]
                        <dl>
-                           [% NEXT IF ! d.diary_note %]
+                       [% FOR d IN test.diaries %]
                            <dt>[% d.diary_date %]</dt>
                            <dd>[% d.diary_note %]</dd>
                        [% END %]
