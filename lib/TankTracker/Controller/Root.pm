@@ -188,6 +188,7 @@ The root page (/)
 sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
 
+    $c->response->status(302);
     $c->response->redirect($c->uri_for('login'));
 
     return;
@@ -199,12 +200,19 @@ Standard 404 error page
 
 =cut
 
-sub default :Path {
+sub default :Local {
     my ( $self, $c ) = @_;
-    #$c->response->body( 'Page not found' );
+
     $c->stash->{'template'} = 'error.tt';
-    $c->stash->{'error'}  ||= 'Requested resource is unavailable';
-    $c->response->status(404);
+    $c->stash->{'error'}  ||= $c->flash->{'error'};
+
+    if ( not $c->stash->{'error'} ) {
+        $c->stash->{'error'} = 'Requested resource is unavailable';
+        $c->response->status(404);
+    }
+    else {
+        $c->response->status(403);
+    }
 }
 
 =head2 end
