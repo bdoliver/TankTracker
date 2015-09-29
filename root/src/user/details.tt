@@ -91,6 +91,14 @@
                         </div>
                         <div class="col-md-4 form-group number">
                             [% form.get_element('role') %]
+                            <span class="role_notes">
+                            <ul>
+                                <li>Owner: can do anything to own tanks;</li>
+                                <li>User: can view anything for permitted tanks and record water tests;</li>
+                                <li>Guest: view-only user.</li>
+                            </ul>
+                            </span>
+
                         </div>
                     </div>
                 [% END %]

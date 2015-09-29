@@ -50,6 +50,14 @@ th.sortable,
   margin-bottom: 15px;
 }
 
+span.role_notes {
+  float: left;
+  margin-left: 140px;
+  margin-top: -35px;
+  width: 25em;
+  font-size: 10px;
+}
+
 div.tank_action fieldset.form-group {
     margin-left: 50px;
     margin-bottom: 0px;
