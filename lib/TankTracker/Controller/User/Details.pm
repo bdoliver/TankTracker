@@ -92,11 +92,11 @@ sub _details_form :Private {
     if ( $role eq 'admin' or $role eq 'owner' ) {
         my @roles;
 
-        if ( $role eq 'admin' ) {
-            push @roles,
-                [ 'admin' => 'Admin' ],
-                [ 'owner' => 'Owner' ];
-        }
+        push @roles,
+            [ 'admin' => 'Admin' ] if $role eq 'admin';
+
+        push @roles,
+            [ 'owner' => 'Owner' ] if ( $role eq 'admin' or $role eq 'owner' );
 
         push @roles,
             [ 'user'  => 'User'  ],
