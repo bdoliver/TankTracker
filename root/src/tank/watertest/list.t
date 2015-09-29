@@ -13,10 +13,6 @@ my $content;
 
 ok( $content = $tt->process(), q{processed template ok} );
 
-like($content => qr{There are no tests in the database for the selected tank.},
-    q{no tests found}
-);
-
 ok($content = $tt->process({
     tank         => { tank_id => 77 },
     col_headings => [
