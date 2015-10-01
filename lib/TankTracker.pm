@@ -81,6 +81,54 @@ __PACKAGE__->config(
         expose_stash   => 'chart_data',
     },
 
+    'View::Email' => {
+        # Where to look in the stash for the email information.
+        # 'email' is the default, so you don't have to specify it.
+        stash_key => 'email',
+        # Define the defaults for the mail
+        default => {
+            # Defines the default content type (mime type). Mandatory
+            content_type => 'text/plain',
+            # Defines the default charset for every MIME part with the
+            # content type text.
+            # According to RFC2049 a MIME part without a charset should
+            # be treated as US-ASCII by the mail client.
+            # If the charset is not set it won't be set for all MIME parts
+            # without an overridden one.
+            # Default: none
+            charset => 'utf-8'
+        },
+        # Setup how to send the email
+        # all those options are passed directly to Email::Sender::Simple
+        sender => {
+            # if mailer doesn't start with Email::Sender::Simple::Transport::,
+            # then this is prepended.
+            mailer => 'SMTP',
+            # mailer_args is passed directly into Email::Sender::Simple
+            mailer_args => {
+                host     => 'smtp.example.com', # defaults to localhost
+                sasl_username => 'sasl_username',
+                sasl_password => 'sasl_password',
+            }
+        }
+    },
+
+    'View::Email::Template' => {
+        # Optional prefix to look somewhere under the existing configured
+        # template  paths.
+        # Default: none
+        template_prefix => 'email',
+        # Define the defaults for the mail
+        default => {
+            # Defines the default view used to render the templates.
+            # If none is specified neither here nor in the stash
+            # Catalysts default view is used.
+            # Warning: if you don't tell Catalyst explicit which of your views should
+            # be its default one, C::V::Email::Template may choose the wrong one!
+            view => 'TT'
+        },
+    },
+
     'Plugin::Authentication' => {
         'default_realm' => 'tt_users',
         'realms'        => {
