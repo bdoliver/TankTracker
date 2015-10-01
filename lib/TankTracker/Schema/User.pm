@@ -46,6 +46,8 @@ __PACKAGE__->add_columns(
   { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "login_attempts",
   { data_type => "integer", default_value => 0, is_nullable => 1 },
+  "reset_hash",
+  { data_type => "text", is_nullable => 1 },
   "last_login",
   { data_type => "timestamp", is_nullable => 1 },
   "created_on",
@@ -120,8 +122,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07043 @ 2015-09-25 14:49:01
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Dk+GjCNs43JP+kNl1x6jPg
+# Created by DBIx::Class::Schema::Loader v0.07043 @ 2015-10-01 10:45:47
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:fQZ/gmHXf4dUTD645cV69A
 
 use Crypt::Eksblowfish::Bcrypt qw(bcrypt_hash en_base64);
 sub hash_pw {

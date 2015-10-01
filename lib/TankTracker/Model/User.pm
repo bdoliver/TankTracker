@@ -31,18 +31,55 @@ sub get {
 }
 
 sub record_last_login {
-    my ( $self, $user_id ) = @_;
+    my ( $self, $user_id, $max_attempts ) = @_;
 
     my $user = $self->resultset->find($user_id) or
         die qq{user #$user_id not found};
+
+    my $attempts = $user->login_attempts();
+
+    # If max login attempts are configured, then blow up if the
+    # user has tried to login too many times...
+    if ( $max_attempts and $attempts > $max_attempts ) {
+        die "Too many login attempts.\n";
+    }
 
     $user->last_login(
         DateTime::Format::Pg->format_timestamp(
             DateTime->now('time_zone' => 'Australia/Melbourne')
         )
     );
+    # also reset the user's login_attempt count:
+    $user->login_attempts(0);
 
     return $user->update();
+}
+
+sub update_login_attempts {
+    my ( $self, $arg ) = @_;
+
+    try {
+
+        my $user = $self->resultset->search(
+            {
+                'username' => $arg,
+            },
+            {
+                'email'    => $arg,
+            },
+        )->single();
+
+        if ( $user ) {
+            my $attempts = $user->login_attempts() + 1;
+            $user->login_attempts($attempts);
+            $user->update();
+        }
+    }
+    catch {
+        # we don't care if this fails...
+    };
+
+    1;
 }
 
 sub update {

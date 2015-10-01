@@ -2,6 +2,8 @@ package TankTracker::Controller::Root;
 use Moose;
 use namespace::autoclean;
 
+use Try::Tiny;
+
 BEGIN { extends 'Catalyst::Controller::HTML::FormFu' }
 
 #
@@ -148,15 +150,28 @@ sub login : Local FormMethod('_login_form') Args(0) {
                         ],
                     },
               }) ) {
-                $c->model('User')->record_last_login($c->user->user_id());
-                $c->response->redirect($c->uri_for('/tank'));
-                $c->detach();
-                return;
+
+                try {
+                    $c->model('User')->record_last_login(
+                        $c->user->user_id(),
+                        $c->config->{'max_login_attempts'},
+                    );
+                }
+                catch {
+                    $c->stash->{'error'} = $_;
+                };
+                if ( not $c->stash->{'error'} ) {
+                    $c->response->redirect($c->uri_for('/tank'));
+                    $c->detach();
+                    return;
+                }
             } else {
-                $c->stash(error => q{Bad username or password.});
+                ## speculatively update failed attempt count...
+                $c->model('User')->update_login_attempts($username);
+                $c->stash->{'error'} = q{Bad username or password.};
             }
         } else {
-            $c->stash(error => q{Empty username or password.})
+            $c->stash->{'error'} = q{Empty username or password.}
                 unless ($c->user_exists);
         }
     }

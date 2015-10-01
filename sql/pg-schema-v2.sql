@@ -24,10 +24,13 @@ CREATE TABLE "user" (
                    REFERENCES "user" (user_id),
 
     login_attempts INTEGER DEFAULT 0,
+    reset_hash     TEXT,
+
     last_login     TIMESTAMP(0),
     created_on     TIMESTAMP(0) NOT NULL DEFAULT now(),
     updated_on     TIMESTAMP(0) DEFAULT now()
 );
+CREATE UNIQUE INDEX username_idx ON "user" ( lower(username) );
 CREATE UNIQUE INDEX email_address_idx ON "user" ( lower(email) );
 
 CREATE TABLE sessions (
