@@ -8,7 +8,7 @@ CREATE TYPE user_role AS ENUM (
     'user'
 );
 
-CREATE TABLE "user" (
+CREATE TABLE users (
     user_id        SERIAL
                    NOT NULL
                    PRIMARY KEY,
@@ -20,8 +20,7 @@ CREATE TABLE "user" (
     last_name      TEXT,
     email          TEXT NOT NULL,
     active         BOOLEAN DEFAULT TRUE,
-    parent_id      INTEGER NOT NULL
-                   REFERENCES "user" (user_id),
+    parent_id      INTEGER NOT NULL,
 
     login_attempts INTEGER DEFAULT 0,
     reset_hash     TEXT,
@@ -30,8 +29,8 @@ CREATE TABLE "user" (
     created_on     TIMESTAMP(0) NOT NULL DEFAULT now(),
     updated_on     TIMESTAMP(0) DEFAULT now()
 );
-CREATE UNIQUE INDEX username_idx ON "user" ( lower(username) );
-CREATE UNIQUE INDEX email_address_idx ON "user" ( lower(email) );
+CREATE UNIQUE INDEX username_idx ON users ( lower(username) );
+CREATE UNIQUE INDEX email_address_idx ON users ( lower(email) );
 
 CREATE TABLE sessions (
     session_id   VARCHAR(72)
@@ -80,7 +79,7 @@ CREATE TABLE tank (
 
     owner_id        INTEGER
                     NOT NULL
-                    REFERENCES "user" ( user_id ),
+                    REFERENCES users ( user_id ),
 
     water_type      water_type NOT NULL,
     tank_name       TEXT NOT NULL,
@@ -114,7 +113,7 @@ CREATE TABLE tank_user_access (
 
     user_id   INTEGER
               NOT NULL
-              REFERENCES "user" ( user_id  ),
+              REFERENCES users ( user_id  ),
 
     role      user_role NOT
               NULL,
@@ -133,7 +132,7 @@ CREATE TABLE tank_photo (
 
     user_id      INTEGER
                  NOT NULL
-                 REFERENCES "user" ( user_id ),
+                 REFERENCES users ( user_id ),
 
     file_name    TEXT
                  NOT NULL,
@@ -323,7 +322,7 @@ CREATE TABLE diary (
 
     user_id     INTEGER
                 NOT NULL
-                REFERENCES "user" ( user_id ),
+                REFERENCES users ( user_id ),
 
     diary_date  TIMESTAMP(0) NOT NULL DEFAULT now(),
     diary_note  TEXT,
@@ -358,7 +357,7 @@ CREATE TABLE water_test (
 
     user_id           INTEGER
                       NOT NULL
-                      REFERENCES "user" ( user_id ),
+                      REFERENCES users ( user_id ),
 
     test_date         TIMESTAMP(0) NOT NULL DEFAULT current_date
 );
@@ -416,8 +415,8 @@ CREATE VIEW tank_water_test_result_view AS (
       JOIN water_test_parameter wtp USING ( parameter_id )
       JOIN tank_water_test_parameter twtp USING ( tank_id, parameter_id )
       JOIN tank                 t   USING ( tank_id )
-      JOIN "user"               u   USING ( user_id )
-      JOIN "user"               tu  ON ( t.owner_id = tu.user_id )
+      JOIN users                u   USING ( user_id )
+      JOIN users                tu  ON ( t.owner_id = tu.user_id )
   ORDER BY wtr.tank_id, wt.test_date, wt.test_id, twtp.param_order, wtr.parameter_id
 );
 
@@ -438,7 +437,7 @@ CREATE TABLE inventory (
 
     user_id           INTEGER
                       NOT NULL
-                      REFERENCES "user" ( user_id ),
+                      REFERENCES users ( user_id ),
 
     description       TEXT NOT NULL,
     purchase_date     DATE NOT NULL,
@@ -479,7 +478,7 @@ CREATE TYPE water_test_order_type AS ENUM (
 CREATE TABLE user_preferences (
     user_id         INTEGER
                     NOT NULL
-                    REFERENCES "user" ( user_id )
+                    REFERENCES users ( user_id )
                     ON DELETE CASCADE,
 
     recs_per_page   INTEGER

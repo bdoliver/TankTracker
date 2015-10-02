@@ -12,7 +12,7 @@ use MooseX::NonMoose;
 use MooseX::MarkAsMethods autoclean => 1;
 extends 'DBIx::Class::Core';
 __PACKAGE__->load_components("InflateColumn::DateTime");
-__PACKAGE__->table("public.user");
+__PACKAGE__->table("public.users");
 __PACKAGE__->add_columns(
   "user_id",
   {
@@ -122,8 +122,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07043 @ 2015-10-01 10:45:47
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:fQZ/gmHXf4dUTD645cV69A
+# Created by DBIx::Class::Schema::Loader v0.07043 @ 2015-10-02 22:19:41
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:R0Gk8sVHy9UtzLc/gFIcLQ
 
 use Crypt::Eksblowfish::Bcrypt qw(bcrypt_hash en_base64);
 sub hash_pw {
