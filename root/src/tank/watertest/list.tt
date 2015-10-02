@@ -23,15 +23,12 @@
             <tbody>
             [% FOR test IN tests %]
             <tr>
-                <td class="text-right">
+                <td class="text-center">
                     <a href="/tank/[% tank.tank_id %]/water_test/[% test.test_id %]/edit"
                        data-toggle="tooltip"
                        title="Click to edit test #[% test.test_id %]">
-                       [% test.test_id %]
-                    </a>
-                </td>
-                <td class="text-center">
                     [% test.test_date |replace('\s+.+$', '') %]
+                    </a>
                 </td>
                 [% FOR result IN test.water_test_results %]
                 <td class="text-right">

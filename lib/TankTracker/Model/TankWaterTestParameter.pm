@@ -32,11 +32,6 @@ sub get_headings {
 
     unshift @{ $rows },
         {
-            'title'     => 'Test ID',
-            'col_align' => 'right',
-            'active'    => 1,
-        },
-        {
             'title'     => 'Test Date',
             'col_align' => 'center',
             'active'    => 1,
