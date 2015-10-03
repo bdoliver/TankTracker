@@ -46,7 +46,10 @@ sub list :Chained('get_tank') PathPart('water_test/list') {
              'tank_id' => $tank_id,
         },
         {
-            order_by => { "-$order_seq" => "me.$order_col" },
+            order_by => [ 
+                { "-$order_seq" => "me.$order_col" },
+                { '-desc'       => 'me.test_id'    },
+            ],
             page     => $page || 1,
             rows     => $c->stash->{'user'}{'preferences'}{'recs_per_page'} || 10,
         },
