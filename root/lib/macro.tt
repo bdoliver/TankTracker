@@ -22,7 +22,7 @@
 [% END %]
 
 [% MACRO test_reminder BLOCK %]
-    [% IF tank.test_reminder %]
+    [% IF tank.test_reminder AND tank.days_overdue > 0 %]
     <div class="row">
         <div class="col col-md-12">
         <div class="alert alert-danger fade in">
