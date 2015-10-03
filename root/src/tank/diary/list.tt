@@ -120,9 +120,10 @@
                             <td class="text-center">
                                 <a href="/tank/[% tank.tank_id %]/diary/[% note.diary_id %]/delete"
                                    data-toggle="tooltip"
-                                   title="Click to delete note">
+                                   title="Click to delete note"
+                                   class="delete_note">
                                       <span class="glyphicon glyphicon-remove"></span>
-                                 </a>
+                                </a>
                             </td>
                             
                         </tr>
@@ -150,6 +151,7 @@
 
     </div>
 </div>
+
 <script>
 $(document).ready(function(){
     $('.glyphicon-search').click(function() {
@@ -163,6 +165,25 @@ $(document).ready(function(){
         // for some reason, form.submit() just doesn't fire, but triggering
         // the search submit button's "click" event works just fine!
         $('input[type="submit"]').trigger('click');
+    });
+
+    $('.delete_note').click( function(e) {
+        e.preventDefault();
+        var href=$(this).prop('href');
+        BootstrapDialog.confirm({
+            title: 'Confirm deletion',
+            message: '<div>The selected note will be permanently deleted and cannot be recovered.</div>'
+                     +'<div><strong>Are you sure?</strong></div>',
+            btnCancelClass: 'btn-primary',
+            btnOKClass: 'btn-info',
+            callback: function(result){
+                if(result) {
+                    window.location.replace(href);
+                } //else {
+                //    alert('Nope.');
+                //}
+            }
+        });
     });
 
 });
