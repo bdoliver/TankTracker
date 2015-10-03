@@ -88,26 +88,43 @@
                         <thead>
                         <tr>
                             [% sortable_column('diary_date', 'Date', 'text-center') %]
-                            [% sortable_column('user_id',    'User', 'text-right' ) %]
+                            [% sortable_column('user_id',    'User', 'text-left' ) %]
                             <th class="text-left">Note</th>
                             <th class="text-center">Last Updated</th>
                             <th>Test ID</th>
+                            <th>&nbsp;</th>
+                            <th>&nbsp;</th>
                         </tr>
                         </thead>
                         <tbody>
                         [% FOR note IN diary %]
                         <tr>
                             <td class="text-center">[% note.diary_date |replace('\s+.+$', '') %]</td>
-                            <td class="text-right">[% note.user_id                            %]</td>
+                            <td class="text-left">[% note.diary_user                          %]</td>
                             <td class="text-left">[% note.diary_note FILTER html_line_break   %]</td>
                             <td class="text-center">[% note.updated_on %]</td>
-                            <td class="text-right">
+                            <td class="text-left">
                                 [% IF note.test_id %]
                                     <a [% href('/tank/' _ tank.tank_id _ '/water_test/view/' _ note.test_id) %]>[% note.test_id %]</a>
                                 [% ELSE %]
                                 &nbsp;
                                 [% END %]
                             </td>
+                            <td class="text-center">
+                                <a href="/tank/[% tank.tank_id %]/diary/[% note.diary_id %]/edit"
+                                   data-toggle="tooltip"
+                                   title="Click to edit note">
+                                      <span class="glyphicon glyphicon-edit"></span>
+                                 </a>
+                            </td>
+                            <td class="text-center">
+                                <a href="/tank/[% tank.tank_id %]/diary/[% note.diary_id %]/delete"
+                                   data-toggle="tooltip"
+                                   title="Click to delete note">
+                                      <span class="glyphicon glyphicon-remove"></span>
+                                 </a>
+                            </td>
+                            
                         </tr>
                         [% END %]
                         </tbody>
@@ -120,6 +137,8 @@
             [% END %]
         </div>
     </div>
+
+    [% form_errors %]
     
     <div class="row">
         <div class="col-md-4 col-md-offset-4 btn-group">

@@ -7,6 +7,35 @@
     [% header %]
 
     <div class="row">
+
+        <div class="form-group col-md-2">
+            <label for="test_date">Diary Date</label>
+        </div>
+        <div class="form-group col-md-4">
+            <div class="input-group date">
+                [% form.get_element('diary_date').placeholder('YYYY-MM-DD') %]
+                <span class="input-group-addon">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                </span>
+            </div>
+        </div>
+        <script>
+        $(document).ready(function(){
+            $('.date').datepicker({
+                format         : 'yyyy-mm-dd',
+                todayHighlight : true,
+                clearBtn       : true,
+                autoclose      : true,
+                endDate        : '+0d',
+                todayBtn       : 'linked',
+                todayHighlight : true,
+            });
+        });
+        </script>
+
+    </div>
+
+    <div class="row">
         <div class="col-md-2">
             <label for="length">Notes:</label>
         </div>

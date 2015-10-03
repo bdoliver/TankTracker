@@ -6,6 +6,9 @@ BEGIN { extends q{Catalyst::Controller::HTML::FormFu} }
 
 with q{TankTracker::TraitFor::Controller::Tank};
 
+use DateTime;
+use Try::Tiny;
+
 =head1 NAME
 
 TankTracker::Controller::Tank::Diary - Catalyst Controller
@@ -97,11 +100,24 @@ sub list: Chained('get_tank') PathPart('diary/list') FormMethod('_search_diary')
     my ( $diary, $pager ) = @{ $c->model('Diary')->list(
         $search,
         {
-            order_by => { "-$direction" => $column },
+            prefetch => 'tracker_user',
+            order_by => [
+                { "-$direction" => $column    },
+                { "-desc"       => 'diary_id' },
+            ],
             page     => $page,
             rows     => $c->stash->{'user'}{'preferences'}{'recs_per_page'} || 10,
         },
     ) };
+
+    for my $d ( @{ $diary } ) {
+        my $user   = delete $d->{'tracker_user'};
+        my $name   = $user->{'first_name'} || '';
+           $name  .= $user->{'last_name'} ? " $user->{'last_name'}" : '';
+           $name ||= $user->{'username'};
+
+        $d->{'diary_user'} = $name;
+    }
 
     if ( $pager and ref($pager) ) {
         $pager->{'what'}      = 'diary notes';
@@ -115,6 +131,11 @@ sub list: Chained('get_tank') PathPart('diary/list') FormMethod('_search_diary')
     $c->stash->{'action_heading'} = 'Diary';
     $c->stash->{'add_url'}        = qq{/tank/$tank_id/diary/add};
 
+    if ( my $status = delete $c->flash->{'del_status'} ) {
+        $c->stash->{'message'} = $status->{'msg'};
+        $c->stash->{'error'}   = $status->{'err'};
+    }
+
     return 1;
 }
 
@@ -124,6 +145,17 @@ sub _diary_form : Private {
     my $tank_id = $c->stash->{'tank'}{'tank_id'};
 
     my $elements = [
+        {
+            name  => 'diary_date',
+            type  => 'Text',
+            value => $c->stash->{'diary'} || DateTime->now()->ymd(),
+            constraints => [
+                {
+                    type    => 'Required',
+                    message => q{You must enter a date for this diary entry.},
+                },
+            ],
+        },
         {
             name  => 'diary_note',
             type  => 'Textarea',
@@ -154,27 +186,96 @@ sub _diary_form : Private {
     return { 'elements' => $elements };
 }
 
-sub add: Chained('get_tank') PathPart('diary/add') Args(0) FormMethod('_diary_form') {
+sub add :Chained('get_tank') PathPart('diary/add') Args(0) {
     my ($self, $c) = @_;
 
     $c->stash->{'action_heading'} = 'Add Diary Note';
+    $c->stash->{'add_diary'}      = 1;
+    $c->forward('details');
 
+    return;
+}
+
+sub get_diary :Chained('get_tank') PathPart('diary') CaptureArgs(1) {
+    my ( $self, $c, $diary_id ) = @_;
+
+    if ( ! $diary_id ) {
+        ## Should never happen...
+        my $error = qq{Missing diary_id!};
+        $c->log->fatal("get_diary() $error");
+        $c->error($error);
+        $c->detach();
+        return;
+    }
+
+    if ( $diary_id !~ qr{\A \d+ \z}msx ) {
+        my $error = qq{Invalid diary_id '$diary_id'};
+        $c->log->fatal("get_diary() $error");
+        $c->error($error);
+        $c->detach();
+        return;
+    }
+
+    if ( my $diary = $c->model('Diary')->get($diary_id) ) {
+        if ( $diary and $diary->{'tank_id'} != $c->stash->{'tank'}{'tank_id'} ) {
+            my $error = qq{Diary requested ($diary_id) does not belong to current tank!};
+            $c->log->fatal("get_diary() $error");
+            $c->error($error);
+            $c->detach();
+            return;
+        }
+
+        $c->stash->{'diary'} = $diary;
+    }
+    else {
+        my $error = qq{Diary requested ($diary_id) not found in database!};
+        $c->log->fatal("get_diary() $error");
+        $c->error($error);
+        $c->detach();
+        return;
+    }
+
+    return;
+}
+
+sub edit :Chained('get_diary') PathPart('edit') Args(0) {
+    my ( $self, $c ) = @_;
+
+    $c->stash->{'action_heading'} = 'Edit Diary Note';
+    $c->stash->{'edit_diary'}      = 1;
+    $c->forward('details');
+
+    return;
+}
+
+sub details: Chained('get_diary') PathPart('diary/details') Args(0) FormMethod('_diary_form') {
+    my ($self, $c) = @_;
+
+    ## FIXME: make sure we have been called via add() or edit();
+    ##        if we haven't, then 404 !!
     my $form = $c->stash->{'form'};
 
     if ( $form->submitted_and_valid() ) {
         my $params = $form->params();
 
-        $params->{'user_id'} = $c->user->user_id();
+        $params->{'user_id'}   = $c->user->user_id();
+        $params->{'test_id'} ||= undef;
+
         delete $params->{'submit'};
 
         try {
-            my $test;
+            my $note;
 
             my $tank_id = $c->stash->{'tank'}{'tank_id'};
 
             $params->{'tank_id'} = $tank_id;
 
-            my $note = $c->model('Diary')->add_diary($params);
+            if ( my $diary_id = $c->stash->{'diary'}{'diary_id'} ) {
+                $note = $c->model('Diary')->update($diary_id, $params);
+            }
+            else {
+                $note = $c->model('Diary')->add_diary($params);
+            }
 
             $c->stash->{'message'} = qq{Saved diary note (no. $note->{'diary_id'}).};
 
@@ -189,6 +290,35 @@ sub add: Chained('get_tank') PathPart('diary/add') Args(0) FormMethod('_diary_fo
             $c->stash->{'error'} = $err;
         };
     }
+
+    $form->default_values($c->stash->{'diary'});
+
+    $c->stash->{'template'} = 'tank/diary/details.tt';
+
+    return;
+}
+
+sub delete :Chained('get_diary') PathPart('delete') Args(0) {
+    my ( $self, $c ) = @_;
+    
+    my $tank_id = $c->stash->{'tank'}{'tank_id'};
+
+    my $status = {};
+
+    try {
+        $c->model('Diary')->delete($c->stash->{'diary'}{'diary_id'});
+        $status->{'msg'} = q{Deleted diary note ok};
+    }
+    catch {
+        $status->{'err'} = qq{Error deleting diary note: $_};
+    };
+
+    my $path = qq{/tank/$tank_id/diary/list};
+
+    $c->flash->{'del_status'} = $status;
+
+    $c->response->redirect($c->uri_for($path));
+    $c->detach();
 
     return;
 }
