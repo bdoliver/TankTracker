@@ -223,6 +223,16 @@ sub get_test :Chained('get_tank') PathPart('water_test') CaptureArgs(1) {
     return;
 }
 
+sub view :Chained('get_test') PathPart('view') Args(0) {
+    my ( $self, $c ) = @_;
+
+    $c->stash->{'action_heading'} = 'View Test Details';
+    $c->stash->{'view_test'}      = 1;
+    $c->forward('details');
+    
+    return;
+}
+
 sub edit :Chained('get_test') PathPart('edit') Args(0) {
     my ( $self, $c ) = @_;
 
@@ -317,13 +327,6 @@ sub _water_test_params :Private {
     return $test;
 }
 
-sub view :Chained('get_test') PathPart('view') Args(0) {
-    my ( $self, $c ) = @_;
-
-    $c->stash->{'action_heading'} = 'View Test Details';
-
-    $c->stash->{'template'} = 'tank/watertest/details.tt';
-}
 
 =pod
 

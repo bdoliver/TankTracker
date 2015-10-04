@@ -105,7 +105,7 @@
                             <td class="text-center">[% note.updated_on %]</td>
                             <td class="text-left">
                                 [% IF note.test_id %]
-                                    <a [% href('/tank/' _ tank.tank_id _ '/water_test/view/' _ note.test_id) %]>[% note.test_id %]</a>
+                                    <a [% href('/tank/' _ tank.tank_id _ '/water_test/' _ note.test_id _ '/view') %]>[% note.test_id %]</a>
                                 [% ELSE %]
                                 &nbsp;
                                 [% END %]

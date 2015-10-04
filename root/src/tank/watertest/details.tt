@@ -63,7 +63,12 @@
     <div class="row">
         <div class="btn-group col-md-6 col-md-offset-1">
             [% submit_btn('Save') %]
+            [% IF edit_test %]
             [% back_btn('/tank/' _ tank.tank_id _ '/water_test/list')%]
+            [% END %]
+            [% IF view_test %]
+            [% back_btn('/tank/' _ tank.tank_id _ '/diary/list')%]
+            [% END %]
             [% logout_btn %]
         </div>
     </div>
@@ -73,3 +78,11 @@
     </div>
 </div>
 </form>
+[% IF view_test %]
+<script>
+    $(function() {
+        $('input').addClass('disabled').prop('disabled', true);
+        $('textarea').addClass('disabled').prop('disabled', true);
+    });
+</script>
+[% END %]
