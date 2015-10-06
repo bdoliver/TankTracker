@@ -1,4 +1,4 @@
-# Production configuration:
+# Dev configuration:
 {
     'name ' => 'TankTracker',
 
