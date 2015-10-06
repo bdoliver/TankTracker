@@ -10,4 +10,8 @@
              'password' => '',
         },
     },
+
+    'uploadtmp'          => '/tmp/tt_uploads',
+    'photo_root'         => '/static/images/photos',
+    'max_login_attempts' => 5,
 }

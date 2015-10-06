@@ -58,9 +58,6 @@ __PACKAGE__->config(
     disable_component_resolution_regex_fallback => 1,
     enable_catalyst_header => 0, # Send X-Catalyst header
     default_view           => 'HTML',
-    uploadtmp              => '/tmp/tt_uploads',
-    photo_root             => '/static/images/photos',
-    max_login_attempts     => 5,
 
     'View::HTML' => {
         # set the location for TT files
