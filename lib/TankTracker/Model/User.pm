@@ -145,6 +145,21 @@ sub update {
     return 1;
 }
 
+sub reset {
+    my ( $self, $who ) = @_;
+
+    my $result = $self->resultset->search([
+        { 'username' => $who },
+        { 'email'    => $who },
+    ]);
+
+    my $user = $result->first();
+
+    return $result->count() == 1
+        ? $self->deflate($result->first())
+        : undef;
+}
+
 no Moose;
 __PACKAGE__->meta->make_immutable();
 
