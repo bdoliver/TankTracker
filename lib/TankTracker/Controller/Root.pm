@@ -226,8 +226,18 @@ sub reset :Local Args(0) FormMethod('_reset_form')  {
 
         try {
             my $user = $c->model('User')->reset($reset);
-use Data::Dumper;
-warn "\n\nfound users:\n", Dumper($user);
+
+            ## FIXME: populate $c->stash->{'email'}
+            if ( $user ) {
+                $c->forward($c->view('Email'));
+                $c->flash->{'reset_ok'} = 1;
+                return;
+            }
+
+            # Redirect to login, regardless of whether or not
+            # we actually reset a user...
+            $c->response->redirect($c->uri_for('login'), 302);
+            $c->detach();
         }
         catch {
             $c->stash->{'error'} = $_;
