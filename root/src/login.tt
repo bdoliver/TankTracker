@@ -34,6 +34,12 @@
                         </div>
                     </div>
 
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <a href="[% reset_link %]">Problem logging in?</a>
+                        </div>
+                    </div>
+
             [% form_errors %]
 
             [% IF logout_message %]

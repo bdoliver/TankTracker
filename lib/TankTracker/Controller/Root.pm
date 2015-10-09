@@ -55,7 +55,7 @@ sub check_request : Private {
         return 0;
     }
 
-    if ( $c->action() eq 'login' ) {
+    if ( $c->action() eq 'login' or $c->action() eq 'reset' ) {
         # auth not required for login page...
         return 1;
     }
@@ -111,11 +111,11 @@ sub _login_form :Private {
     return { 'elements' => $elements };
 }
 
-sub login : Local FormMethod('_login_form') Args(0) {
-    my ( $self, $c, @args ) = @_;
+sub login : Local Args(0) FormMethod('_login_form') {
+    my ( $self, $c ) = @_;
 
     if ( $c->user_exists() ) {
-        $c->response->redirect($c->uri_for('tank'));
+        $c->response->redirect($c->uri_for('tank'), 302);
         $c->detach();
         return;
     }
@@ -124,8 +124,8 @@ sub login : Local FormMethod('_login_form') Args(0) {
 
     if ( $form->submitted_and_valid() ) {
 
-        my $username = $c->request->params->{'username'};
-        my $password = $c->request->params->{'password'};
+        my $username = $form->param('username');
+        my $password = $form->param('password');
 
         # If the username and password values were found in form
         if ( $username and $password ) {
@@ -161,7 +161,7 @@ sub login : Local FormMethod('_login_form') Args(0) {
                     $c->stash->{'error'} = $_;
                 };
                 if ( not $c->stash->{'error'} ) {
-                    $c->response->redirect($c->uri_for('/tank'));
+                    $c->response->redirect($c->uri_for('/tank'), 302);
                     $c->detach();
                     return;
                 }
@@ -176,6 +176,7 @@ sub login : Local FormMethod('_login_form') Args(0) {
         }
     }
 
+    $c->stash->{'reset_link'} = $c->uri_for('/reset');
     $c->stash->{'page_title'} = 'Login';
     $c->stash->{'template'}   = 'login.tt';
 
@@ -189,9 +190,53 @@ sub logout :Local Args(0) {
 
     # setting flash should recreate the session
     $c->stash->{'logout_message'} = 'You have logged out.';
-    $c->response->redirect($c->uri_for('login'),302);
+    $c->response->redirect($c->uri_for('login'), 302);
     return;
+}
 
+sub _reset_form :Private {
+    my ( $self, $c ) = @_;
+
+    my $elements = [
+        {
+            name        => 'reset',
+            type        => 'Text',
+            constraints => [
+                'Printable',
+                'Required',
+                { type => 'Length', min => 3, max => 50 },
+            ],
+        },
+        {
+            type => 'Submit',
+            name => 'submit',
+        },
+    ];
+
+    return { 'elements' => $elements };
+}
+
+sub reset :Local Args(0) FormMethod('_reset_form')  {
+    my ( $self, $c ) = @_;
+
+    my $form = $c->stash->{form};
+
+    if ( $form->submitted_and_valid() ) {
+        my $reset = $form->param('reset');
+
+        try {
+            my $user = $c->model('User')->reset($reset);
+
+        }
+        catch {
+            $c->stash->{'error'} = $_;
+        };
+    }
+
+    $c->stash->{'page_title'} = 'Account Re-set';
+    $c->stash->{'template'}   = 'reset.tt';
+
+    return;
 }
 
 =head2 index

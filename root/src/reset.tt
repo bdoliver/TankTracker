@@ -1,0 +1,33 @@
+<form class="form" method="[% form.method %]" action="[% form.action %]" >
+    <div class="row">
+        <div class="col-md-4 col-md-offset-4 well">
+
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h4>Re-set account</h4>
+                </div>
+                <div class="panel-body">
+
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label for="reset" class="sr-only">Login / Email</label>
+
+                            [% form.get_element('reset').placeholder('Login or email') %]
+
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-md-12">
+
+                        [% form.get_element('submit').value('Reset') %]
+
+                        </div>
+                    </div>
+
+            [% form_errors %]
+
+            </div>
+        </div>
+    </div>
+</form>
