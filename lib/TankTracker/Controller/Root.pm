@@ -55,8 +55,10 @@ sub check_request : Private {
         return 0;
     }
 
-    if ( $c->action() eq 'login' or $c->action() eq 'reset' ) {
-        # auth not required for login page...
+    if ( $c->action() eq 'login' or
+         $c->action() eq 'reset' or
+         $c->action() eq 'signup' ) {
+        # auth not required for login/reset/signup pages...
         return 1;
     }
 
@@ -207,16 +209,12 @@ sub _reset_form :Private {
                 { type => 'Length', min => 3, max => 50 },
             ],
         },
-        {
-            type => 'Submit',
-            name => 'submit',
-        },
     ];
 
     return { 'elements' => $elements };
 }
 
-sub reset :Local Args(0) FormMethod('_reset_form')  {
+sub reset :Local Args(0) FormMethod('_reset_form') {
     my ( $self, $c ) = @_;
 
     my $form = $c->stash->{form};
@@ -246,6 +244,59 @@ sub reset :Local Args(0) FormMethod('_reset_form')  {
 
     $c->stash->{'page_title'} = 'Account Re-set';
     $c->stash->{'template'}   = 'reset.tt';
+
+    return;
+}
+
+sub _signup_form :Private {
+    my ( $self, $c ) = @_;
+
+    my $elements = [
+        {
+            name        => 'email',
+            type        => 'Text',
+            constraints => [
+                'Printable',
+                'Required',
+                { type => 'Length', min => 3, max => 50 },
+            ],
+            validators => [ 'TankTracker::EmailExists' ],
+        },
+    ];
+
+    return { 'elements' => $elements };
+}
+
+sub signup :Local Args(0) FormMethod('_signup_form') {
+    my ( $self, $c ) = @_;
+
+    my $form = $c->stash->{form};
+
+    if ( $form->submitted_and_valid() ) {
+        my $email = $form->param('email');
+
+        try {
+            my $user = $c->model('User')->signup($email);
+
+            ## FIXME: populate $c->stash->{'email'}
+            if ( $user ) {
+                $c->forward($c->view('Email'));
+                $c->flash->{'reset_ok'} = 1;
+                return;
+            }
+
+            # Redirect to login, regardless of whether or not
+            # we actually emailed the user...
+            $c->response->redirect($c->uri_for('login'), 302);
+            $c->detach();
+        }
+        catch {
+            $c->stash->{'error'} = $_;
+        };
+    }
+
+    $c->stash->{'page_title'} = 'Sign-up for an account';
+    $c->stash->{'template'}   = 'signup.tt';
 
     return;
 }

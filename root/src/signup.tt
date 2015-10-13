@@ -4,15 +4,15 @@
 
             <div class="panel panel-info">
                 <div class="panel-heading">
-                    <h4>Re-set account</h4>
+                    <h4>Sign up?</h4>
                 </div>
                 <div class="panel-body">
 
                     <div class="row">
                         <div class="form-group col-md-12">
-                            <label for="reset" class="sr-only">Login / Email</label>
+                            <label for="reset" class="sr-only">Email address</label>
 
-                            [% form.get_element('reset').placeholder('Login or email') %]
+                            [% form.get_element('email').placeholder('Email address') %]
 
                         </div>
                     </div>
@@ -20,7 +20,7 @@
                     <div class="row">
                         <div class="form-group col-md-12">
 
-                        [% submit_btn('Reset') %]
+                        [% submit_btn() %]
 
                         </div>
                     </div>
