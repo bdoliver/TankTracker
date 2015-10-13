@@ -276,10 +276,10 @@ sub signup :Local Args(0) FormMethod('_signup_form') {
         my $email = $form->param('email');
 
         try {
-            my $user = $c->model('User')->signup($email);
+            my $signup = $c->model('Signup')->add($email);
 
-            ## FIXME: populate $c->stash->{'email'}
-            if ( $user ) {
+            ## FIXME: populate $c->stash->{'signup'}
+            if ( $signup ) {
                 $c->forward($c->view('Email'));
                 $c->flash->{'reset_ok'} = 1;
                 return;

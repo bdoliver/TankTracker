@@ -18,6 +18,7 @@ CREATE TABLE signup (
     created_on     TIMESTAMP(0) DEFAULT now()
 );
 CREATE UNIQUE INDEX email_idx ON signup ( lower(email) );
+CREATE UNIQUE INDEX signup_hash_idx ON signup ( lower(signup_hash) );
 
 CREATE TABLE users (
     user_id        SERIAL
