@@ -8,6 +8,17 @@ CREATE TYPE user_role AS ENUM (
     'user'
 );
 
+CREATE TABLE signup (
+    signup_id      SERIAL
+                   NOT NULL
+                   PRIMARY KEY,
+
+    email          TEXT NOT NULL,
+    signup_hash    TEXT NOT NULL,
+    created_on     TIMESTAMP(0) DEFAULT now()
+);
+CREATE UNIQUE INDEX email_idx ON signup ( lower(email) );
+
 CREATE TABLE users (
     user_id        SERIAL
                    NOT NULL
