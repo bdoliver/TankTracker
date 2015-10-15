@@ -25,6 +25,8 @@ __PACKAGE__->add_columns(
   { data_type => "text", is_nullable => 0 },
   "hash",
   { data_type => "text", is_nullable => 0 },
+  "user_id",
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
   "created_on",
   {
     data_type     => "timestamp",
@@ -34,10 +36,21 @@ __PACKAGE__->add_columns(
   },
 );
 __PACKAGE__->set_primary_key("signup_id");
+__PACKAGE__->belongs_to(
+  "tracker_user",
+  "TankTracker::Schema::User",
+  { user_id => "user_id" },
+  {
+    is_deferrable => 0,
+    join_type     => "LEFT",
+    on_delete     => "NO ACTION",
+    on_update     => "NO ACTION",
+  },
+);
 
 
-# Created by DBIx::Class::Schema::Loader v0.07043 @ 2015-10-14 10:31:39
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:L+4nAL3tg/4Q6l/TxZCwPg
+# Created by DBIx::Class::Schema::Loader v0.07043 @ 2015-10-16 08:52:17
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:+A/G3aR12tft1jqFRO2dBw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

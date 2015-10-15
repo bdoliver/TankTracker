@@ -8,18 +8,6 @@ CREATE TYPE user_role AS ENUM (
     'user'
 );
 
-CREATE TABLE signup (
-    signup_id      SERIAL
-                   NOT NULL
-                   PRIMARY KEY,
-
-    email          TEXT NOT NULL,
-    hash           TEXT NOT NULL,
-    created_on     TIMESTAMP(0) DEFAULT now()
-);
-CREATE UNIQUE INDEX email_idx ON signup ( lower(email) );
-CREATE UNIQUE INDEX signup_hash_idx ON signup ( lower(signup_hash) );
-
 CREATE TABLE users (
     user_id        SERIAL
                    NOT NULL
@@ -43,6 +31,23 @@ CREATE TABLE users (
 );
 CREATE UNIQUE INDEX username_idx ON users ( lower(username) );
 CREATE UNIQUE INDEX email_address_idx ON users ( lower(email) );
+
+CREATE TABLE signup (
+    signup_id      SERIAL
+                   NOT NULL
+                   PRIMARY KEY,
+
+    email          TEXT NOT NULL,
+    hash           TEXT NOT NULL,
+    -- user_id will only be set when an existing user
+    -- issues an invite, so this col is nullable:
+    user_id        INTEGER
+                   REFERENCES users (user_id),
+
+    created_on     TIMESTAMP(0) DEFAULT now()
+);
+CREATE UNIQUE INDEX email_idx ON signup ( lower(email) );
+CREATE UNIQUE INDEX signup_hash_idx ON signup ( lower(hash) );
 
 CREATE TABLE sessions (
     session_id   VARCHAR(72)
