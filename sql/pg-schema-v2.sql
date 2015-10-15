@@ -14,7 +14,7 @@ CREATE TABLE signup (
                    PRIMARY KEY,
 
     email          TEXT NOT NULL,
-    signup_hash    TEXT NOT NULL,
+    hash           TEXT NOT NULL,
     created_on     TIMESTAMP(0) DEFAULT now()
 );
 CREATE UNIQUE INDEX email_idx ON signup ( lower(email) );

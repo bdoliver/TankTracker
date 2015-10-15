@@ -23,7 +23,7 @@ __PACKAGE__->add_columns(
   },
   "email",
   { data_type => "text", is_nullable => 0 },
-  "signup_hash",
+  "hash",
   { data_type => "text", is_nullable => 0 },
   "created_on",
   {
@@ -36,8 +36,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("signup_id");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07043 @ 2015-10-13 15:57:19
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:x0VKvs2QkTstRlqr98Xo3Q
+# Created by DBIx::Class::Schema::Loader v0.07043 @ 2015-10-14 10:31:39
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:L+4nAL3tg/4Q6l/TxZCwPg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
