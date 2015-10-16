@@ -277,13 +277,16 @@ sub signup :Local Args(0) FormMethod('_signup_form') {
 
         try {
             my $signup = $c->model('Signup')->add($email);
-use Digest::SHA qw(sha256_base64);
-warn "\n\nemail=$email\n",
-warn "sha_356=", sha256_base64($email), "\n\n";
             ## FIXME: populate $c->stash->{'signup'}
             if ( $signup ) {
 use Data::Dumper;
 warn "\n\nSIGNUP:\n", Dumper($signup);
+                my $email = {
+                    from     => 'tanktracker@example.com',
+                    to       => $email,
+                    subject  => 'Signup to TankTracker',
+                    template => 'signup.tt2',
+                };
 #                 $c->forward($c->view('Email'));
                 $c->flash->{'reset_ok'} = 1;
                 return;
