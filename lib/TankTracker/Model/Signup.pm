@@ -18,11 +18,12 @@ has 'rs_name' => (
 my $secret = '}bZ[o8@?aR:k`/kO+_T2.H1.gf6bsF8OM';
 
 sub add {
-    my ( $self, $email ) = @_;
+    my ( $self, $email, $user_id ) = @_;
 
     my $hash = JSON::WebToken->encode(
         {
-            email => $email,
+            email   => $email,
+            user_id => $user_id, # NB: may be undef! (which is ok)
         },
         $secret,
     );
@@ -37,8 +38,9 @@ sub add {
                 die "Cannot use that email address.\n" if ( $obj and @$obj );
 
                 $signup = $self->resultset->create({
-                    email => $email,
-                    hash  => $hash,
+                    email   => $email,
+                    hash    => $hash,
+                    user_id => $user_id,
                 });
             }
         );
