@@ -122,6 +122,9 @@ sub login : Local Args(0) FormMethod('_login_form') {
         return;
     }
 
+    $c->stash->{'signup_ok'} ||= $c->flash->{'signup_ok'};
+    $c->stash->{'reset_ok'}  ||= $c->flash->{'reset_ok'};
+
     my $form = $c->stash->{form};
 
     if ( $form->submitted_and_valid() ) {
@@ -225,17 +228,24 @@ sub reset :Local Args(0) FormMethod('_reset_form') {
         try {
             my $user = $c->model('User')->reset($reset);
 
-            ## FIXME: populate $c->stash->{'email'}
             if ( $user ) {
+                my $email = {
+                    from         => 'tanktracker@example.com',
+                    to           => $user->email(),
+                    subject      => 'Reset TankTracker login',
+                    template     => 'reset.tt',
+                    content_type => 'multipart/alternative',
+                };
+                $c->stash->{'email'} = $email;
                 $c->forward($c->view('Email'));
                 $c->flash->{'reset_ok'} = 1;
-                return;
             }
 
             # Redirect to login, regardless of whether or not
             # we actually reset a user...
             $c->response->redirect($c->uri_for('login'), 302);
             $c->detach();
+            return;
         }
         catch {
             $c->stash->{'error'} = $_;
@@ -277,25 +287,27 @@ sub signup :Local Args(0) FormMethod('_signup_form') {
 
         try {
             my $signup = $c->model('Signup')->add($email);
-            ## FIXME: populate $c->stash->{'signup'}
+
             if ( $signup ) {
 use Data::Dumper;
 warn "\n\nSIGNUP:\n", Dumper($signup);
                 my $email = {
-                    from     => 'tanktracker@example.com',
-                    to       => $email,
-                    subject  => 'Signup to TankTracker',
-                    template => 'signup.tt2',
+                    from         => 'tanktracker@example.com',
+                    to           => $email,
+                    subject      => 'Signup to TankTracker',
+                    template     => 'signup.tt',
+                    content_type => 'multipart/alternative',
                 };
-#                 $c->forward($c->view('Email'));
-                $c->flash->{'reset_ok'} = 1;
-                return;
+                $c->stash->{'email'} = $email;
+                $c->forward($c->view('Email'));
+                $c->flash->{'signup_ok'} = 1;
             }
 
             # Redirect to login, regardless of whether or not
             # we actually emailed the user...
             $c->response->redirect($c->uri_for('login'), 302);
             $c->detach();
+            return;
         }
         catch {
             $c->stash->{'error'} = $_;

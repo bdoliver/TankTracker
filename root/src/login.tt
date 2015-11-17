@@ -48,7 +48,25 @@
             [% IF logout_message %]
                     <div class="row">
                         <div class="form-group col-md-12">
-                        <p class="text-info pg-info">[% logout_message %]</p>
+                        <p class="text-info bg-info">[% logout_message %]</p>
+                        </div>
+                    </div>
+            [% END %]
+            [% IF signup_ok %]
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                        <p class="text-success bg-success">
+                            An email has been sent with signup instructions.
+                        </p>
+                        </div>
+                    </div>
+            [% END %]
+            [% IF reset_ok %]
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                        <p class="text-success bg-success">
+                            An email has been sent with instructions to reset your login.
+                        </p>
                         </div>
                     </div>
             [% END %]
