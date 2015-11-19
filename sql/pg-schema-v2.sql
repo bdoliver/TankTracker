@@ -1,6 +1,16 @@
 \set ON_ERROR_STOP 1
 BEGIN TRANSACTION;
 
+CREATE OR REPLACE FUNCTION set_updated_on()
+RETURNS TRIGGER AS
+$$
+BEGIN
+    NEW.updated_on := now();
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE TYPE user_role AS ENUM (
     'admin',
     'guest',
@@ -31,6 +41,9 @@ CREATE TABLE users (
 );
 CREATE UNIQUE INDEX username_idx ON users ( lower(username) );
 CREATE UNIQUE INDEX email_address_idx ON users ( lower(email) );
+CREATE TRIGGER set_user_updated
+    BEFORE INSERT OR UPDATE ON users
+    FOR EACH ROW EXECUTE PROCEDURE set_updated_on();
 
 CREATE TABLE signup (
     signup_id      SERIAL
@@ -122,6 +135,9 @@ CREATE TABLE tank (
     updated_on      TIMESTAMP(0) DEFAULT now()
 );
 CREATE UNIQUE INDEX tank_name_idx ON tank (lower(tank_name));
+CREATE TRIGGER set_tank_updated
+    BEFORE INSERT OR UPDATE ON tank
+    FOR EACH ROW EXECUTE PROCEDURE set_updated_on();
 
 CREATE TABLE tank_user_access (
     tank_id   INTEGER
@@ -348,6 +364,9 @@ CREATE TABLE diary (
 );
 CREATE INDEX tank_diary_date ON diary ( tank_id, diary_date );
 CREATE INDEX test_diary_note ON diary ( test_id );
+CREATE TRIGGER set_diary_updated
+    BEFORE INSERT OR UPDATE ON diary
+    FOR EACH ROW EXECUTE PROCEDURE set_updated_on();
 
 CREATE OR REPLACE FUNCTION chk_diary_note() RETURNS TRIGGER AS
 $$
@@ -464,6 +483,9 @@ CREATE TABLE inventory (
     created_on        TIMESTAMP(0) NOT NULL DEFAULT now(),
     updated_on        TIMESTAMP(0) DEFAULT now()
 );
+CREATE TRIGGER set_inventory_updated
+    BEFORE INSERT OR UPDATE ON inventory
+    FOR EACH ROW EXECUTE PROCEDURE set_updated_on();
 
 CREATE TABLE tank_inventory (
     tank_id           INTEGER
@@ -479,6 +501,9 @@ CREATE TABLE tank_inventory (
 
     PRIMARY KEY ( tank_id, inventory_id )
 );
+CREATE TRIGGER set_tank_inventory_updated
+    BEFORE INSERT OR UPDATE ON tank_inventory
+    FOR EACH ROW EXECUTE PROCEDURE set_updated_on();
 
 CREATE TYPE tank_order_type AS ENUM (
     'tank_id',
@@ -526,6 +551,9 @@ CREATE TABLE user_preferences (
     updated_on       TIMESTAMP(0) DEFAULT now(),
     PRIMARY KEY ( user_id )
 );
+CREATE TRIGGER set_prefs_updated
+    BEFORE INSERT OR UPDATE ON user_preferences
+    FOR EACH ROW EXECUTE PROCEDURE set_updated_on();
 
 CREATE VIEW user_tanks AS (
     SELECT tank_id,

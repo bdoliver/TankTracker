@@ -227,11 +227,13 @@ sub reset :Local Args(0) FormMethod('_reset_form') {
 
         try {
             my $user = $c->model('User')->reset($reset);
+# use Data::Dumper;
+# warn "\n\nRESET:\n", Dumper($user);
 
             if ( $user ) {
                 my $email = {
                     from         => 'tanktracker@example.com',
-                    to           => $user->email(),
+                    to           => $user->{'email'},
                     subject      => 'Reset TankTracker login',
                     template     => 'reset.tt',
                     content_type => 'multipart/alternative',
@@ -289,8 +291,8 @@ sub signup :Local Args(0) FormMethod('_signup_form') {
             my $signup = $c->model('Signup')->add($email);
 
             if ( $signup ) {
-use Data::Dumper;
-warn "\n\nSIGNUP:\n", Dumper($signup);
+# use Data::Dumper;
+# warn "\n\nSIGNUP:\n", Dumper($signup);
                 my $email = {
                     from         => 'tanktracker@example.com',
                     to           => $email,

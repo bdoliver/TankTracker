@@ -132,13 +132,15 @@ __PACKAGE__->has_many(
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:B/Soga037zAzUOYFyUz6Vg
 
 use Crypt::Eksblowfish::Bcrypt qw(bcrypt_hash en_base64);
-sub hash_pw {
-    my ( $self, $pw ) = @_;
+sub hash_str {
+    my ( $self, $pw, $salt ) = @_;
+
+    $salt ||= q{]+_%%^981#^!*|vB};
 
     return $pw
            ? en_base64(bcrypt_hash({ key_nul => 1,
                                      cost    => 8,
-                                     salt    => ']+_%%^981#^!*|vB' }, $pw))
+                                     salt    => $salt }, $pw))
            : '';
 }
 
@@ -149,9 +151,24 @@ sub check_password {
         my $ret = 0;
 
         if ( $attempt ) {
-                my $hash = $self->hash_pw($attempt);
+                my $hash = $self->hash_str($attempt);
 
                 $ret = ($hash eq $self->password());
+        }
+
+        return $ret;
+}
+
+sub check_hash {
+
+        my ( $self, $attempt ) = @_;
+
+        my $ret = 0;
+
+        if ( $attempt ) {
+                my $hash = $self->hash_str($attempt);
+
+                $ret = ($hash eq $self->reset_hash());
         }
 
         return $ret;

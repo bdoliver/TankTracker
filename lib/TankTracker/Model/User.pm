@@ -102,13 +102,13 @@ sub update {
             $curr_pw or
                 die qq{cannot set new password without current password\n};
 
-            ( $self->hash_pw($curr_pw) eq $user->password() ) or
+            ( $self->hash_str($curr_pw) eq $user->password() ) or
                 die qq{cannot set new password - current password invalid\n};
 
             ( $pw_1 and $pw_2 and $pw_1 eq $pw_2 ) or
                 die qq{cannot set new password: new + confirmed do not match\n};
 
-            $params->{'password'} = $self->resultset->result_class->hash_pw($pw_1);
+            $params->{'password'} = $self->resultset->result_class->hash_str($pw_1);
         }
     }
     else {
@@ -118,7 +118,7 @@ sub update {
         ( $pw_1 and $pw_2 and $pw_1 eq $pw_2 ) or
             die qq{passwords do not match\n};
 
-        $params->{'password'} = $self->resultset->result_class->hash_pw($pw_1);
+        $params->{'password'} = $self->resultset->result_class->hash_str($pw_1);
     }
 
     $self->txn_begin();
@@ -131,9 +131,11 @@ sub update {
             $user = $self->resultset->create($params);
         }
 
-        $prefs->{'user_id'} = $user->user_id();
+        if ( $prefs ) {
+            $prefs->{'user_id'} = $user->user_id();
 
-        $self->schema->resultset('UserPreference')->update_or_create($prefs);
+            $self->schema->resultset('UserPreference')->update_or_create($prefs);
+        }
     }
     catch {
         $self->rollback();
@@ -153,11 +155,21 @@ sub reset {
         { 'email'    => $who },
     ]);
 
-    my $user = $result->first();
+    if ( $result->count() != 1 ) {
+        # log a message? user not found...
+        return;
+    }
 
-    return $result->count() == 1
-        ? $self->deflate($result->first())
-        : undef;
+    my $user = $result->first();
+    my $salt = q{TTr#53tH@5hK*7[~};
+
+    # Hash the user's email concatenated with the current time:
+    my $key  = $user->email() . DateTime->now();
+    my $hash = $user->hash_str($key, $salt);
+
+    $user->update({reset_hash => $hash})->discard_changes();
+
+    return $self->deflate($user);
 }
 
 no Moose;
