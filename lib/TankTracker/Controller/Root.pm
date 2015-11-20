@@ -227,8 +227,8 @@ sub reset :Local Args(0) FormMethod('_reset_form') {
 
         try {
             my $user = $c->model('User')->reset($reset);
-# use Data::Dumper;
-# warn "\n\nRESET:\n", Dumper($user);
+use Data::Dumper;
+warn "\n\nRESET:\n", Dumper($user);
 
             if ( $user ) {
                 my $email = {

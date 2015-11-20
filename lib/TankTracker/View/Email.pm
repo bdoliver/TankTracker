@@ -12,7 +12,7 @@ __PACKAGE__->config(
         # Define the defaults for the mail
         template_prefix => 'email',
         default => {
-            view => 'HTML',
+            view => 'Text',
             # Defines the default content type (mime type). Mandatory
             content_type => 'text/plain',
             # Defines the default charset for every MIME part with the
