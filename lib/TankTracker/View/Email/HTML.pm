@@ -1,8 +1,8 @@
-package TankTracker::View::Email;
+package TankTracker::View::Email::HTML;
 use Moose;
 use namespace::autoclean;
 
-extends 'Catalyst::View::Email::Template';
+extends 'TankTracker::View::Email';
 
 __PACKAGE__->config(
     # Where to look in the stash for the email information.
@@ -13,7 +13,7 @@ __PACKAGE__->config(
     default => {
         view => 'Text',
         # Defines the default content type (mime type). Mandatory
-        content_type => 'text/plain',
+        content_type => 'text/html',
         # Defines the default charset for every MIME part with the
         # content type text.
         # According to RFC2049 a MIME part without a charset should
@@ -42,11 +42,11 @@ __PACKAGE__->config(
 
 =head1 NAME
 
-TankTracker::View::Email - Email View for TankTracker
+TankTracker::View::Email::HTML - HTML Email View for TankTracker
 
 =head1 DESCRIPTION
 
-Email View for TankTracker.
+HTML Email View for TankTracker.
 
 =head1 SEE ALSO
 

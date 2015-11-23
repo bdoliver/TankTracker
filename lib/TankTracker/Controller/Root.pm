@@ -239,7 +239,7 @@ warn "\n\nRESET:\n", Dumper($user);
                     content_type => 'multipart/alternative',
                 };
                 $c->stash->{'email'} = $email;
-                $c->forward($c->view('Email'));
+                $c->forward($c->view('Email::HTML'));
                 $c->flash->{'reset_ok'} = 1;
             }
 
@@ -301,7 +301,7 @@ sub signup :Local Args(0) FormMethod('_signup_form') {
                     content_type => 'multipart/alternative',
                 };
                 $c->stash->{'email'} = $email;
-                $c->forward($c->view('Email'));
+                $c->forward($c->view('Email::HTML'));
                 $c->flash->{'signup_ok'} = 1;
             }
 

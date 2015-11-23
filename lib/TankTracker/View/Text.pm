@@ -21,50 +21,36 @@ use Path::Class qw(dir);
 #  CHOMP_GREEDY    3          ~       remove all WS including any newlines
 #--------------------------------------------------------------------------
 
-__PACKAGE__->config( {
-        CATALYST_VAR       => 'Catalyst',
-        TRIM               => 1,
-        PRE_CHOMP          => 1,
-        POST_CHOMP         => 0,
-        TEMPLATE_EXTENSION => '.tt',
-        INCLUDE_PATH => [
-#             __PACKAGE__->path_to('root', 'lib'),
-#             __PACKAGE__->path_to('root', 'src'),
-             '../root/lib', '../root/src',
-        ],
+__PACKAGE__->config({
+    CATALYST_VAR => 'Catalyst',
+    TRIM               => 1,
+    PRE_CHOMP          => 1,
+    POST_CHOMP         => 0,
 
-#        PRE_PROCESS        => 'lib/main.tt2',
-        PRE_PROCESS        => undef,
+    render_die         => 1,
 
-        # see app config files
-        # STAT_TTL         => 1,        # 1 second for development
-        # STAT_TTL         => 60*60*24, # 1 day for WEBSERVER
+    # ensure these are never on
+    ABSOLUTE           => 0,
+    RELATIVE           => 0,
+    RECURSION          => 0,
+    TOLERANT           => 0,
+    EVAL_PERL          => 0,
+    INTERPOLATE        => 0,
+    ANYCASE            => 0,
+    TIMER              => 0,
+});
 
-        render_die         => 1,
+# Set template include paths:
+sub new {
+    my ( $class, $c, $arguments ) = @_;
 
-        # ensure these are never on
-        ABSOLUTE           => 0,
-        RELATIVE           => 0,
-        RECURSION          => 0,
-        TOLERANT           => 0,
-        EVAL_PERL          => 0,
-        INTERPOLATE        => 0,
-        ANYCASE            => 0,
-        TIMER              => 0,
+    my $prefix = $c->config->{home};
+
+    for my $dir ( qw( lib src ) ) {
+        push @{ $class->config->{INCLUDE_PATH} }, (
+            dir($prefix, "root/$dir")->stringify(),
+        );
     }
-);
-
-# lets be explicit about our INCLUDE_PATH
-#sub new {
-#    my ( $class, $c, $arguments ) = @_;
-#
-#    my $prefix = $c->config->{home};
-#
-#    push @{ $class->config->{INCLUDE_PATH} }, (
-#        dir($prefix, 'root')->stringify(),
-#    );
-#
-#    return $class->next::method($c,$arguments);
-#}
+    return $class->next::method($c,$arguments);
+}
 1;
-
