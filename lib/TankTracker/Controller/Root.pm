@@ -364,7 +364,27 @@ Attempt to render a view, if needed.
 
 =cut
 
-sub end : ActionClass('RenderView') {}
+# sub end : ActionClass('RenderView') {}
+## Security-related headers. Refer:
+## http://perltricks.com/article/84/2014/4/28/Is-your-login-page-secure-
+## https://github.com/dnmfarrell/SecApp_login/blob/master/lib/SecApp/Controller/Root.pm#L90
+sub end : ActionClass('RenderView') {
+    my ($self, $c) = @_;
+
+    # don't require TLS for testing
+#    unless ($c->config->{testing} == 1) {
+    unless ($c->config->{testing} ) {
+        $c->response->header('Strict-Transport-Security' => 'max-age=3600');
+    }
+
+    $c->response->header(
+            'X-Frame-Options'           => q{DENY},
+            'Content-Security-Policy'   => q{default-src 'self' http://www.google.com https://www.google.com 'unsafe-eval' 'unsafe-inline'},
+            'X-Content-Type-Options'    => q{nosniff},
+            'X-Download-Options'        => q{noopen},
+            'X-XSS-Protection'          => q{1; 'mode=block'},
+    );
+}
 
 =head1 AUTHOR
 
