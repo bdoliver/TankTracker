@@ -102,7 +102,7 @@ my $rs = $schema->resultset('User');
 
 if ( $add ) {
     ## create user:
-    my $hash = TankTracker::Schema::User->hash_pw($pass);
+    my $hash = TankTracker::Schema::User->hash_str($pass);
     Encode::from_to($hash, "iso-8859-1", "utf8");
 
     try {
@@ -148,13 +148,13 @@ else {
 
         $user or die "Cannot find user '$user' in database!\n";
 
-        $user->email($email)                   if $email;
-        $user->first_name($first_name)         if $first_name;
-        $user->last_name($last_name)           if $last_name;
-        $user->password($user->hash_pw($pass)) if $pass;
-        $user->active($active)                 if defined $active;
-        $user->parent_id($parent_id)           if $parent_id;
-        $user->role($role)                     if $role;
+        $user->email($email)                    if $email;
+        $user->first_name($first_name)          if $first_name;
+        $user->last_name($last_name)            if $last_name;
+        $user->password($user->hash_str($pass)) if $pass;
+        $user->active($active)                  if defined $active;
+        $user->parent_id($parent_id)            if $parent_id;
+        $user->role($role)                      if $role;
 
         $user->update() or die "Failed to update user\n";
 
