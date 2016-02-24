@@ -227,8 +227,8 @@ sub reset :Local Args(0) FormMethod('_reset_form') {
 
         try {
             my $user = $c->model('User')->reset($reset);
-use Data::Dumper;
-warn "\n\nRESET:\n", Dumper($user);
+#use Data::Dumper;
+#warn "\n\nRESET:\n", Dumper($user);
 
             if ( $user ) {
                 my $email = {
@@ -370,12 +370,6 @@ Attempt to render a view, if needed.
 ## https://github.com/dnmfarrell/SecApp_login/blob/master/lib/SecApp/Controller/Root.pm#L90
 sub end : ActionClass('RenderView') {
     my ($self, $c) = @_;
-
-    # don't require TLS for testing
-#    unless ($c->config->{testing} == 1) {
-    unless ($c->config->{testing} ) {
-        $c->response->header('Strict-Transport-Security' => 'max-age=3600');
-    }
 
     $c->response->header(
             'X-Frame-Options'           => q{DENY},
