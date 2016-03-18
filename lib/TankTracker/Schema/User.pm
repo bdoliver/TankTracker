@@ -50,6 +50,8 @@ __PACKAGE__->add_columns(
   { data_type => "text", is_nullable => 1 },
   "last_login",
   { data_type => "timestamp", is_nullable => 1 },
+  "last_pwchange",
+  { data_type => "timestamp", is_nullable => 1 },
   "created_on",
   {
     data_type     => "timestamp",
@@ -122,8 +124,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07043 @ 2015-10-02 22:19:41
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:R0Gk8sVHy9UtzLc/gFIcLQ
+# Created by DBIx::Class::Schema::Loader v0.07043 @ 2016-03-18 12:29:00
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:YemzxogcjOxbmT7XQr52dg
 
 use Crypt::SaltedHash;
 sub hash_pw {

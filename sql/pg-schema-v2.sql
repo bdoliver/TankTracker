@@ -36,6 +36,7 @@ CREATE TABLE users (
     reset_hash     TEXT,
 
     last_login     TIMESTAMP(0),
+    last_pwchange  TIMESTAMP(0),
     created_on     TIMESTAMP(0) NOT NULL DEFAULT now(),
     updated_on     TIMESTAMP(0) DEFAULT now()
 );
@@ -44,23 +45,6 @@ CREATE UNIQUE INDEX email_address_idx ON users ( lower(email) );
 CREATE TRIGGER set_user_updated
     BEFORE INSERT OR UPDATE ON users
     FOR EACH ROW EXECUTE PROCEDURE set_updated_on();
-
-CREATE TABLE signup (
-    signup_id      SERIAL
-                   NOT NULL
-                   PRIMARY KEY,
-
-    email          TEXT NOT NULL,
-    hash           TEXT NOT NULL,
-    -- user_id will only be set when an existing user
-    -- issues an invite, so this col is nullable:
-    user_id        INTEGER
-                   REFERENCES users (user_id),
-
-    created_on     TIMESTAMP(0) DEFAULT now()
-);
-CREATE UNIQUE INDEX email_idx ON signup ( lower(email) );
-CREATE UNIQUE INDEX signup_hash_idx ON signup ( lower(hash) );
 
 CREATE TABLE sessions (
     session_id   VARCHAR(72)
