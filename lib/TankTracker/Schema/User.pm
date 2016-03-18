@@ -85,12 +85,6 @@ __PACKAGE__->belongs_to(
   { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
 __PACKAGE__->has_many(
-  "signups",
-  "TankTracker::Schema::Signup",
-  { "foreign.user_id" => "self.user_id" },
-  { cascade_copy => 0, cascade_delete => 0 },
-);
-__PACKAGE__->has_many(
   "tank_photos",
   "TankTracker::Schema::TankPhoto",
   { "foreign.user_id" => "self.user_id" },
@@ -128,50 +122,38 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07043 @ 2015-10-16 08:52:17
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:B/Soga037zAzUOYFyUz6Vg
+# Created by DBIx::Class::Schema::Loader v0.07043 @ 2015-10-02 22:19:41
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:R0Gk8sVHy9UtzLc/gFIcLQ
 
-use Crypt::Eksblowfish::Bcrypt qw(bcrypt_hash en_base64);
-sub hash_str {
-    my ( $self, $pw, $salt ) = @_;
+use Crypt::SaltedHash;
+sub hash_pw {
+    my ( $self, $pw ) = @_;
 
-    $salt ||= q{]+_%%^981#^!*|vB};
+    my $crypt_pass = q{};
 
-    return $pw
-           ? en_base64(bcrypt_hash({ key_nul => 1,
-                                     cost    => 8,
-                                     salt    => $salt }, $pw))
-           : '';
+    if ( $pw ) {
+        my $csh = Crypt::SaltedHash->new(algorithm => 'SHA-512');
+
+        $csh->add($pw);
+
+        $crypt_pass = $csh->generate();
+    }
+
+    return $crypt_pass;
 }
 
 sub check_password {
 
         my ( $self, $attempt ) = @_;
 
-        my $ret = 0;
-
-        if ( $attempt ) {
-                my $hash = $self->hash_str($attempt);
-
-                $ret = ($hash eq $self->password());
-        }
-
-        return $ret;
+        return $attempt
+            ? Crypt::SaltedHash->validate($self->password(), $attempt)
+            : 0;
 }
 
-sub check_hash {
-
-        my ( $self, $attempt ) = @_;
-
-        my $ret = 0;
-
-        if ( $attempt ) {
-                my $hash = $self->hash_str($attempt);
-
-                $ret = ($hash eq $self->reset_hash());
-        }
-
-        return $ret;
+## This when called by Dancer2 app:
+sub match_password {
+    return shift->check_password(@_);
 }
 
 use List::Util qw(any);

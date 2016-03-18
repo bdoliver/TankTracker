@@ -151,7 +151,7 @@ else {
         $user->email($email)                    if $email;
         $user->first_name($first_name)          if $first_name;
         $user->last_name($last_name)            if $last_name;
-        $user->password($user->hash_str($pass)) if $pass;
+        $user->password($user->hash_pw($pass))  if $pass;
         $user->active($active)                  if defined $active;
         $user->parent_id($parent_id)            if $parent_id;
         $user->role($role)                      if $role;
