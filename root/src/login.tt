@@ -1,4 +1,5 @@
 <form class="form" method="[% form.method %]" action="[% form.action %]" >
+    <input type="hidden" name="return_url" value="[% return_url %]" />
     <div class="row">
         <div class="col-md-4 col-md-offset-4 well">
 
