@@ -40,7 +40,7 @@
                             <a href="/signup">Sign up?</a>
                         </div>
                         <div class="form-group col-md-6">
-                            <a href="[% reset_link %]">Problem logging in?</a>
+                            <a href="/password_reset">Problem logging in?</a>
                         </div>
                     </div>
 
