@@ -62,7 +62,7 @@
                         </div>
                     </div>
             [% END %]
-            [% IF reset_ok %]
+            [% IF reset_ok OR deferred.reset_ok %]
                     <div class="row">
                         <div class="form-group col-md-12">
                         <p class="text-success bg-success">
