@@ -92,11 +92,11 @@ href="[% path %]"
             <div class="alert alert-danger fade in">[% error %]</div>
         </div>
     [% END %]
-    [% IF message %]
+    [% IF message OR deferred.message %]
         <div class="row form_errors">
             <div class="alert alert-success fade in">
                 <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                [% message %]
+                [% message || deferred.message %]
             </div>
         </div>
     [% END %]
