@@ -53,7 +53,7 @@
                         </div>
                     </div>
             [% END %]
-            [% IF signup_ok %]
+            [% IF signup_ok or deferred.signup_ok %]
                     <div class="row">
                         <div class="form-group col-md-12">
                         <p class="text-success bg-success">
