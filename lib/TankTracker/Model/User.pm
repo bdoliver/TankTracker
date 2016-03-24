@@ -103,13 +103,13 @@ sub update {
             $curr_pw or
                 die qq{cannot set new password without current password\n};
 
-            ( $self->hash_str($curr_pw) eq $user->password() ) or
+            ( $user->hash_str($curr_pw) eq $user->password() ) or
                 die qq{cannot set new password - current password invalid\n};
 
             ( $pw_1 and $pw_2 and $pw_1 eq $pw_2 ) or
                 die qq{cannot set new password: new + confirmed do not match\n};
 
-            $params->{'password'} = $self->resultset->result_class->hash_str($pw_1);
+            $params->{'password'} = $user->hash_str($pw_1);
         }
     }
     else {
@@ -119,7 +119,7 @@ sub update {
         ( $pw_1 and $pw_2 and $pw_1 eq $pw_2 ) or
             die qq{passwords do not match\n};
 
-        $params->{'password'} = $self->resultset->result_class->hash_str($pw_1);
+        $params->{'password'} = $user->hash_str($pw_1);
     }
 
     $self->txn_begin();
@@ -180,7 +180,10 @@ sub reset_password {
     ( $reset_code and $password ) or
         die "reset_password() requires 'reset_code' and 'password'";
 
-    my $user = $self->resultset->first({reset_code => $reset_code});
+    my $user = $self->resultset->find(
+        { 'reset_code' => $reset_code},
+        { 'key'        => 'reset_code_idx' },
+    );
 
     if ( $user ) {
         my $now = DateTime->now('time_zone' => 'Australia/Melbourne');
@@ -189,7 +192,7 @@ sub reset_password {
         }
 
         $user->update({
-            password      => $self->resultset->result_class->hash_str($password),
+            password      => $user->hash_str($password),
             last_pwchange => DateTime::Format::Pg->format_timestamp($now),
             reset_code    => undef,
             reset_expires => undef,
@@ -197,9 +200,7 @@ sub reset_password {
 
         return $self->deflate($user);
     }
-else {
-warn "\nno user found with reset_code '$reset_code'\n";
-}
+
     return;
 }
 

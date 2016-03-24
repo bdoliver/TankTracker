@@ -137,7 +137,7 @@ __PACKAGE__->has_many(
 
 use Crypt::SaltedHash;
 
-sub hash_pw {
+sub hash_str {
     my ( $self, $pw ) = @_;
 
     my $crypt_pass = q{};
