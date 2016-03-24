@@ -43,10 +43,10 @@ __PACKAGE__->add_columns(
   "active",
   { data_type => "boolean", default_value => \"true", is_nullable => 1 },
   "parent_id",
-  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
   "login_attempts",
   { data_type => "integer", default_value => 0, is_nullable => 1 },
-  "reset_hash",
+  "reset_code",
   { data_type => "text", is_nullable => 1 },
   "last_login",
   { data_type => "timestamp", is_nullable => 1 },
@@ -66,8 +66,11 @@ __PACKAGE__->add_columns(
     is_nullable   => 1,
     original      => { default_value => \"now()" },
   },
+  "reset_expires",
+  { data_type => "timestamp", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("user_id");
+__PACKAGE__->add_unique_constraint("reset_code_idx", ["reset_code"]);
 __PACKAGE__->has_many(
   "diaries",
   "TankTracker::Schema::Diary",
@@ -84,7 +87,12 @@ __PACKAGE__->belongs_to(
   "parent",
   "TankTracker::Schema::User",
   { user_id => "parent_id" },
-  { is_deferrable => 0, on_delete => "NO ACTION", on_update => "NO ACTION" },
+  {
+    is_deferrable => 0,
+    join_type     => "LEFT",
+    on_delete     => "NO ACTION",
+    on_update     => "NO ACTION",
+  },
 );
 __PACKAGE__->has_many(
   "tank_photos",
@@ -124,10 +132,11 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07043 @ 2016-03-18 12:29:00
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:YemzxogcjOxbmT7XQr52dg
+# Created by DBIx::Class::Schema::Loader v0.07043 @ 2016-03-24 15:20:46
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:FxUYJ7sEPW05Ynp8FO0FEA
 
 use Crypt::SaltedHash;
+
 sub hash_pw {
     my ( $self, $pw ) = @_;
 
@@ -146,9 +155,9 @@ sub hash_pw {
 
 sub check_password {
 
-        my ( $self, $attempt ) = @_;
+    my ( $self, $attempt ) = @_;
 
-        return $attempt
+    return $attempt
             ? Crypt::SaltedHash->validate($self->password(), $attempt)
             : 0;
 }

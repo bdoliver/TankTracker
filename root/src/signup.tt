@@ -4,15 +4,24 @@
 
             <div class="panel panel-info">
                 <div class="panel-heading">
-                    <h4>Sign up?</h4>
+                    <h4>Create a new account</h4>
                 </div>
                 <div class="panel-body">
 
                     <div class="row">
                         <div class="form-group col-md-12">
-                            <label for="reset" class="sr-only">Email address</label>
+                            <label for="username" class="sr-only">Username</label>
 
-                            [% form.get_element('email').placeholder('Email address') %]
+                            [% form.get_element('username').placeholder('Username') %]
+
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label for="email" class="sr-only">Email Address</label>
+
+                            [% form.get_element('email').placeholder('Email Address') %]
 
                         </div>
                     </div>
@@ -20,7 +29,7 @@
                     <div class="row">
                         <div class="form-group col-md-12">
 
-                        [% submit_btn() %]
+                        [% form.get_element('submit').value('Create') %]
 
                         </div>
                     </div>

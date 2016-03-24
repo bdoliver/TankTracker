@@ -6,6 +6,7 @@ use Moose;
 use Try::Tiny;
 use DateTime;
 use DateTime::Format::Pg;
+use Session::Token;
 use namespace::autoclean;
 
 extends 'TankTracker::Model::Base';
@@ -147,29 +148,59 @@ sub update {
     return 1;
 }
 
-sub reset {
-    my ( $self, $who ) = @_;
+sub reset_code {
+    my ( $self, $username ) = @_;
 
-    my $result = $self->resultset->search([
-        { 'username' => $who },
-        { 'email'    => $who },
-    ]);
+    $username or
+        die "reset_code() requires 'username' for password reset";
 
-    if ( $result->count() != 1 ) {
-        # log a message? user not found...
-        return;
+    my $user = $self->resultset->first({username => $username});
+
+    if ( $user ) {
+
+        my $reset_code    = Session::Token->new()->get();
+        my $reset_expires = DateTime->now()->add('hours' => 24);
+        $user->update({
+            reset_code    => $reset_code,
+            reset_expires => $reset_expires,
+        });
+
+        return $self->deflate($user);
     }
 
-    my $user = $result->first();
-    my $salt = q{TTr#53tH@5hK*7[~};
+    return;
+}
 
-    # Hash the user's email concatenated with the current time:
-    my $key  = $user->email() . DateTime->now();
-    my $hash = $user->hash_str($key, $salt);
+sub reset_password {
+    my ( $self, $args ) = @_;
 
-    $user->update({reset_hash => $hash})->discard_changes();
+    my $reset_code = $args->{'reset_code'};
+    my $password   = $args->{'password'};
 
-    return $self->deflate($user);
+    ( $reset_code and $password ) or
+        die "reset_password() requires 'reset_code' and 'password'";
+
+    my $user = $self->resultset->first({reset_code => $reset_code});
+
+    if ( $user ) {
+        my $now = DateTime->now('time_zone' => 'Australia/Melbourne');
+        if ( DateTime->compare($now, $user->reset_expires()) > 0 ) {
+            die "Password reset request has expired\n";
+        }
+
+        $user->update({
+            password      => $self->resultset->result_class->hash_str($password),
+            last_pwchange => DateTime::Format::Pg->format_timestamp($now),
+            reset_code    => undef,
+            reset_expires => undef,
+        });
+
+        return $self->deflate($user);
+    }
+else {
+warn "\nno user found with reset_code '$reset_code'\n";
+}
+    return;
 }
 
 no Moose;

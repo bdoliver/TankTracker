@@ -51,12 +51,17 @@ sub check_request : Private {
     if ( $c->request->method() eq 'GET'          &&
          scalar %{ $c->request->query_params() }
     ) {
-        $c->forward('default'); # unknown resource page
-        return 0;
+        # password_reset() is the only action permissible
+        # with GET parameters.  Necessary because the
+        # code is provided as a link in an email...
+        if ( $c->action ne 'password_reset' ) {
+            $c->forward('default'); # unknown resource page
+            return 0;
+        }
     }
 
-    if ( $c->action() eq 'login' or
-         $c->action() eq 'reset' or
+    if ( $c->action() eq 'login'          or
+         $c->action() eq 'password_reset' or
          $c->action() eq 'signup' ) {
         # auth not required for login/reset/signup pages...
         return 1;
@@ -199,63 +204,157 @@ sub logout :Local Args(0) {
     return;
 }
 
-sub _reset_form :Private {
+sub _password_reset_form {
     my ( $self, $c ) = @_;
 
-    my $elements = [
+    my $reset_code;
+
+    if ( $c->request->method() eq 'GET' ) {
+        # reset request code only via GET.
+        $reset_code = $c->request->query_parameters->{'code'};
+    }
+    else {
+        $reset_code = $c->request->body_parameters->{'reset_code'};
+    }
+
+    my @elements;
+
+    if ( $reset_code ) {
+        @elements = (
         {
-            name        => 'reset',
+            name  => 'reset_code',
+            type  => 'Hidden',
+            value => $reset_code,
+        },
+        {
+            name        => 'check_password_1',
+            type        => 'Password',
+            constraints => [
+                'Printable',
+                {
+                    type => 'Length',
+                    min  => 8,
+                    max => 50,
+                },
+                {
+                    type    => 'Required',
+                    message => 'New password is required'
+                },
+            ],
+        },
+        {
+            name        => 'check_password_2',
+            type        => 'Password',
+            constraints => [
+                'Printable',
+                {
+                    type => 'Length',
+                    min  => 8,
+                    max => 50,
+                },
+                {
+                    type    => 'Required',
+                    message => 'Confirm password is required'
+                },
+                {
+                    type => 'Callback',
+                    callback => sub {
+                        my ( $value, $params ) = @_;
+
+                        return 1 if ( ! $value and ! $params->{'check_password_1'} );
+                        return ( $value and $params->{'check_password_1'}
+                                 and
+                                 ( $value eq $params->{'check_password_1'} ) );
+                    },
+                    message => 'New passwords do not match',
+                },
+            ],
+        },
+        {
+            type => 'Submit',
+            name => 'submit',
+        },
+        );
+    }
+    else {
+        @elements = (
+        {
+            name        => 'username',
             type        => 'Text',
             constraints => [
                 'Printable',
                 'Required',
-                { type => 'Length', min => 3, max => 50 },
             ],
         },
-    ];
+        {
+            type => 'Submit',
+            name => 'submit',
+        },
+        );
+    }
 
-    return { 'elements' => $elements };
+    return {
+        'method'   => 'POST',
+        'action'   => '/password_reset',
+        'elements' => \@elements,
+    };
 }
 
-sub reset :Local Args(0) FormMethod('_reset_form') {
+sub password_reset :Local FormMethod('_password_reset_form') {
     my ( $self, $c ) = @_;
 
     my $form = $c->stash->{form};
 
     if ( $form->submitted_and_valid() ) {
-        my $reset = $form->param('reset');
-
         try {
-            my $user = $c->model('User')->reset($reset);
-#use Data::Dumper;
-#warn "\n\nRESET:\n", Dumper($user);
+            if ( my $username = $form->param('username') ) {
+                # request a reset code be sent to $username
+                my $user = $c->model('User')->reset_code($username);
 
-            if ( $user ) {
-                my $email = {
-                    from         => 'tanktracker@example.com',
-                    to           => $user->{'email'},
-                    subject      => 'Reset TankTracker login',
-                    template     => 'reset.tt',
-                    content_type => 'multipart/alternative',
-                };
-                $c->stash->{'email'} = $email;
-                $c->forward($c->view('Email::HTML'));
+                if ( $user ) {
+use Data::Dumper;
+warn "\n\nuser reset:\n", Dumper($user),"\n\n";
+#                     my $email = {
+#                         from         => 'tanktracker@example.com',
+#                         to           => $user->{'email'},
+#                         subject      => 'Reset TankTracker login',
+#                         template     => 'reset.tt',
+#                         content_type => 'multipart/alternative',
+#                     };
+#                     $c->stash->{'email'} = $email;
+#                     $c->forward($c->view('Email::HTML'));
+                }
+                else {
+                    # log the fact that there was no such user:
+                    $c->log->warn("Attempt to reset password for non-existant user '$username'");
+                }
+
+                # always make it look like reset was sent ok:
                 $c->flash->{'reset_ok'} = 1;
             }
-
-            # Redirect to login, regardless of whether or not
-            # we actually reset a user...
-            $c->response->redirect($c->uri_for('login'), 302);
-            $c->detach();
-            return;
+            else {
+                # user is trying to reset their password:
+                my $args = {
+                    reset_code => $form->param('reset_code'),
+                    password   => $form->param('check_password_1'),
+                };
+                my $user = $c->model('User')->reset_password($args);
+            }
         }
         catch {
+warn "\n\nOOPS: $_\n\n";
             $c->stash->{'error'} = $_;
         };
+
+        # Redirect to login, regardless of whether or not
+        # we actually reset a user...
+        $c->response->redirect($c->uri_for('login'), 302);
+        $c->detach();
+        return;
     }
 
     $c->stash->{'page_title'} = 'Account Re-set';
-    $c->stash->{'template'}   = 'reset.tt';
+    $c->stash->{'template'}   = 'password_reset.tt';
 
     return;
 }

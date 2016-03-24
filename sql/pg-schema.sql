@@ -11,6 +11,18 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION set_parent_id()
+RETURNS TRIGGER AS
+$$
+BEGIN
+    IF NEW.parent_id IS NULL THEN
+        NEW.parent_id := NEW.user_id;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE TYPE user_role AS ENUM (
     'admin',
     'guest',
@@ -33,7 +45,8 @@ CREATE TABLE users (
     parent_id      INTEGER NOT NULL,
 
     login_attempts INTEGER DEFAULT 0,
-    reset_hash     TEXT,
+    reset_code     TEXT,
+    reset_expires  TIMESTAMP(0),
 
     last_login     TIMESTAMP(0),
     last_pwchange  TIMESTAMP(0),
@@ -42,9 +55,13 @@ CREATE TABLE users (
 );
 CREATE UNIQUE INDEX username_idx ON users ( lower(username) );
 CREATE UNIQUE INDEX email_address_idx ON users ( lower(email) );
+CREATE UNIQUE INDEX reset_code_idx ON users ( reset_code );
 CREATE TRIGGER set_user_updated
     BEFORE INSERT OR UPDATE ON users
     FOR EACH ROW EXECUTE PROCEDURE set_updated_on();
+CREATE TRIGGER set_parent_id
+    BEFORE INSERT OR UPDATE ON users
+    FOR EACH ROW EXECUTE PROCEDURE set_parent_id();
 
 CREATE TABLE sessions (
     session_id   VARCHAR(72)
