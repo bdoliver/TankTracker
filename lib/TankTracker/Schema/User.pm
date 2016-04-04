@@ -43,7 +43,7 @@ __PACKAGE__->add_columns(
   "active",
   { data_type => "boolean", default_value => \"true", is_nullable => 1 },
   "parent_id",
-  { data_type => "integer", is_nullable => 0 },
+  { data_type => "integer", is_nullable => 1 },
   "login_attempts",
   { data_type => "integer", default_value => 0, is_nullable => 1 },
   "reset_code",
@@ -115,8 +115,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07043 @ 2016-04-04 15:53:45
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:4+92KQe519hq6ugAhafF0w
+# Created by DBIx::Class::Schema::Loader v0.07043 @ 2016-04-04 15:59:06
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:h84CQcIXIjAiqY5H+q2z+A
 
 use Crypt::SaltedHash;
 
