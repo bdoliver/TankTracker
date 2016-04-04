@@ -5,7 +5,7 @@ use namespace::autoclean;
 use Try::Tiny;
 
 BEGIN { extends 'Catalyst::Controller::HTML::FormFu' }
-with 'Catalyst::TraitFor::Controller::reCAPTCHA';
+with 'Catalyst::TraitFor::Controller::reCAPTCHA::V2';
 
 #
 # Sets the actions in this controller to be registered with no prefix
@@ -538,11 +538,15 @@ sub _signup_form :Private {
             name        => 'email',
             type        => 'Text',
             constraints => [
-                'Printable',
-                'Required',
-                { type => 'Length', min => 3, max => 50 },
+                {
+                    type => 'Required',
+                    message => 'You must enter an email address',
+                },
             ],
-            validators => [ 'TankTracker::EmailExists' ],
+            validators => [
+                'TankTracker::ValidEmail',
+                'TankTracker::EmailExists',
+            ],
         },
         {
             type => 'Submit',
@@ -602,12 +606,9 @@ sub signup :Local Args(0) FormMethod('_signup_form') {
             $c->stash->{'error'} = $_;
         };
     }
-    else {
-        $c->forward('captcha_get');
-    }
 
-    $c->stash->{'want_recaptcha'}    = 1;
-    $c->stash->{'recaptcha_pub_key'} = $c->config->{'recaptcha'}{'pub_key'};
+    $c->forward('captcha_get');
+
     $c->stash->{'page_title'}        = 'Sign-up for an account';
     $c->stash->{'template'}          = 'signup.tt';
 
@@ -663,13 +664,17 @@ Attempt to render a view, if needed.
 sub end : ActionClass('RenderView') {
     my ($self, $c) = @_;
 
-    $c->response->header(
-        'X-Frame-Options'           => q{DENY},
-        'Content-Security-Policy'   => q{default-src 'self' http://www.google.com https://www.google.com 'unsafe-eval' 'unsafe-inline'},
-        'X-Content-Type-Options'    => q{nosniff},
-        'X-Download-Options'        => q{noopen},
-        'X-XSS-Protection'          => q{1; 'mode=block'},
-    );
+    # NB: these headers will prevent reCAPTCHA from working, but on
+    #     the pages where they are used, we can safely ignore them:
+    if ( not $c->stash->{'recaptcha'} ) {
+        $c->response->header(
+            'X-Frame-Options'           => q{DENY},
+            'Content-Security-Policy'   => q{default-src 'self' http://www.google.com https://www.google.com 'unsafe-eval' 'unsafe-inline'},
+            'X-Content-Type-Options'    => q{nosniff},
+            'X-Download-Options'        => q{noopen},
+            'X-XSS-Protection'          => q{1; 'mode=block'},
+        );
+    }
 }
 
 =head1 AUTHOR
