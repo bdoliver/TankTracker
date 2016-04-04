@@ -185,6 +185,16 @@ __PACKAGE__->config(
             },
         },
     },
+
+    'recaptcha' => {
+        pub_key  => '6LceLxwTAAAAAKUOERkJ-zsqZQvPreUv8hoZI1I9',
+        priv_key => '6LceLxwTAAAAAOESx6R1Hc_N1s22wNVN4QU9cHn2',
+        options  => {
+            theme => 'light',
+            type  => 'image',
+            size  => 'compact',
+        },
+    },
 );
 
 # Start the application

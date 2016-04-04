@@ -1,5 +1,10 @@
-Plain-text welcome email.
+Welcome to TankTracker.
+
+Please visit the link below within the next 24 hours to set a password
+for your new account.
 
 https://tanktracker.caboo.isa-geek.net/password_reset?code=[% code %]
 
-.. Da management
+If you experience any issues, please send an email to caboo.web@gmail.com.
+
+- The TankTracker Team.

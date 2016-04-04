@@ -31,6 +31,24 @@ sub get {
     return $user;
 }
 
+sub is_password_expired {
+    my ( $self, $user_id, $expiry ) = @_;
+
+    return 0 unless $expiry;
+
+    my $user = $self->resultset->find($user_id) or
+        die qq{user #$user_id not found};
+
+    my $last_changed = $user->last_pwchange() or
+        return 1;  # report expired if never changed...
+
+    my $duration = $last_changed->delta_days(
+        DateTime->now('time_zone' => 'Australia/Melbourne')
+    );
+
+    return $duration->in_units('days') > $expiry ? 1 : 0;
+}
+
 sub record_last_login {
     my ( $self, $user_id, $max_attempts ) = @_;
 
@@ -149,12 +167,9 @@ sub update {
 }
 
 sub reset_code {
-    my ( $self, $username ) = @_;
+    my ( $self, $args ) = @_;
 
-    $username or
-        die "reset_code() requires 'username' for password reset";
-
-    my $user = $self->resultset->first({username => $username});
+    my $user = $self->resultset->first($args);
 
     if ( $user ) {
 
@@ -175,15 +190,18 @@ sub reset_password {
     my ( $self, $args ) = @_;
 
     my $reset_code = $args->{'reset_code'};
+    my $user_id    = $args->{'user_id'};
     my $password   = $args->{'password'};
 
-    ( $reset_code and $password ) or
-        die "reset_password() requires 'reset_code' and 'password'";
+    ( ( $reset_code or $user_id ) and $password ) or
+        die "reset_password() requires 'password' and either 'reset_code' or 'user_id'";
 
-    my $user = $self->resultset->find(
-        { 'reset_code' => $reset_code},
-        { 'key'        => 'reset_code_idx' },
-    );
+    my $user = $user_id
+                ? $self->resultset->find($user_id)
+                : $self->resultset->find(
+                    { 'reset_code' => $reset_code},
+                    { 'key'        => 'reset_code_idx' },
+                );
 
     if ( $user ) {
         my $now = DateTime->now('time_zone' => 'Australia/Melbourne');

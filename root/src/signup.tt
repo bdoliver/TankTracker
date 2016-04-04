@@ -25,6 +25,13 @@
 
                         </div>
                     </div>
+                [% IF recaptcha %]
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            [% recaptcha %]
+                        </div>
+                    </div>
+                [% END %]
 
                     <div class="row">
                         <div class="form-group col-md-12">

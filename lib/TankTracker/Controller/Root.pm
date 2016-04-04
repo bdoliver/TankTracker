@@ -5,6 +5,7 @@ use namespace::autoclean;
 use Try::Tiny;
 
 BEGIN { extends 'Catalyst::Controller::HTML::FormFu' }
+with 'Catalyst::TraitFor::Controller::reCAPTCHA';
 
 #
 # Sets the actions in this controller to be registered with no prefix
@@ -51,19 +52,24 @@ sub check_request : Private {
     if ( $c->request->method() eq 'GET'          &&
          scalar %{ $c->request->query_params() }
     ) {
-        # password_reset() is the only action permissible
+        # password_(update|reset) are the only action permissible
         # with GET parameters.  Necessary because the
         # code is provided as a link in an email...
-        if ( $c->action ne 'password_reset' ) {
+        if ( $c->action !~ qr{^password_(?:update|reset)$} ) {
             $c->forward('default'); # unknown resource page
             return 0;
         }
     }
 
-    if ( $c->action() eq 'login'          or
-         $c->action() eq 'password_reset' or
-         $c->action() eq 'signup' ) {
-        # auth not required for login/reset/signup pages...
+    my %permitted_actions = (
+        'login'            => 1,
+        'password_reset'   => 1,
+        'password_expired' => 1,
+        'signup'           => 1,
+    );
+
+    # authorisation not required for permitted actions...
+    if ( exists $permitted_actions{ $c->action() } ) {
         return 1;
     }
 
@@ -161,6 +167,26 @@ sub login : Local Args(0) FormMethod('_login_form') {
                     },
               }) ) {
 
+
+                if ( $c->model('User')->is_password_expired(
+                        $c->user->user_id(),
+                        $c->config->{'password_expires_days'},
+                    ) ) {
+                    if ( my $user = $c->model('User')->reset_code(
+                        { user_id => $c->user->user_id() }
+                       ) ) {
+                        $c->delete_session();
+                        $c->response->redirect($c->uri_for("/password_expired?code=$user->{reset_code}"), 302);
+                        $c->detach();
+                        return;
+                    }
+                    else {
+                        $c->stash->{'error'} = q{Failed to generate password reset code};
+                    }
+                }
+else {
+warn "\n\nPASSWORD **NOT** EXPIRED\n\n";
+}
                 try {
                     $c->model('User')->record_last_login(
                         $c->user->user_id(),
@@ -221,81 +247,77 @@ sub _password_reset_form {
 
     if ( $reset_code ) {
         @elements = (
-        {
-            name  => 'reset_code',
-            type  => 'Hidden',
-            value => $reset_code,
-        },
-        {
-            name        => 'check_password_1',
-            type        => 'Password',
-            constraints => [
-                'Printable',
-                {
-                    type => 'Length',
-                    min  => 8,
-                    max => 50,
-                },
-                {
-                    type    => 'Required',
-                    message => 'New password is required'
-                },
-            ],
-        },
-        {
-            name        => 'check_password_2',
-            type        => 'Password',
-            constraints => [
-                'Printable',
-                {
-                    type => 'Length',
-                    min  => 8,
-                    max => 50,
-                },
-                {
-                    type    => 'Required',
-                    message => 'Confirm password is required'
-                },
-                {
-                    type => 'Callback',
-                    callback => sub {
-                        my ( $value, $params ) = @_;
-
-                        return 1 if ( ! $value and ! $params->{'check_password_1'} );
-                        return ( $value and $params->{'check_password_1'}
-                                 and
-                                 ( $value eq $params->{'check_password_1'} ) );
+            {
+                name  => 'reset_code',
+                type  => 'Hidden',
+                value => $reset_code,
+            },
+            {
+                name        => 'check_password_1',
+                type        => 'Password',
+                constraints => [
+                    'Printable',
+                    {
+                        type => 'Length',
+                        min  => 8,
+                        max => 50,
                     },
-                    message => 'New passwords do not match',
-                },
-            ],
-        },
-        {
-            type => 'Submit',
-            name => 'submit',
-        },
+                    {
+                        type    => 'Required',
+                        message => 'New password is required'
+                    },
+                ],
+            },
+            {
+                name        => 'check_password_2',
+                type        => 'Password',
+                constraints => [
+                    'Printable',
+                    {
+                        type => 'Length',
+                        min  => 8,
+                        max => 50,
+                    },
+                    {
+                        type    => 'Required',
+                        message => 'Confirm password is required'
+                    },
+                    {
+                        type => 'Callback',
+                        callback => sub {
+                            my ( $value, $params ) = @_;
+
+                            return 1 if ( ! $value and ! $params->{'check_password_1'} );
+                            return ( $value and $params->{'check_password_1'}
+                                    and
+                                    ( $value eq $params->{'check_password_1'} ) );
+                        },
+                        message => 'New passwords do not match',
+                    },
+                ],
+            },
         );
     }
     else {
         @elements = (
-        {
-            name        => 'username',
-            type        => 'Text',
-            constraints => [
-                'Printable',
-                'Required',
-            ],
-        },
-        {
-            type => 'Submit',
-            name => 'submit',
-        },
+            {
+                name        => 'username',
+                type        => 'Text',
+                constraints => [
+                    'Printable',
+                    'Required',
+                ],
+            },
         );
     }
 
+    push @elements,
+        {
+            type => 'Submit',
+            name => 'submit',
+        };
+
     return {
-        'method'   => 'POST',
-        'action'   => '/password_reset',
         'elements' => \@elements,
     };
 }
@@ -309,7 +331,7 @@ sub password_reset :Local FormMethod('_password_reset_form') {
         try {
             if ( my $username = $form->param('username') ) {
                 # request a reset code be sent to $username
-                my $user = $c->model('User')->reset_code($username);
+                my $user = $c->model('User')->reset_code({username => $username});
 
                 if ( $user ) {
 use Data::Dumper;
@@ -359,6 +381,155 @@ warn "\n\nOOPS: $_\n\n";
     return;
 }
 
+sub _password_expired_form {
+    my ( $self, $c ) = @_;
+
+    my $elements = [
+        {
+            name  => 'user_name',
+            type  => 'Hidden',
+            value => $c->user->username(),
+        },
+        {
+            name        => 'original_password',
+            type        => 'Password',
+            constraints => [
+                'Printable',
+                {
+                    type => 'Length',
+                    min  => 8,
+                    max => 50,
+                },
+                {
+                    type    => 'Required',
+                    message => 'Original password is required'
+                },
+            ],
+        },
+        {
+            name        => 'check_password_1',
+            type        => 'Password',
+            constraints => [
+                'Printable',
+                {
+                    type => 'Length',
+                    min  => 8,
+                    max => 50,
+                },
+                {
+                    type    => 'Required',
+                    message => 'New password is required'
+                },
+            ],
+        },
+        {
+            name        => 'check_password_2',
+            type        => 'Password',
+            constraints => [
+                'Printable',
+                {
+                    type => 'Length',
+                    min  => 8,
+                    max => 50,
+                },
+                {
+                    type    => 'Required',
+                    message => 'Confirm password is required'
+                },
+                {
+                    type => 'Callback',
+                    callback => sub {
+                        my ( $value, $params ) = @_;
+
+                        return 1 if ( ! $value and ! $params->{'check_password_1'} );
+                        return ( $value and $params->{'check_password_1'}
+                                and
+                                ( $value eq $params->{'check_password_1'} ) );
+                    },
+                    message => 'New passwords do not match',
+                },
+            ],
+        },
+        {
+            type => 'Submit',
+            name => 'submit',
+        },
+    ];
+
+    return {
+        'elements' => $elements,
+    };
+}
+
+sub password_expired :Local FormMethod('_password_expired_form') {
+    my ( $self, $c ) = @_;
+
+    my $form = $c->stash->{form};
+
+    if ( $form->submitted_and_valid() ) {
+        my $username      = $form->param('username');
+        my $old_password = $form->param('original_password');
+        my $new_password = $form->param('check_password_1');
+warn "\n\n username=$username / old pass=$old_password / new pass=$new_password\n\n";
+        try {
+            if ( $c->authenticate({
+                    'password'   => $old_password,
+                    'dbix_class' => {
+                        'searchargs' => [
+                            {
+#                                '-or' => [
+                                    username => $username,
+#                                    email    => $username,
+#                                ],
+                            },
+                            {
+                                'prefetch' => [
+                                    'user_preference',
+                                    'tank_user_accesses',
+                                ],
+                            },
+                        ],
+                    },
+            }) ) {
+warn "\n\n\tAUTH OK!\n";
+                my $args = {
+                    username  => $username,
+                    password => $form->param('check_password_1'),
+                };
+
+                if ( my $user = $c->model('User')->reset_password($args) ) {
+                    $c->log->warn("Changed password for user #$username");
+warn "\n\nChanged password for user #$username\n\n";
+                }
+                else {
+warn "\n\nChange password for user #$username **FAILED**\n\n";
+                    # log the fact that there was no such user:
+                    $c->log->warn("Attempt to update expired password for non-existant user '$username'");
+                }
+
+                # Redirect to login, regardless of whether or not
+                # we actually reset a user...
+                $c->flash->{'reset_ok'} = 1;
+                $c->response->redirect($c->uri_for('login'), 302);
+                $c->detach();
+                return;
+
+            }
+            else {
+                $c->stash->{'error'} = q{Password change failed: invalid user or password};
+            }
+        }
+        catch {
+            $c->stash->{'error'} = $_;
+        };
+    }
+
+    $c->stash->{'page_title'} = 'Update Expired Password';
+    $c->stash->{'template'}   = 'password_update.tt';
+
+    return;
+}
+
 sub _signup_form :Private {
     my ( $self, $c ) = @_;
 
@@ -373,6 +544,10 @@ sub _signup_form :Private {
             ],
             validators => [ 'TankTracker::EmailExists' ],
         },
+        {
+            type => 'Submit',
+            name => 'submit',
+        },
     ];
 
     return { 'elements' => $elements };
@@ -384,19 +559,32 @@ sub signup :Local Args(0) FormMethod('_signup_form') {
     my $form = $c->stash->{form};
 
     if ( $form->submitted_and_valid() ) {
-        my $email = $form->param('email');
+
+# use Data::Dumper;
+# warn "\n\nuser signup:\n", Dumper($user),"\n\n";
 
         try {
+            # check reCAPTCHA result:
+            if ( not $c->forward('captcha_check') ) {
+                my $err = $c->stash->{recaptcha_error}."\n";
+                 $err ||= "reCAPTCHA verification failed\n";
+                die $err;
+            }
+
+            my $email = $form->param('email');
+
             my $signup = $c->model('Signup')->add($email);
 
             if ( $signup ) {
-# use Data::Dumper;
-# warn "\n\nSIGNUP:\n", Dumper($signup);
+
                 my $email = {
-                    from         => 'tanktracker@example.com',
+                    from         => 'admin@tanktracker.caboo.isa-geek.net',
                     to           => $email,
-                    subject      => 'Signup to TankTracker',
-                    template     => 'signup.tt',
+                    subject      => 'Welcome to TankTracker',
+                    template     => [
+                        'email/welcome_text.tt',
+                        'email/welcome_html.tt',
+                    ],
                     content_type => 'multipart/alternative',
                 };
                 $c->stash->{'email'} = $email;
@@ -414,9 +602,14 @@ sub signup :Local Args(0) FormMethod('_signup_form') {
             $c->stash->{'error'} = $_;
         };
     }
+    else {
+        $c->forward('captcha_get');
+    }
 
-    $c->stash->{'page_title'} = 'Sign-up for an account';
-    $c->stash->{'template'}   = 'signup.tt';
+    $c->stash->{'want_recaptcha'}    = 1;
+    $c->stash->{'recaptcha_pub_key'} = $c->config->{'recaptcha'}{'pub_key'};
+    $c->stash->{'page_title'}        = 'Sign-up for an account';
+    $c->stash->{'template'}          = 'signup.tt';
 
     return;
 }
@@ -471,11 +664,11 @@ sub end : ActionClass('RenderView') {
     my ($self, $c) = @_;
 
     $c->response->header(
-            'X-Frame-Options'           => q{DENY},
-            'Content-Security-Policy'   => q{default-src 'self' http://www.google.com https://www.google.com 'unsafe-eval' 'unsafe-inline'},
-            'X-Content-Type-Options'    => q{nosniff},
-            'X-Download-Options'        => q{noopen},
-            'X-XSS-Protection'          => q{1; 'mode=block'},
+        'X-Frame-Options'           => q{DENY},
+        'Content-Security-Policy'   => q{default-src 'self' http://www.google.com https://www.google.com 'unsafe-eval' 'unsafe-inline'},
+        'X-Content-Type-Options'    => q{nosniff},
+        'X-Download-Options'        => q{noopen},
+        'X-XSS-Protection'          => q{1; 'mode=block'},
     );
 }
 

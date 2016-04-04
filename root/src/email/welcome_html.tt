@@ -1,10 +1,13 @@
 
-<h2>html welcome email.</h2>
+<h3>Welcome to TankTracker.</h3>
 <p>
-Please <a href="https://tanktracker.caboo.isa-geek.net/password_reset?code=[% code %]">
-go here</a> to set your password.
+Please visit <a href="https://tanktracker.caboo.isa-geek.net/password_reset?code=[% code %]">
+the password page</a> within the next 24 hours to set a password for your new account.
 </p>
-
 <p>
-.. Da management
+If you experience any issues, please send an email to <a href="mailto:caboo.web@gmail.com?Subject="tankTracker%20Query" target="_top">
+TankTracker Admin</a>
+</p>
+<p>
+- The TankTracker Team.
 </p>
