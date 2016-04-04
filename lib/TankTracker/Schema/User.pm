@@ -43,14 +43,12 @@ __PACKAGE__->add_columns(
   "active",
   { data_type => "boolean", default_value => \"true", is_nullable => 1 },
   "parent_id",
-  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
+  { data_type => "integer", is_nullable => 0 },
   "login_attempts",
   { data_type => "integer", default_value => 0, is_nullable => 1 },
   "reset_code",
   { data_type => "text", is_nullable => 1 },
   "last_login",
-  { data_type => "timestamp", is_nullable => 1 },
-  "last_pwchange",
   { data_type => "timestamp", is_nullable => 1 },
   "created_on",
   {
@@ -66,6 +64,8 @@ __PACKAGE__->add_columns(
     is_nullable   => 1,
     original      => { default_value => \"now()" },
   },
+  "last_pwchange",
+  { data_type => "timestamp", is_nullable => 1 },
   "reset_expires",
   { data_type => "timestamp", is_nullable => 1 },
 );
@@ -82,17 +82,6 @@ __PACKAGE__->has_many(
   "TankTracker::Schema::Inventory",
   { "foreign.user_id" => "self.user_id" },
   { cascade_copy => 0, cascade_delete => 0 },
-);
-__PACKAGE__->belongs_to(
-  "parent",
-  "TankTracker::Schema::User",
-  { user_id => "parent_id" },
-  {
-    is_deferrable => 0,
-    join_type     => "LEFT",
-    on_delete     => "NO ACTION",
-    on_update     => "NO ACTION",
-  },
 );
 __PACKAGE__->has_many(
   "tank_photos",
@@ -119,12 +108,6 @@ __PACKAGE__->might_have(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 __PACKAGE__->has_many(
-  "users",
-  "TankTracker::Schema::User",
-  { "foreign.parent_id" => "self.user_id" },
-  { cascade_copy => 0, cascade_delete => 0 },
-);
-__PACKAGE__->has_many(
   "water_tests",
   "TankTracker::Schema::WaterTest",
   { "foreign.user_id" => "self.user_id" },
@@ -132,8 +115,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07043 @ 2016-03-24 15:20:46
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:FxUYJ7sEPW05Ynp8FO0FEA
+# Created by DBIx::Class::Schema::Loader v0.07043 @ 2016-04-04 15:53:45
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:4+92KQe519hq6ugAhafF0w
 
 use Crypt::SaltedHash;
 
