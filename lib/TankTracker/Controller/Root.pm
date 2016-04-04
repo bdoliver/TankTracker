@@ -535,6 +535,25 @@ sub _signup_form :Private {
 
     my $elements = [
         {
+            name        => 'username',
+            type        => 'Text',
+            constraints => [
+                {
+                    type => 'Required',
+                    message => 'You must enter a user name for your account',
+                },
+                {
+                    type => 'Length',
+                    message => 'Your user name must be between 4 and 20 characters long',
+                    min  => 4,
+                    max  => 20,
+                },
+            ],
+            validators => [
+                'TankTracker::UserExists',
+            ],
+        },
+        {
             name        => 'email',
             type        => 'Text',
             constraints => [
@@ -569,29 +588,46 @@ sub signup :Local Args(0) FormMethod('_signup_form') {
 
         try {
             # check reCAPTCHA result:
-            if ( not $c->forward('captcha_check') ) {
-                my $err = $c->stash->{recaptcha_error}."\n";
-                 $err ||= "reCAPTCHA verification failed\n";
-                die $err;
-            }
+#             if ( not $c->forward('captcha_check') ) {
+#                 my $err = $c->stash->{recaptcha_error}."\n";
+#                  $err ||= "reCAPTCHA verification failed\n";
+#                 die $err;
+#             }
 
-            my $email = $form->param('email');
+            my $username = $form->param('username');
+            my $email    = $form->param('email');
 
-            my $signup = $c->model('Signup')->add($email);
+            # sanity check
+            ( $username and $email ) or
+                die "Signup requires both user name and email address\n";
 
-            if ( $signup ) {
+            if ( my $reset_code = $c->model('User')->signup({
+                username => $username,
+                email    => $email
+            })) {
 
                 my $email = {
                     from         => 'admin@tanktracker.caboo.isa-geek.net',
                     to           => $email,
                     subject      => 'Welcome to TankTracker',
-                    template     => [
-                        'email/welcome_text.tt',
-                        'email/welcome_html.tt',
+                    templates    => [
+                        {
+                            template        => 'welcome_html.tt',
+                            content_type    => 'text/html',
+                            charset         => 'utf-8',
+                            encoding        => 'quoted-printable',
+                        },
+                        {
+                            template        => 'welcome_text.tt',
+                            content_type    => 'text/plain',
+                            charset         => 'utf-8',
+                            encoding        => 'quoted-printable',
+                        }
                     ],
                     content_type => 'multipart/alternative',
                 };
                 $c->stash->{'email'} = $email;
+                $c->stash->{'reset_code'} = $reset_code;
                 $c->forward($c->view('Email::HTML'));
                 $c->flash->{'signup_ok'} = 1;
             }

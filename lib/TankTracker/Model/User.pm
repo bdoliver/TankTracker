@@ -166,6 +166,23 @@ sub update {
     return 1;
 }
 
+sub signup {
+    my ( $self, $args ) = @_;
+
+    $args->{reset_code}    = Session::Token->new()->get();
+    # since password can't be blank, just plug the reset code
+    # in as a temporary measure.
+    $args->{password}      = $args->{reset_code};
+    $args->{role}          = 'user';
+    $args->{reset_expires} = DateTime->now()->add('hours' => 24);
+
+    # on successful creation, return the reset_code so that it can
+    # be mailed out.
+    return $self->resultset->create($args)->update()
+           ? $args->{reset_code}
+           : undef;
+}
+
 sub reset_code {
     my ( $self, $args ) = @_;
 
