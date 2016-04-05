@@ -38,12 +38,12 @@ sub captcha_check :Private {
         $response,
         $c->req->address,
     );
-    
+
     croak 'Failed to get valid result from reCaptcha'
         unless ref $res eq 'HASH';
 
     unless ( $res->{success} ) {
-        $c->stash( recaptcha_error => $res->{error} || 'Invalid recaptcha' );
+        $c->stash( recaptcha_error => $res->{error_codes} || 'Invalid recaptcha' );
     }
 
     $c->stash( recaptcha_ok => $res->{success} );
