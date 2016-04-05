@@ -583,16 +583,13 @@ sub signup :Local Args(0) FormMethod('_signup_form') {
 
     if ( $form->submitted_and_valid() ) {
 
-# use Data::Dumper;
-# warn "\n\nuser signup:\n", Dumper($user),"\n\n";
-
         try {
             # check reCAPTCHA result:
-#             if ( not $c->forward('captcha_check') ) {
-#                 my $err = $c->stash->{recaptcha_error}."\n";
-#                  $err ||= "reCAPTCHA verification failed\n";
-#                 die $err;
-#             }
+            if ( not $c->forward('captcha_check') ) {
+                my $err = $c->stash->{recaptcha_error}."\n";
+                 $err ||= "reCAPTCHA verification failed\n";
+                die $err;
+            }
 
             my $username = $form->param('username');
             my $email    = $form->param('email');
@@ -639,7 +636,17 @@ sub signup :Local Args(0) FormMethod('_signup_form') {
             return;
         }
         catch {
-            $c->stash->{'error'} = $_;
+            my $err;
+
+            if ( $c->error ) {
+                $err = ref($c->error) eq 'ARRAY'
+                       ? join("\n", @{ $c->error } )
+                       : $c->error;
+            }
+
+            $err ||= $_;
+
+            $c->stash->{'error'} = $err;
         };
     }
 
