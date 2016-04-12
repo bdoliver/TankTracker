@@ -31,22 +31,32 @@ sub get {
     return $user;
 }
 
+sub days_since_last_change {
+    my ( $self, $user_id ) = @_;
+
+    my $user = $self->resultset->find($user_id) or
+        die qq{days_since_last_change() user #$user_id not found};
+
+    my $last_changed = $user->last_pwchange();
+
+    $last_changed or return undef;
+
+    return $last_changed->delta_days(
+        DateTime->now('time_zone' => 'Australia/Melbourne')
+    )->in_units('days');
+}
+
 sub is_password_expired {
     my ( $self, $user_id, $expiry ) = @_;
 
     return 0 unless $expiry;
 
-    my $user = $self->resultset->find($user_id) or
-        die qq{user #$user_id not found};
+    my $days_since_last_change = $self->days_since_last_change($user_id);
 
-    my $last_changed = $user->last_pwchange() or
-        return 1;  # report expired if never changed...
+    ( defined $days_since_last_change ) or
+        return 1; # never changed, therefore expired
 
-    my $duration = $last_changed->delta_days(
-        DateTime->now('time_zone' => 'Australia/Melbourne')
-    );
-
-    return $duration->in_units('days') > $expiry ? 1 : 0;
+    return $days_since_last_change > $expiry ? 1 : 0;
 }
 
 sub record_last_login {
