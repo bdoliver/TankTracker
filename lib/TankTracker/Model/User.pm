@@ -186,10 +186,9 @@ sub signup {
 sub request_password_reset {
     my ( $self, $args ) = @_;
 
-    my $user = $self->resultset->find($args);
+    my $user = $self->resultset->search($args)->first();
 
     if ( $user ) {
-
         my $reset_code    = Session::Token->new()->get();
         my $reset_expires = DateTime->now()->add('hours' => 24);
         $user->update({

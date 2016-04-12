@@ -328,8 +328,15 @@ sub password_reset :Local FormMethod('_password_reset_form') {
     if ( $form->submitted_and_valid() ) {
         try {
             if ( my $username = $form->param('username') ) {
-                # request a reset code be sent to $username
-                my $user = $c->model('User')->request_password_reset({username => $username});
+                # request a reset code be sent to the user
+                my $user = $c->model('User')->request_password_reset(
+                    {
+                        '-or' => {
+                            username => $username,
+                            email    => $username,
+                        },
+                    },
+                );
 
                 if ( $user ) {
                     my $email = {
