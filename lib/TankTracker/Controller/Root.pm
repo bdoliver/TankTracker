@@ -172,7 +172,7 @@ sub login : Local Args(0) FormMethod('_login_form') {
                         $c->config->{'password_expires_days'},
                     ) ) {
                     $c->log->warn("detected expired password for user=$username");
-                    if ( my $user = $c->model('User')->reset_code(
+                    if ( my $user = $c->model('User')->request_password_reset(
                         { user_id => $c->user->user_id() }
                        ) ) {
                         $c->delete_session();
@@ -330,28 +330,37 @@ sub password_reset :Local FormMethod('_password_reset_form') {
         try {
             if ( my $username = $form->param('username') ) {
                 # request a reset code be sent to $username
-                my $user = $c->model('User')->reset_code({username => $username});
+                my $user = $c->model('User')->request_password_reset({username => $username});
 
                 if ( $user ) {
-use Data::Dumper;
-warn "\n\nuser reset:\n", Dumper($user),"\n\n";
-#                     my $email = {
-#                         from         => 'tanktracker@example.com',
-#                         to           => $user->{'email'},
-#                         subject      => 'Reset TankTracker login',
-#                         template     => 'reset.tt',
-#                         content_type => 'multipart/alternative',
-#                     };
-#                     $c->stash->{'email'} = $email;
-#                     $c->forward($c->view('Email::HTML'));
+                    my $email = {
+                        from         => 'admin@tanktracker.caboo.isa-geek.net',
+                        to           => $user->{'email'},
+                        subject      => 'TankTracker - password reset request',
+                        templates    => [
+                            {
+                                template        => 'password_reset_html.tt',
+                                content_type    => 'text/html',
+                                charset         => 'utf-8',
+                                encoding        => 'quoted-printable',
+                            },
+                            {
+                                template        => 'password_reset_text.tt',
+                                content_type    => 'text/plain',
+                                charset         => 'utf-8',
+                            },
+                        ],
+                        content_type => 'multipart/alternative',
+                    };
+                    $c->stash->{'email'} = $email;
+                    $c->stash->{'code'}  = $user->{'reset_code'};
+                    $c->forward($c->view('Email::HTML'));
+                    $c->flash->{'reset_ok'} = 1;
                 }
                 else {
                     # log the fact that there was no such user:
                     $c->log->warn("Attempt to reset password for non-existant user '$username'");
                 }
-
-                # always make it look like reset was sent ok:
-                $c->flash->{'reset_ok'} = 1;
             }
             else {
                 # user is trying to reset their password:
@@ -360,10 +369,10 @@ warn "\n\nuser reset:\n", Dumper($user),"\n\n";
                     password   => $form->param('check_password_1'),
                 };
                 my $user = $c->model('User')->reset_password($args);
+                $c->flash->{'update_ok'} = 1;
             }
         }
         catch {
-warn "\n\nOOPS: $_\n\n";
             $c->stash->{'error'} = $_;
         };
 
