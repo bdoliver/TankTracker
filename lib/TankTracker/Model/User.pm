@@ -110,14 +110,13 @@ sub update {
         $user = $self->resultset->find($user_id) or
             die qq{user #$user_id not found};
 
-        my $chg_password = delete $params->{'change_password'};
-        my $curr_pw      = delete $params->{'current_password'};
-        my $pw_1         = delete $params->{'new_password1'};
-        my $pw_2         = delete $params->{'new_password2'};
-
         ## This should all have been taken care of within the Controller,
         ## but prefer to be paranoid about it...
-        if ( $chg_password ) {
+        if ( delete $params->{'change_password'} ) {
+            my $curr_pw = delete $params->{'current_password'};
+            my $pw_1    = delete $params->{'new_password1'};
+            my $pw_2    = delete $params->{'new_password2'};
+
             $curr_pw or
                 die qq{cannot set new password without current password\n};
 
@@ -129,15 +128,6 @@ sub update {
 
             $params->{'password'} = $user->hash_str($pw_1);
         }
-    }
-    else {
-        # must be adding a new user:
-        my $pw_1 = delete $params->{'new_password1'};
-        my $pw_2 = delete $params->{'new_password2'};
-        ( $pw_1 and $pw_2 and $pw_1 eq $pw_2 ) or
-            die qq{passwords do not match\n};
-
-        $params->{'password'} = $user->hash_str($pw_1);
     }
 
     $self->txn_begin();
@@ -173,12 +163,12 @@ sub signup {
     # since password can't be blank, just plug the reset code
     # in as a temporary measure.
     $args->{password}      = $args->{reset_code};
-    $args->{role}          = 'user';
+    $args->{role}          = 'owner';
     $args->{reset_expires} = DateTime->now()->add('hours' => 24);
 
     # on successful creation, return the reset_code so that it can
     # be mailed out.
-    return $self->resultset->create($args)->update()
+    return $self->update(undef, $args, {})
            ? $args->{reset_code}
            : undef;
 }
