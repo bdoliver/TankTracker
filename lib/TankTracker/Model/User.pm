@@ -173,10 +173,10 @@ sub signup {
            : undef;
 }
 
-sub reset_code {
+sub request_password_reset {
     my ( $self, $args ) = @_;
 
-    my $user = $self->resultset->first($args);
+    my $user = $self->resultset->find($args);
 
     if ( $user ) {
 
