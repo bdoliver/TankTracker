@@ -64,7 +64,6 @@ sub check_request : Private {
     my %permitted_actions = (
         'login'            => 1,
         'password_reset'   => 1,
-        'password_expired' => 1,
         'signup'           => 1,
     );
 
@@ -176,12 +175,12 @@ sub login : Local Args(0) FormMethod('_login_form') {
                         { user_id => $c->user->user_id() }
                        ) ) {
                         $c->delete_session();
-                        $c->response->redirect($c->uri_for("/password_expired?code=$user->{reset_code}"), 302);
+                        $c->response->redirect($c->uri_for("/password_reset?code=$user->{reset_code}"), 302);
                         $c->detach();
                         return;
                     }
                     else {
-                        $c->stash->{'error'} = q{Failed to generate password reset code};
+                        $c->log->error(q{Failed to generate expired password reset code});
                     }
                 }
 
@@ -385,155 +384,6 @@ sub password_reset :Local FormMethod('_password_reset_form') {
 
     $c->stash->{'page_title'} = 'Account Re-set';
     $c->stash->{'template'}   = 'password_reset.tt';
-
-    return;
-}
-
-sub _password_expired_form {
-    my ( $self, $c ) = @_;
-
-    my $elements = [
-        {
-            name  => 'user_name',
-            type  => 'Hidden',
-            value => $c->user->username(),
-        },
-        {
-            name        => 'original_password',
-            type        => 'Password',
-            constraints => [
-                'Printable',
-                {
-                    type => 'Length',
-                    min  => 8,
-                    max => 50,
-                },
-                {
-                    type    => 'Required',
-                    message => 'Original password is required'
-                },
-            ],
-        },
-        {
-            name        => 'check_password_1',
-            type        => 'Password',
-            constraints => [
-                'Printable',
-                {
-                    type => 'Length',
-                    min  => 8,
-                    max => 50,
-                },
-                {
-                    type    => 'Required',
-                    message => 'New password is required'
-                },
-            ],
-        },
-        {
-            name        => 'check_password_2',
-            type        => 'Password',
-            constraints => [
-                'Printable',
-                {
-                    type => 'Length',
-                    min  => 8,
-                    max => 50,
-                },
-                {
-                    type    => 'Required',
-                    message => 'Confirm password is required'
-                },
-                {
-                    type => 'Callback',
-                    callback => sub {
-                        my ( $value, $params ) = @_;
-
-                        return 1 if ( ! $value and ! $params->{'check_password_1'} );
-                        return ( $value and $params->{'check_password_1'}
-                                and
-                                ( $value eq $params->{'check_password_1'} ) );
-                    },
-                    message => 'New passwords do not match',
-                },
-            ],
-        },
-        {
-            type => 'Submit',
-            name => 'submit',
-        },
-    ];
-
-    return {
-        'elements' => $elements,
-    };
-}
-
-sub password_expired :Local FormMethod('_password_expired_form') {
-    my ( $self, $c ) = @_;
-
-    my $form = $c->stash->{form};
-
-    if ( $form->submitted_and_valid() ) {
-        my $username      = $form->param('username');
-        my $old_password = $form->param('original_password');
-        my $new_password = $form->param('check_password_1');
-warn "\n\n username=$username / old pass=$old_password / new pass=$new_password\n\n";
-        try {
-            if ( $c->authenticate({
-                    'password'   => $old_password,
-                    'dbix_class' => {
-                        'searchargs' => [
-                            {
-#                                '-or' => [
-                                    username => $username,
-#                                    email    => $username,
-#                                ],
-                            },
-                            {
-                                'prefetch' => [
-                                    'user_preference',
-                                    'tank_user_accesses',
-                                ],
-                            },
-                        ],
-                    },
-            }) ) {
-warn "\n\n\tAUTH OK!\n";
-                my $args = {
-                    username  => $username,
-                    password => $form->param('check_password_1'),
-                };
-
-                if ( my $user = $c->model('User')->reset_password($args) ) {
-                    $c->log->warn("Changed password for user #$username");
-warn "\n\nChanged password for user #$username\n\n";
-                }
-                else {
-warn "\n\nChange password for user #$username **FAILED**\n\n";
-                    # log the fact that there was no such user:
-                    $c->log->warn("Attempt to update expired password for non-existant user '$username'");
-                }
-
-                # Redirect to login, regardless of whether or not
-                # we actually reset a user...
-                $c->flash->{'reset_ok'} = 1;
-                $c->response->redirect($c->uri_for('login'), 302);
-                $c->detach();
-                return;
-
-            }
-            else {
-                $c->stash->{'error'} = q{Password change failed: invalid user or password};
-            }
-        }
-        catch {
-            $c->stash->{'error'} = $_;
-        };
-    }
-
-    $c->stash->{'page_title'} = 'Update Expired Password';
-    $c->stash->{'template'}   = 'password_update.tt';
 
     return;
 }
