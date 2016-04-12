@@ -167,11 +167,11 @@ sub login : Local Args(0) FormMethod('_login_form') {
                     },
               }) ) {
 
-
                 if ( $c->model('User')->is_password_expired(
                         $c->user->user_id(),
                         $c->config->{'password_expires_days'},
                     ) ) {
+                    $c->log->warn("detected expired password for user=$username");
                     if ( my $user = $c->model('User')->reset_code(
                         { user_id => $c->user->user_id() }
                        ) ) {
@@ -184,9 +184,7 @@ sub login : Local Args(0) FormMethod('_login_form') {
                         $c->stash->{'error'} = q{Failed to generate password reset code};
                     }
                 }
-else {
-warn "\n\nPASSWORD **NOT** EXPIRED\n\n";
-}
+
                 try {
                     $c->model('User')->record_last_login(
                         $c->user->user_id(),
@@ -196,6 +194,7 @@ warn "\n\nPASSWORD **NOT** EXPIRED\n\n";
                 catch {
                     $c->stash->{'error'} = $_;
                 };
+
                 if ( not $c->stash->{'error'} ) {
                     $c->response->redirect($c->uri_for('/tank'), 302);
                     $c->detach();
@@ -618,13 +617,12 @@ sub signup :Local Args(0) FormMethod('_signup_form') {
                             template        => 'welcome_text.tt',
                             content_type    => 'text/plain',
                             charset         => 'utf-8',
-                            encoding        => 'quoted-printable',
                         }
                     ],
                     content_type => 'multipart/alternative',
                 };
                 $c->stash->{'email'} = $email;
-                $c->stash->{'reset_code'} = $reset_code;
+                $c->stash->{'code'}  = $reset_code;
                 $c->forward($c->view('Email::HTML'));
                 $c->flash->{'signup_ok'} = 1;
             }
