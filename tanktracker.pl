@@ -14,5 +14,5 @@
     'uploadtmp'          => '/tmp/tt_uploads',
     'photo_root'         => '/static/images/photos',
     'max_login_attempts' => 5,
-    'password_expires_days' => -5,
+    'password_expires_days' => 180,
 }
