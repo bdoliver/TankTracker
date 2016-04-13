@@ -15,4 +15,5 @@
     'photo_root'         => '/static/images/photos',
     'max_login_attempts' => 5,
     'password_expires_days' => 180,
+    'skip_recaptcha'     => 1, # skip reCAPTCHA in testing
 }
