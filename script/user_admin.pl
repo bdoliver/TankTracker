@@ -80,12 +80,12 @@ if ( $add ) {
             -verbose => 1,
         );
 
-    $parent_id or
-        pod2usage(
-            -message => "--parent_id XXXX mandatory for new a/c\n",
-            -exitval => 2,
-            -verbose => 1,
-        );
+#    $parent_id or
+#        pod2usage(
+#            -message => "--parent_id XXXX mandatory for new a/c\n",
+#            -exitval => 2,
+#            -verbose => 1,
+#        );
 }
 else {
     ( $email or $user ) or
