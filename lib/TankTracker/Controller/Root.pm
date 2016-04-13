@@ -265,6 +265,9 @@ sub _password_reset_form {
                         message => 'New password is required'
                     },
                 ],
+                validators => [
+                    'TankTracker::ValidPassword',
+                ],
             },
             {
                 name        => 'check_password_2',
