@@ -31,6 +31,17 @@ sub get {
     return $user;
 }
 
+sub get_by_reset_code {
+    my ( $self, $reset_code, $no_deflate ) = @_;
+
+    my $user = $self->resultset->find(
+                { 'reset_code' => $reset_code},
+                { 'key'        => 'reset_code_idx' },
+               );
+
+    return $no_deflate ? $user : $self->deflate($user);
+}
+
 sub days_since_last_change {
     my ( $self, $user_id ) = @_;
 
@@ -214,10 +225,7 @@ sub reset_password {
 
     my $user = $user_id
                 ? $self->resultset->find($user_id)
-                : $self->resultset->find(
-                    { 'reset_code' => $reset_code},
-                    { 'key'        => 'reset_code_idx' },
-                );
+                : $self->get_by_reset_code($reset_code, $self->no_deflate());
 
     if ( $user ) {
         my $now = DateTime->now('time_zone' => 'Australia/Melbourne');
