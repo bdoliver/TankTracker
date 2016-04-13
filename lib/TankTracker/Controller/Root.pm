@@ -444,16 +444,21 @@ sub _signup_form :Private {
 sub signup :Local Args(0) FormMethod('_signup_form') {
     my ( $self, $c ) = @_;
 
+    ## invert the 'skip_recaptcha' config setting:
+    my $want_recaptcha = ( $c->config->{'skip_recaptcha'} || 0 ) ? 0 : 1;
+
     my $form = $c->stash->{form};
 
     if ( $form->submitted_and_valid() ) {
 
         try {
             # check reCAPTCHA result:
-            if ( not $c->forward('captcha_check') ) {
-                my $err = $c->stash->{recaptcha_error}."\n";
-                 $err ||= "reCAPTCHA verification failed\n";
-                die $err;
+            if ( $want_recaptcha ) {
+                if ( not $c->forward('captcha_check') ) {
+                    my $err = $c->stash->{recaptcha_error}."\n";
+                     $err ||= "reCAPTCHA verification failed\n";
+                    die $err;
+                }
             }
 
             my $username = $form->param('username');
@@ -514,7 +519,9 @@ sub signup :Local Args(0) FormMethod('_signup_form') {
         };
     }
 
-    $c->forward('captcha_get');
+    if ( $want_recaptcha ) {
+        $c->forward('captcha_get');
+    }
 
     $c->stash->{'page_title'}        = 'Sign-up for an account';
     $c->stash->{'template'}          = 'signup.tt';
