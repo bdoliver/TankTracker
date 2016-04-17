@@ -234,10 +234,11 @@ sub reset_password {
         }
 
         $user->update({
-            password      => $user->hash_str($password),
-            last_pwchange => DateTime::Format::Pg->format_timestamp($now),
-            reset_code    => undef,
-            reset_expires => undef,
+            password       => $user->hash_str($password),
+            last_pwchange  => DateTime::Format::Pg->format_timestamp($now),
+            reset_code     => undef,
+            reset_expires  => undef,
+            login_attempts => 0,
         });
 
         return $self->deflate($user);
