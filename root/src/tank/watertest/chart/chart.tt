@@ -12,7 +12,7 @@
                     <div class="form-group">
                         <label for="sdate">Date range from:</label>
                         <div class="input-group date" id="start_date">
-                            <input type="text" class="form-control" id="sdate" size="10" onChange="generateChart('[% tank.tank_id %]');" />
+                            <input type="text" class="form-control" id="sdate" size="10" />
                             <span class="input-group-addon">
                                <span class="glyphicon glyphicon-calendar"></span>
                             </span>
@@ -21,7 +21,7 @@
                     <div class="form-group">
                         <label for="sdate">to:</label>
                         <div class="input-group date" id="end_date">
-                            <input type="text" class="form-control" id="edate" size="10" onChange="generateChart('[% tank.tank_id %]');" />
+                            <input type="text" class="form-control" id="edate" size="10" />
                             <span class="input-group-addon">
                                <span class="glyphicon glyphicon-calendar"></span>
                             </span>
@@ -75,7 +75,19 @@
 </form>
 
 <script>
-require(['jquery','tank-chart'], function($, TC) {
-    $(function() { TC.initChart([% tank.tank_id %]); });
-)};
+require(['jquery',
+         'bootstrap-datepicker',
+         'moment',
+         'moment-strftime',
+         'jquery.flot',
+         'jquery.flot.navigate',
+         'jquery.flot.resize',
+         'jquery.flot.time'
+        ], function ($) {
+    $(function() {
+        require(['tankChart'], function(tankChart) {
+            tankChart.setup([% tank.tank_id %]);
+        });
+    });
+});
 </script>
