@@ -1,3 +1,9 @@
+require(['jquery',
+         'jquery.flot',
+         'jquery.flot.navigate',
+         'jquery.flot.resize',
+         'jquery.flot.time'
+        ], function ($) {
 
 function chartTooltip(x, y, contents) {
     $('<div id="tooltip">'+contents+'</div>').css({
@@ -12,7 +18,7 @@ function chartTooltip(x, y, contents) {
     }).appendTo("body").fadeIn(200);
 }
 
-function _get_request_data() {
+function get_request_data() {
     var ret = false;
     var msg;
     var request_data = {};
@@ -61,7 +67,7 @@ function generateChart(tank_id) {
 
     $('div#msgChartDiv').empty(); // clear any previous message
 
-    var request_data = _get_request_data();
+    var request_data = get_request_data();
 
     if ( ! request_data ) {
         // insufficient selections to chart
@@ -209,3 +215,8 @@ function initChart(tank_id) {
     // ... and the show_notes option:
     $('#show_notes').change(function() { generateChart(tank_id); } );
 }
+
+    return {
+        initChart: initChart
+    }
+});
