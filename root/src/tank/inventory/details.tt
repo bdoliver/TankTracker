@@ -39,13 +39,15 @@
             </div>
         </div>
         <script>
-        $(document).ready(function(){
-            $('.date').datepicker({
-                format         : 'yyyy-mm-dd',
-                todayHighlight : true,
-                clearBtn       : true,
-                autoclose      : true,
-                endDate        : '+0d'
+        require(['jquery','bootstrap-datepicker'], function($) {
+            $(function(){
+                $('.date').datepicker({
+                    format         : 'yyyy-mm-dd',
+                    todayHighlight : true,
+                    clearBtn       : true,
+                    autoclose      : true,
+                    endDate        : '+0d'
+                });
             });
         });
         </script>

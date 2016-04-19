@@ -24,13 +24,15 @@
                             </div>
                         </div>
                         <script>
-                        $(document).ready(function(){
-                            $('#start_date').datepicker({
-                                format         : 'yyyy-mm-dd',
-                                todayHighlight : false,
-                                clearBtn       : true,
-                                autoclose      : true,
-                                endDate        : '+0d'
+                        require(['jquery','bootstrap-datepicker'], function($) {
+                            $(function(){
+                                $('#start_date').datepicker({
+                                    format         : 'yyyy-mm-dd',
+                                    todayHighlight : false,
+                                    clearBtn       : true,
+                                    autoclose      : true,
+                                    endDate        : '+0d'
+                                });
                             });
                         });
                         </script>
@@ -45,13 +47,15 @@
                                 </span>
                             </div>
                             <script>
-                            $(document).ready(function(){
-                                $('#end_date').datepicker({
-                                    format         : 'yyyy-mm-dd',
-                                    todayHighlight : true,
-                                    clearBtn       : true,
-                                    autoclose      : true,
-                                    endDate        : '+0d'
+                            require(['jquery','bootstrap-datepicker'], function($) {
+                                $(function(){
+                                    $('#end_date').datepicker({
+                                        format         : 'yyyy-mm-dd',
+                                        todayHighlight : true,
+                                        clearBtn       : true,
+                                        autoclose      : true,
+                                        endDate        : '+0d'
+                                    });
                                 });
                             });
                             </script>
@@ -128,19 +132,20 @@
     </div>
 </div>
 <script>
-$(function() {
-    $('.glyphicon-search').click(function() {
-        $('div.search-bar').toggle('blind');
-    });
-    $('.glyphicon-refresh').click(function() {
-        $('div.search-bar input[type="text"]').val('');
-        $('div.search-bar select').val('');
-        //$('#search_form').submit(function() { alert("clearing search..."); true; } );
+require(['jquery'], function($) {
+    $(function() {
+        $('.glyphicon-search').click(function() {
+            $('div.search-bar').toggle('blind');
+        });
+        $('.glyphicon-refresh').click(function() {
+            $('div.search-bar input[type="text"]').val('');
+            $('div.search-bar select').val('');
+            //$('#search_form').submit(function() { alert("clearing search..."); true; } );
 
-        // for some reason, form.submit() just doesn't fire, but triggering
-        // the search submit button's "click" event works just fine!
-        $('input[type="submit"]').trigger('click');
+            // for some reason, form.submit() just doesn't fire, but triggering
+            // the search submit button's "click" event works just fine!
+            $('input[type="submit"]').trigger('click');
+        });
     });
-
 });
 </script>
