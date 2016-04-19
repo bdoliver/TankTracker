@@ -1,7 +1,6 @@
 var require = {
     baseUrl: "/static/js",
     shim   : {
- 'jquery': { exports: '$' },
         'bootstrap'   : ['jquery'],
         'colpick'     : ['jquery'],
         'jquery.flot' : {
