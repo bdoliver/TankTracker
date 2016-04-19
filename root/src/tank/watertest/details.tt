@@ -26,17 +26,18 @@
                             </div>
                         </div>
                         <script>
-                        $(document).ready(function(){
-                            $('.date').datepicker({
-                                format         : 'yyyy-mm-dd',
-                                todayHighlight : true,
-                                clearBtn       : true,
-                                autoclose      : true,
-                                endDate        : '+0d'
+                        require(['jquery','bootstrap-datepicker'], function($) {
+                            $(function(){
+                                $('.date').datepicker({
+                                    format         : 'yyyy-mm-dd',
+                                    todayHighlight : true,
+                                    clearBtn       : true,
+                                    autoclose      : true,
+                                    endDate        : '+0d'
+                                });
                             });
                         });
                         </script>
-
                     </div>
                     [% FOR field IN test_fields %]
                     <div class="row">
@@ -80,9 +81,11 @@
 </form>
 [% IF view_test %]
 <script>
+require(['jquery'], function($) {
     $(function() {
         $('input').addClass('disabled').prop('disabled', true);
         $('textarea').addClass('disabled').prop('disabled', true);
     });
+});
 </script>
 [% END %]
