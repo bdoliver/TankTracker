@@ -92,7 +92,9 @@
 </div>
 </form>
 <script>
-$(document).ready(function(){
-    $('#import_file').fileinput();
+require(['jquery','fileinput'], function($) {
+    $(function(){
+        $('#import_file').fileinput();
+    });
 });
 </script>

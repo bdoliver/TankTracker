@@ -27,13 +27,15 @@
                     </div>
                 </div>
                 <script>
-                $(document).ready(function(){
-                    $('#start_date').datepicker({
-                        format         : 'yyyy-mm-dd',
-                        todayHighlight : false,
-                        clearBtn       : true,
-                        autoclose      : true,
-                        endDate        : '+0d'
+                require(['jquery','bootstrap-datepicker'], function($) {
+                    $(function(){
+                        $('#start_date').datepicker({
+                            format         : 'yyyy-mm-dd',
+                            todayHighlight : false,
+                            clearBtn       : true,
+                            autoclose      : true,
+                            endDate        : '+0d'
+                        });
                     });
                 });
                 </script>
@@ -51,13 +53,15 @@
                     </div>
                 </div>
                 <script>
-                $(document).ready(function(){
-                    $('#end_date').datepicker({
-                        format         : 'yyyy-mm-dd',
-                        todayHighlight : true,
-                        clearBtn       : true,
-                        autoclose      : true,
-                        endDate        : '+0d'
+                require(['jquery','bootstrap-datepicker'], function($) {
+                    $(function(){
+                        $('#end_date').datepicker({
+                            format         : 'yyyy-mm-dd',
+                            todayHighlight : true,
+                            clearBtn       : true,
+                            autoclose      : true,
+                            endDate        : '+0d'
+                        });
                     });
                 });
                 </script>
