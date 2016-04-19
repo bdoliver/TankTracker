@@ -61,29 +61,31 @@
 </form>
 
 <script>
-$(function() {
-    [% # on page load, we un-check & disable ALL admin checkboxes where the
-       # corresponding access checkbox is _not_ checked (can't admin something
-       # which is not accessible)
-    %]
-    $('input[name="access"]:checkbox:not(:checked)').each(function(idx, obj) {
-        $('#admin_'+$(obj).val()).prop('disabled', true).prop('checked', false);
-    });
+require(['jquery'], function($) {
+    $(function() {
+        [% # on page load, we un-check & disable ALL admin checkboxes where the
+           # corresponding access checkbox is _not_ checked (can't admin something
+           # which is not accessible)
+        %]
+        $('input[name="access"]:checkbox:not(:checked)').each(function(idx, obj) {
+            $('#admin_'+$(obj).val()).prop('disabled', true).prop('checked', false);
+        });
 
-    [% # This sets up a click handler so that:
-       # 1) checking an access checkbox will enable the corresponding admin
-       #    checkbox; and
-       # 2) un-checking an access checkbox also un-checks the corresponding
-       #    admin checkbox & disables it.
-    %]
-    $('input[name="access"]').click(function() {
-        var admin_id = '#admin_'+$(this).val();
-        if ( $(this).is(':checked') ) {
-            $(admin_id).prop('disabled', false);
-        }
-        else {
-            $(admin_id).prop('disabled', true).prop('checked', false);
-        }
+        [% # This sets up a click handler so that:
+           # 1) checking an access checkbox will enable the corresponding admin
+           #    checkbox; and
+           # 2) un-checking an access checkbox also un-checks the corresponding
+           #    admin checkbox & disables it.
+        %]
+        $('input[name="access"]').click(function() {
+            var admin_id = '#admin_'+$(this).val();
+            if ( $(this).is(':checked') ) {
+                $(admin_id).prop('disabled', false);
+            }
+            else {
+                $(admin_id).prop('disabled', true).prop('checked', false);
+            }
+        });
     });
 });
 </script>

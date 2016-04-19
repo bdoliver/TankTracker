@@ -154,29 +154,30 @@
     </div>
 </form>
 <script>
-$(function() {
+require(['jquery'], function($) {
+    $(function() {
 [% # when there's no change_password form element, we are in 'add' mode,
    # so display the password input fields immediately on load: %]
 [% IF not form.get_element('change_password') %]
-    $('div.change_password').show();
+        $('div.change_password').show();
 [% END %]
-
 
 [% IF message %]
 [% # faark, this is ugly! But I cannot figure out how to have the
    # 'change_password' checkbox UNchecked by HTML::FormFu AFTER a
    # successful form submission! %]
-   $('input[name="change_password"]').attr('checked', false);
+        $('input[name="change_password"]').attr('checked', false);
 [% END %]
-    if ( $('input[name="change_password"]').is(':checked') ) {
-        $('div.change_password').show();
-    }
-
-    $('input[name="change_password"]').click(function() {
-        $('div.change_password').toggle('blind');
-        if ( $('input[name="current_password"]').is(':visible') ) {
-            $('input[name="current_password"]').focus();
+        if ( $('input[name="change_password"]').is(':checked') ) {
+            $('div.change_password').show();
         }
+
+        $('input[name="change_password"]').click(function() {
+            $('div.change_password').toggle('blind');
+            if ( $('input[name="current_password"]').is(':visible') ) {
+                $('input[name="current_password"]').focus();
+            }
+        });
     });
 });
 </script>

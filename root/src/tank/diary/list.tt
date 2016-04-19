@@ -24,13 +24,15 @@
                             </div>
                         </div>
                         <script>
-                        $(document).ready(function(){
-                            $('#start_date').datepicker({
-                                format         : 'yyyy-mm-dd',
-                                todayHighlight : false,
-                                clearBtn       : true,
-                                autoclose      : true,
-                                endDate        : '+0d'
+                        require(['jquery','bootstrap-datepicker'], function($) {
+                            $(function(){
+                                $('#start_date').datepicker({
+                                    format         : 'yyyy-mm-dd',
+                                    todayHighlight : false,
+                                    clearBtn       : true,
+                                    autoclose      : true,
+                                    endDate        : '+0d'
+                                });
                             });
                         });
                         </script>
@@ -45,13 +47,15 @@
                                 </span>
                             </div>
                             <script>
-                            $(document).ready(function(){
-                                $('#end_date').datepicker({
-                                    format         : 'yyyy-mm-dd',
-                                    todayHighlight : true,
-                                    clearBtn       : true,
-                                    autoclose      : true,
-                                    endDate        : '+0d'
+                            require(['jquery','bootstrap-datepicker'], function($) {
+                                $(function(){
+                                    $('#end_date').datepicker({
+                                        format         : 'yyyy-mm-dd',
+                                        todayHighlight : true,
+                                        clearBtn       : true,
+                                        autoclose      : true,
+                                        endDate        : '+0d'
+                                    });
                                 });
                             });
                             </script>
@@ -153,38 +157,39 @@
 </div>
 
 <script>
-$(document).ready(function(){
-    $('.glyphicon-search').click(function() {
-        $('div.search-bar').toggle('blind');
-    });
-    $('.glyphicon-refresh').click(function() {
-        $('div.search-bar input[type="text"]').val('');
-        $('div.search-bar select').val('');
-        //$('#search_form').submit(function() { alert("clearing search..."); true; } );
+require(['jquery','bootstrap-dialog'], function($, BD) {
+    $(document).ready(function(){
+        $('.glyphicon-search').click(function() {
+            $('div.search-bar').toggle('blind');
+        });
+        $('.glyphicon-refresh').click(function() {
+            $('div.search-bar input[type="text"]').val('');
+            $('div.search-bar select').val('');
+            //$('#search_form').submit(function() { alert("clearing search..."); true; } );
 
-        // for some reason, form.submit() just doesn't fire, but triggering
-        // the search submit button's "click" event works just fine!
-        $('input[type="submit"]').trigger('click');
-    });
-
-    $('.delete_note').click( function(e) {
-        e.preventDefault();
-        var href=$(this).prop('href');
-        BootstrapDialog.confirm({
-            title: 'Confirm deletion',
-            message: '<div>The selected note will be permanently deleted and cannot be recovered.</div>'
-                     +'<div><strong>Are you sure?</strong></div>',
-            btnCancelClass: 'btn-primary',
-            btnOKClass: 'btn-info',
-            callback: function(result){
-                if(result) {
-                    window.location.replace(href);
-                } //else {
-                //    alert('Nope.');
-                //}
-            }
+            // for some reason, form.submit() just doesn't fire, but triggering
+            // the search submit button's "click" event works just fine!
+            $('input[type="submit"]').trigger('click');
+        });
+        $('.delete_note').click( function(e) {
+            e.preventDefault();
+            var href=$(this).prop('href');
+//            BootstrapDialog.confirm({
+            BD.confirm({
+                title         : 'Confirm deletion',
+                message       : '<div>The selected note will be permanently deleted and cannot be recovered.</div>'
+                                +'<div><strong>Are you sure?</strong></div>',
+                btnCancelClass: 'btn-primary',
+                btnOKClass    : 'btn-info',
+                callback      : function(result){
+                    if(result) {
+                        window.location.replace(href);
+                    } //else {
+                    //    alert('Nope.');
+                    //}
+                }
+            });
         });
     });
-
 });
 </script>

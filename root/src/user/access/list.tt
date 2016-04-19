@@ -38,10 +38,12 @@
 </div>
 
 <script>
-$(function() {
-    $('input[type="submit"]').click(function() {
-        $('input[name="by_tank"]').val( $(this).val() == 'Tank / User' ? 1 : 0 );
-        return true;
+require(['jquery'], function($) {
+    $(function() {
+        $('input[type="submit"]').click(function() {
+            $('input[name="by_tank"]').val( $(this).val() == 'Tank / User' ? 1 : 0 );
+            return true;
+        });
     });
 });
 </script>
