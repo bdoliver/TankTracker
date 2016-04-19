@@ -253,7 +253,7 @@
 [% END %]
 
 <script>
-require(['jquery','tank-details'], function($, TD) {
+require(['jquery','tankDetails'], function($, TD) {
     $(function() { });
 });
 </script>
