@@ -38,7 +38,9 @@
     </div>
 </form>
 <script>
-$(document).ready(function(){
-    $('#upload_photo').fileinput();
+require(['jquery','fileinput'], function($) {
+    $function(){
+        $('#upload_photo').fileinput();
+    });
 });
 </script>
