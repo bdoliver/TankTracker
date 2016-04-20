@@ -97,7 +97,7 @@
                     [% IF can_edit OR can_add %]
                     <a [% href('/tank/' _ tank.tank_id _ '/edit') %] class="btn btn-md btn-info">Edit</a>
                     <script>
-                    require(['jquery','bootstrap'], function($) {
+                    require(['jquery'], function($) {
                         $(function() {
                             $('input').addClass('disabled').prop('disabled', true);
                             $('select').addClass('disabled').prop('disabled', true);
