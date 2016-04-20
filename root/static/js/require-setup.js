@@ -7,13 +7,13 @@ var require = {
             'deps'    : ['jquery'],
             'exports' : '$.plot'
         },
-        'jquery.flot.time' : {
-            'deps'    : ['jquery.flot']
-        },
         'jquery.flot.navigate' : {
             'deps'    : ['jquery.flot']
         },
         'jquery.flot.resize' : {
+            'deps'    : ['jquery.flot']
+        },
+        'jquery.flot.time' : {
             'deps'    : ['jquery.flot']
         }
     },
@@ -29,7 +29,7 @@ var require = {
         "jquery.flot.resize"   : 'lib/jquery.flot.resize.min',
         "jquery.flot.time"     : 'lib/jquery.flot.time.min',
         "moment"               : 'lib/moment.min',
-        "moment-strftime"      : 'lib/moment-strftime-0.1.2.min'
+        "moment-strftime"      : 'lib/moment-strftime'
     }
 };
 
