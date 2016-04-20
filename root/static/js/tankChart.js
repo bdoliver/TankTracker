@@ -124,7 +124,7 @@ define(['jquery',
                 // Put each dataset's measurement on its own Y-axis.
                 // This permits better scaling when vastly different
                 // test results are being charted (eg. Ca ppm vs. pH)
-                for ( var i = 1; i <= data.length; i++ ) {
+                for ( var i = 0; i < data.length; i++ ) {
                     yaxes.push({position: 'left'});
                 }
                 options.yaxes = yaxes;
