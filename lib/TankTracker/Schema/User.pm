@@ -137,7 +137,6 @@ sub hash_str {
 }
 
 sub check_password {
-
     my ( $self, $attempt ) = @_;
 
     return $attempt
@@ -147,7 +146,9 @@ sub check_password {
 
 ## This when called by Dancer2 app:
 sub match_password {
-    return shift->check_password(@_);
+    my ( $self, @args ) = @_;
+
+    return $self->check_password(@args);
 }
 
 use List::Util qw(any);
