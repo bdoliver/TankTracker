@@ -2,6 +2,7 @@ package TankTracker::Model::Base;
 
 use strict;
 use base 'Catalyst::Model';
+use Carp;
 use Moose;
 use Try::Tiny;
 use Readonly;
@@ -21,13 +22,13 @@ has 'no_deflate' => (
 sub initialise_after_setup {
     my ( $self, $app ) = @_;
 
-    $self->schema($app->model('TankTracker')->schema());
+    return $self->schema($app->model('TankTracker')->schema());
 }
 
 sub rs_name {
     my $self = shift;
 
-    die "Class ".ref($self)." does not provide a rs_name() method!";
+    croak "Class ".ref($self)." does not provide a rs_name() method!";
 }
 
 sub resultset {
@@ -107,7 +108,7 @@ sub add_diary {
 
     for my $attr ( qw( tank_id user_id diary_note ) ) {
         $params->{$attr} or
-            die "add_diary() missing required param: '$attr'";
+            croak "add_diary() missing required param: '$attr'";
     }
 
     my $note;
@@ -142,7 +143,7 @@ sub AUTOLOAD {
 
     $name =~ s/.*:://;
 
-    if ( ! $self->can($name) and
+    if ( not $self->can($name) and
          $self->resultset->can($name) ) {
         my $me = ref $self;
         warn "\n\n**** $me: forwarding unresolved method '$name' to resultset via AUTOLOAD!!\n\n";

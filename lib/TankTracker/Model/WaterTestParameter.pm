@@ -3,6 +3,7 @@ package TankTracker::Model::WaterTestParameter;
 use strict;
 
 use Moose;
+use Carp;
 use Try::Tiny;
 use namespace::autoclean;
 
@@ -52,7 +53,7 @@ sub update {
         );
     }
     catch {
-        die $_;
+        croak $_;
     };
 
     return 1; # update() ok

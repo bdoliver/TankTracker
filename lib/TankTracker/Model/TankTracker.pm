@@ -1,6 +1,8 @@
 package TankTracker::Model::TankTracker;
 
 use strict;
+use warnings;
+
 use base 'Catalyst::Model::DBIC::Schema';
 
 __PACKAGE__->config(

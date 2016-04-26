@@ -5,9 +5,10 @@ use strict;
 use Hash::Ordered;
 
 use Moose;
+use Carp;
+use DateTime::Format::Pg;
 use Text::CSV_XS;
 use Try::Tiny;
-use DateTime::Format::Pg;
 
 use namespace::autoclean;
 
@@ -22,9 +23,9 @@ sub add {
     my ( $self, $params ) = @_;
 
     my $details = delete $params->{'details'} or
-        die qq{WaterTest::add() requires hashref with 'details' key\n};
+        croak qq{WaterTest::add() requires hashref with 'details' key\n};
     my $results = delete $params->{'results'} or
-        die qq{WaterTest::add() requires hashref with 'results' key\n};
+        croak qq{WaterTest::add() requires hashref with 'results' key\n};
 
     my $test;
 
@@ -55,7 +56,7 @@ sub add {
         });
     }
     catch {
-        die $_;
+        croak $_;
     };
 
     return $self->deflate($test);
@@ -65,9 +66,9 @@ sub update {
     my ( $self, $test_id, $params ) = @_;
 
     my $details = delete $params->{'details'} or
-        die qq{WaterTest::update() requires hashref with 'details' key\n};
+        croak qq{WaterTest::update() requires hashref with 'details' key\n};
     my $results = delete $params->{'results'} or
-        die qq{WaterTest::update() requires hashref with 'results' key\n};
+        croak qq{WaterTest::update() requires hashref with 'results' key\n};
 
     my $test;
 
@@ -93,13 +94,13 @@ sub update {
                         my $test_rec = $rs->find({
                             'test_result_id' => $result->{'test_result_id'},
                         }) or
-                            die "Cannot find test_result_id #$result->{'test_result_id'}\n";
+                            croak "Cannot find test_result_id #$result->{'test_result_id'}\n";
 
                         # sanity check:
                         $test_rec->tank_id() == $result->{'tank_id'} or
-                            die "test_result_id #$result->{'test_result_id'} does not belong to current tank!\n";
+                            croak "test_result_id #$result->{'test_result_id'} does not belong to current tank!\n";
                         $test_rec->test_id() == $result->{'test_id'} or
-                            die "test_result_id #$result->{'test_result_id'} does not belong to current test!\n";
+                            croak "test_result_id #$result->{'test_result_id'} does not belong to current test!\n";
 
                         $test_rec->test_result($result->{'test_result'});
 
@@ -134,7 +135,7 @@ sub update {
         });
     }
     catch {
-        die $_;
+        croak $_;
     };
 
     return $self->get($test_id);
@@ -145,7 +146,7 @@ sub get {
 
     my ( $test, undef ) = @{ $self->list({'me.test_id' => $test_id}) };
 
-    $test or return undef;
+    $test or return;
 
     ## Munge test into something suitable for providing the form default
     ## values:
@@ -189,7 +190,7 @@ sub _list_args {
     ## Ensure results are orderd by param_order / param_id.
     my $order_by = delete $args->{'order_by'};
 
-    if ( ! $order_by or ref($order_by) eq 'HASH' ) {
+    if ( not $order_by or ref($order_by) eq 'HASH' ) {
         $order_by = [ $order_by ];
     }
 
@@ -276,7 +277,7 @@ sub _get_import_headings {
         }
     }
 
-    die "Invalid column names: ".join(", ", @errors) if @errors;
+    croak "Invalid column names: ".join(", ", @errors) if @errors;
 
     return \@headings;
 }
@@ -289,7 +290,7 @@ sub import_tests {
 
     for my $arg ( qw( tank_id user_id fh ) ) {
         $args->{$arg} or
-        die qq{import_tests() missing '$arg' parameter!};
+        croak qq{import_tests() missing '$arg' parameter!};
     }
 
     my $fh      = $args->{'fh'};
@@ -326,7 +327,7 @@ sub import_tests {
                 my $dt = DateTime::Format::Pg->parse_datetime($row->{'test_date'});
             }
             catch {
-                die "Record #$rec_no: has invalid test_date.";
+                croak "Record #$rec_no: has invalid test_date.";
             };
 
             if ( $row->{'test_id'} and
@@ -341,7 +342,7 @@ sub import_tests {
                 delete $current_test->{'details'};
             }
 
-            if ( ! $tank_parameters or ( $row->{'tank_id'} != $current_tank_id ) ) {
+            if ( not $tank_parameters or ( $row->{'tank_id'} != $current_tank_id ) ) {
                 # get parameters for current tank:
                 $current_tank_id = $row->{'tank_id'};
                 $tank_parameters = {};
@@ -359,7 +360,7 @@ sub import_tests {
                     'user_id'   => $row->{'user_id'} || $user_id,
                     'notes'     => 'Imported water test',
                 };
-                $current_test->{'results'} = [],
+                $current_test->{'results'} = [];
             }
 
             push @{ $current_test->{'results'} },
@@ -385,7 +386,7 @@ sub import_tests {
     }
     catch {
         $self->rollback();
-        die $_;
+        croak $_;
     };
 
     return "Imported $rec_no test records.";

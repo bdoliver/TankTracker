@@ -3,6 +3,7 @@ package TankTracker::Model::Access;
 use strict;
 
 use Moose;
+use Carp;
 use Try::Tiny;
 use namespace::autoclean;
 
@@ -18,7 +19,7 @@ sub update {
 
     for my $param ( qw( mode id ) ) {
         # id = 0 is invalid, so this works:
-        $args->{$param} or die "update() missing mandatory param '$param'";
+        $args->{$param} or croak "update() missing mandatory param '$param'";
     }
 
     my $key = $args->{'mode'}.'_id';
@@ -65,7 +66,7 @@ sub update {
         );
     }
     catch {
-        die $_;
+        croak $_;
     };
 
     return 1; # update() ok

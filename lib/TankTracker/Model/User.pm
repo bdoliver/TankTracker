@@ -3,10 +3,11 @@ package TankTracker::Model::User;
 use strict;
 
 use Moose;
-use Try::Tiny;
+use Carp;
 use DateTime;
 use DateTime::Format::Pg;
 use Session::Token;
+use Try::Tiny;
 use namespace::autoclean;
 
 extends 'TankTracker::Model::Base';
@@ -46,11 +47,11 @@ sub days_since_last_change {
     my ( $self, $user_id ) = @_;
 
     my $user = $self->resultset->find($user_id) or
-        die qq{days_since_last_change() user #$user_id not found};
+        croak qq{days_since_last_change() user #$user_id not found};
 
     my $last_changed = $user->last_pwchange();
 
-    $last_changed or return undef;
+    $last_changed or return;
 
     return $last_changed->delta_days(
         DateTime->now('time_zone' => 'Australia/Melbourne')
@@ -74,14 +75,14 @@ sub record_last_login {
     my ( $self, $user_id, $max_attempts ) = @_;
 
     my $user = $self->resultset->find($user_id) or
-        die qq{user #$user_id not found};
+        croak qq{user #$user_id not found};
 
     my $attempts = $user->login_attempts();
 
     # If max login attempts are configured, then blow up if the
     # user has tried to login too many times...
     if ( $max_attempts and $attempts > $max_attempts ) {
-        die "Too many login attempts.\n";
+        croak "Too many login attempts.\n";
     }
 
     $user->last_login(
@@ -119,7 +120,7 @@ sub update_login_attempts {
         # we don't care if this fails...
     };
 
-    1;
+    return 1;
 }
 
 sub update {
@@ -129,7 +130,7 @@ sub update {
 
     if ( $user_id ) {
         $user = $self->resultset->find($user_id) or
-            die qq{user #$user_id not found};
+            croak qq{user #$user_id not found};
 
         ## This should all have been taken care of within the Controller,
         ## but prefer to be paranoid about it...
@@ -139,13 +140,13 @@ sub update {
             my $pw_2    = delete $params->{'new_password2'};
 
             $curr_pw or
-                die qq{cannot set new password without current password\n};
+                croak qq{cannot set new password without current password\n};
 
             ( $user->hash_str($curr_pw) eq $user->password() ) or
-                die qq{cannot set new password - current password invalid\n};
+                croak qq{cannot set new password - current password invalid\n};
 
             ( $pw_1 and $pw_2 and $pw_1 eq $pw_2 ) or
-                die qq{cannot set new password: new + confirmed do not match\n};
+                croak qq{cannot set new password: new + confirmed do not match\n};
 
             $params->{'password'} = $user->hash_str($pw_1);
         }
@@ -169,7 +170,7 @@ sub update {
     }
     catch {
         $self->rollback();
-        die $_;
+        croak $_;
     };
 
     $self->txn_commit();
@@ -221,7 +222,7 @@ sub reset_password {
     my $password   = $args->{'password'};
 
     ( ( $reset_code or $user_id ) and $password ) or
-        die "reset_password() requires 'password' and either 'reset_code' or 'user_id'";
+        croak "reset_password() requires 'password' and either 'reset_code' or 'user_id'";
 
     my $user = $user_id
                 ? $self->resultset->find($user_id)
@@ -230,7 +231,7 @@ sub reset_password {
     if ( $user ) {
         my $now = DateTime->now('time_zone' => 'Australia/Melbourne');
         if ( DateTime->compare($now, $user->reset_expires()) > 0 ) {
-            die "Password reset request has expired\n";
+            croak "Password reset request has expired\n";
         }
 
         $user->update({

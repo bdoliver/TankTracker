@@ -3,6 +3,7 @@ package TankTracker::Model::Tank;
 use strict;
 
 use Moose;
+use Carp;
 use Try::Tiny;
 use namespace::autoclean;
 
@@ -94,7 +95,7 @@ sub update {
 
     if ( $wtp ) {
         ref($wtp) eq 'ARRAY' or
-            die "Tank::update() expected 3rd arg to be arrayref!\n";
+            croak "Tank::update() expected 3rd arg to be arrayref!\n";
     }
 
     try {
@@ -116,7 +117,7 @@ sub update {
         });
     }
     catch {
-        die $_;
+        croak $_;
     };
 
     return $self->deflate($tank);
@@ -127,7 +128,7 @@ sub add {
 
     if ( $wtp ) {
         ref($wtp) eq 'ARRAY' or
-            die "Tank::add() expected 2rd arg to be arrayref!\n";
+            croak "Tank::add() expected 2rd arg to be arrayref!\n";
     }
 
     my $tank;
@@ -156,7 +157,7 @@ sub add {
         });
     }
     catch {
-        die $_;
+        croak $_;
     };
 
     return $self->deflate($tank);
