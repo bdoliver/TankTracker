@@ -25,7 +25,7 @@ sub update {
     return $self->deflate($diary);
 }
 
-sub delete {
+sub delete {   ## no critic (homonym); We know delete is a homonym, this is fine
     my ( $self, $diary_id ) = @_;
 
     my $diary = $self->resultset->find($diary_id);
