@@ -63,7 +63,7 @@ ok($content = $tt->process({
     => q{processed template with diary + test ID}
 );
 
-like($content => qr{<a\s+href="/tank/77/water_test/view/1234">1234</a>}ms,
+like($content => qr{<a\s+href="/tank/77/water_test/1234/view">1234</a>}ms,
     q{note is attached to a water test}
 );
 

@@ -65,7 +65,7 @@ subtest 'data formatting' => sub {
     like($content => qr{<a href="/tank/77/water_test/9875/edit"},
         q{edit test URL}
     );
-    like($content => qr{<td\ class="text-center">2015-01-31\s+</td>}msx,
+    like($content => qr{<td\ class="text-center">\s*<a\ href.+?>2015-01-31\s+</a>}msx,
         q{test date}
     );
     like($content => qr{<td\ class="text-right">8.20\s+</td>}msx,
