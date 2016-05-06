@@ -4,6 +4,7 @@ use strict;
 
 use Moose;
 use Carp;
+use Log::Any qw($log);
 use Try::Tiny;
 use namespace::autoclean;
 
@@ -33,8 +34,7 @@ sub update {
                     my $row = $self->get($param->{'parameter_id'}, $self->no_deflate());
 
                     if ( ! $row ) {
-                        ## FIXME: log an error...
-                        warn "update() parameter_id $param->{'parameter_id'} not found in database!\n";
+                        $log->warn("WTP::update() parameter_id $param->{'parameter_id'} not found in database!");
                         next;
                     }
                     for my $col ( qw( title label rgb_colour ) ) {

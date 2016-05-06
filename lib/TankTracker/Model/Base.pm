@@ -3,6 +3,7 @@ package TankTracker::Model::Base;
 use strict;
 use base 'Catalyst::Model';
 use Carp;
+use Log::Any qw($log);
 use Moose;
 use Try::Tiny;
 use Readonly;
@@ -118,8 +119,7 @@ sub add_diary {
         $note = $self->schema->resultset('Diary')->create($params);
     }
     catch {
-        # FIXME log that we failed to update diary
-        warn "\n\n\n*** add_diary() failed: $_ \n\n\n";
+        $log->warn("*** add_diary() failed: $_");
     };
 
     return $self->deflate($note);
@@ -146,7 +146,7 @@ sub AUTOLOAD {
     if ( not $self->can($name) and
          $self->resultset->can($name) ) {
         my $me = ref $self;
-        warn "\n\n**** $me: forwarding unresolved method '$name' to resultset via AUTOLOAD!!\n\n";
+        $log->warn("**** $me: forwarding unresolved method '$name' to resultset via AUTOLOAD!!");
         no strict 'refs';
         *$AUTOLOAD = sub {
             return $self->resultset->$name(@_);
